@@ -13,10 +13,54 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Subsystems">
+      <UniqueIdentifier>{2a0982d8-d4c9-4739-b71c-e69c0ebbc777}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Subsystems\GameObject">
+      <UniqueIdentifier>{638d6e77-a840-4606-a9d1-ff4242b64d0a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Subsystems">
+      <UniqueIdentifier>{adccbc8b-8b66-43c1-9cee-886933b128f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Subsystems\GameObject">
+      <UniqueIdentifier>{7a4423a8-79f0-4e27-b079-2796c42f3a9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Subsystems\Include">
+      <UniqueIdentifier>{c866b11b-2b6b-41bc-8084-c1e32dc404e3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\subsystems\gameobject\gameobject.h">
+      <Filter>Header Files\Subsystems\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="src\subsystems\gameobject\gameobjectcomponent.h">
+      <Filter>Header Files\Subsystems\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="src\subsystems\gameobject\gameobjecttemplate.h">
+      <Filter>Header Files\Subsystems\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="src\subsystems\gameobject\gameobjectworld.h">
+      <Filter>Header Files\Subsystems\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="src\subsystems\include\gameobjectsubsystem.h">
+      <Filter>Header Files\Subsystems\Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\subsystems\gameobject\gameobject.cpp">
+      <Filter>Source Files\Subsystems\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="src\subsystems\gameobject\gameobjecttemplate.cpp">
+      <Filter>Source Files\Subsystems\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="src\subsystems\gameobject\gameobjectworld.cpp">
+      <Filter>Source Files\Subsystems\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="src\subsystems\gameobject\gameobjectcomponent.cpp">
+      <Filter>Source Files\Subsystems\GameObject</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

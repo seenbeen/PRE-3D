@@ -8,6 +8,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\subsystems\gameobject\gameobject.cpp" />
+    <ClCompile Include="src\subsystems\gameobject\gameobjectcomponent.cpp" />
+    <ClCompile Include="src\subsystems\gameobject\gameobjecttemplate.cpp" />
+    <ClCompile Include="src\subsystems\gameobject\gameobjectworld.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\subsystems\gameobject\gameobject.h" />
+    <ClInclude Include="src\subsystems\gameobject\gameobjectcomponent.h" />
+    <ClInclude Include="src\subsystems\gameobject\gameobjecttemplate.h" />
+    <ClInclude Include="src\subsystems\gameobject\gameobjectworld.h" />
+    <ClInclude Include="src\subsystems\include\gameobjectsubsystem.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -35,7 +46,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Native|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\ProjectRedemption\src;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\lib\x64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)Build\</OutDir>
     <IntDir>$(SolutionDir)Build\Intermediate\</IntDir>

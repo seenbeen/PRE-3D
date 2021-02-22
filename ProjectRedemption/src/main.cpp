@@ -7,6 +7,8 @@
 #include <iostream>
 #include <stdlib.h>
 
+#include <subsystems/include/gameobjectsubsystem.h>
+
 const auto SCREEN_WIDTH = 800;
 const auto SCREEN_HEIGHT = 600;
 
@@ -17,18 +19,37 @@ static SDL_Event evt;
 
 static void Shutdown();
 
+static bool MainLoopShutdown()
+{
+#ifdef __EMSCRIPTEN__
+    Shutdown();
+    return true;
+#else
+    running = false;
+    return false;
+#endif
+}
+
 static void MainLoop()
 {
     while (SDL_PollEvent(&evt))
     {
         if (evt.type == SDL_QUIT)
         {
-#ifdef __EMSCRIPTEN__
-            Shutdown();
-            break;
-#else
-            running = false;
-#endif
+            if (MainLoopShutdown())
+            {
+                break;
+            }
+        }
+        else if (evt.type == SDL_KEYDOWN)
+        {
+            if (evt.key.keysym.sym == SDLK_ESCAPE)
+            {
+                if (MainLoopShutdown())
+                {
+                    break;
+                }
+            }
         }
     }
 
@@ -43,9 +64,38 @@ static void Shutdown()
     std::cout << "Program Terminated." << std::endl;
 }
 
+class FooComponent : public GameObjectSubsystem::GameObjectComponent
+{
+protected:
+    void OnStart() override
+    {
+        std::cout << "Start!" << std::endl;
+    }
+
+    void OnUpdate() override
+    {
+        std::cout << "Update!" << std::endl;
+        gameObject().Destroy(gameObject());
+    }
+
+    void OnDestroy() override
+    {
+        std::cout << "Destroy!" << std::endl;
+    }
+};
+
+class FooTemplate : public GameObjectSubsystem::GameObjectTemplate
+{
+protected:
+    void Instantiate() override
+    {
+        AddComponent<FooComponent>();
+    }
+};
+
 int main(int argc, char* argv[])
 {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    /*if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
         std::cout << "SDL could not initialize! SDL_Error: %s\n" << SDL_GetError() << std::endl;
         return -1;
@@ -65,7 +115,18 @@ int main(int argc, char* argv[])
     }
 
     Shutdown();
-#endif
+#endif*/
+
+    GameObjectSubsystem::GameObjectWorld world;
+    FooTemplate fooTemplate;
+    std::cout << "Instantiate" << std::endl;
+    auto& gameObject = world.Instantiate(fooTemplate);
+    std::cout << "--------------------------" << std::endl;
+    world.Update();
+    std::cout << "--------------------------" << std::endl;
+    world.Update();
+    std::cout << "--------------------------" << std::endl;
+    world.Update();
 
     return 0;
 }
