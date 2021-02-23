@@ -2,6 +2,7 @@
 
 #include <iterator>
 #include <list>
+#include <queue>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -11,6 +12,7 @@
 #include <include/modules/transform.h>
 
 using std::list;
+using std::queue;
 
 using PRE::TransformModule::Transform;
 
@@ -142,6 +144,30 @@ namespace PRE
 		const glm::mat4& TransformComponent::GetInverseMatrix()
 		{
 			return _transform.GetInverseMatrix();
+		}
+
+		void TransformComponent::OnDestroy()
+		{
+			SetParent(nullptr, true);
+			queue<TransformComponent*> transformQueue;
+
+			transformQueue.push(this);
+			while (!transformQueue.empty())
+			{
+				auto top = transformQueue.front();
+				transformQueue.pop();
+
+				auto children = top->GetChildren();
+				for (auto it = children.begin(); it != children.end(); ++it)
+				{
+					auto pChild = *it;
+					pChild->SetParent(nullptr, true);
+					transformQueue.push(pChild);
+				}
+
+				// this is fine; re-destruction of parent = no-op
+				gameObject().Destroy(top->gameObject());
+			}
 		}
 	} // namespace Core
 } // namespace PRE

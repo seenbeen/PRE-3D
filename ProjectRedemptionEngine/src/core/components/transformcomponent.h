@@ -62,6 +62,7 @@ namespace PRE
 			const glm::mat4& GetInverseMatrix();
 
 		protected:
+			void OnDestroy() override;
 
 		private:
 			Transform<TransformComponent> _transform;
