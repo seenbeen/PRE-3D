@@ -5,10 +5,12 @@
 #include <glm/gtc/quaternion.hpp>
 
 #include <include/subsystems/gameobject.h>
+#include <subsystems/transform/transform.h>
 
 using std::list;
 
 using PRE::GameObjectSubsystem::GameObjectComponent;
+using PRE::TransformSubsystem::Transform;
 
 namespace PRE
 {
@@ -17,6 +19,8 @@ namespace PRE
 		class TransformComponent : public GameObjectComponent
 		{
 		public:
+			TransformComponent();
+
 #pragma region Relations
 			TransformComponent* GetParent();
 			void SetParent(TransformComponent* transform, bool worldPositionStays);
@@ -57,30 +61,10 @@ namespace PRE
 			const glm::mat4& GetMatrix();
 			const glm::mat4& GetInverseMatrix();
 
+		protected:
+
 		private:
-			TransformComponent* _parentTransform;
-			list<TransformComponent*> _childTransforms;
-
-			glm::mat4 _matrix;
-			glm::mat4 _inverseMatrix;
-
-			glm::mat4 _localMatrix; // local-to-parent
-
-			glm::vec3 _position;
-			glm::vec3 _localPosition;
-
-			glm::fquat _rotation;
-			glm::fquat _localRotation;
-
-			glm::vec3 _euler;
-			glm::vec3 _localEuler;
-
-			glm::vec3 _scale;
-			glm::vec3 _localScale;
-
-			void UpdateMatrix();
-			void UpdateLocalMatrix();
-			void AncestryChanged();
+			Transform<TransformComponent> _transform;
 		};
 	} // namespace Core
 } // namespace PRE

@@ -43,6 +43,9 @@
     <Filter Include="Header Files\Include\Subsystems">
       <UniqueIdentifier>{686bae6d-bbc1-44ce-926e-57dff7eefdf1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Subsystems\Transform">
+      <UniqueIdentifier>{055cb775-9760-40e8-977e-9a05405263b5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\subsystems\gameobject\gameobject.h">
@@ -66,11 +69,11 @@
     <ClInclude Include="src\include\subsystems\gameobject.h">
       <Filter>Header Files\Include\Subsystems</Filter>
     </ClInclude>
+    <ClInclude Include="src\subsystems\transform\transform.h">
+      <Filter>Header Files\Subsystems\Transform</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\subsystems\gameobject\gameobject.cpp">
       <Filter>Source Files\Subsystems\GameObject</Filter>
     </ClCompile>
@@ -85,6 +88,9 @@
     </ClCompile>
     <ClCompile Include="src\core\components\transformcomponent.cpp">
       <Filter>Source Files\Core\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

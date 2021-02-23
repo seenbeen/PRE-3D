@@ -22,6 +22,7 @@
     <ClInclude Include="src\subsystems\gameobject\gameobjectcomponent.h" />
     <ClInclude Include="src\subsystems\gameobject\gameobjecttemplate.h" />
     <ClInclude Include="src\subsystems\gameobject\gameobjectworld.h" />
+    <ClInclude Include="src\subsystems\transform\transform.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

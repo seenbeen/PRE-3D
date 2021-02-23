@@ -13,18 +13,18 @@ namespace PRE
 			friend class GameObject;
 
 		public:
+			GameObjectComponent() = default;
+			virtual ~GameObjectComponent() = default;
+
 			GameObject& gameObject();
 
 		protected:
-			GameObjectComponent() = default;
-			~GameObjectComponent() = default;
-
 			virtual void OnStart();
 			virtual void OnUpdate();
 			virtual void OnDestroy();
 
 		private:
-			GameObject* _pGameObject;
+			GameObject* _pGameObject = nullptr;
 		};
 	} // namespace GameObjectSubsystem
 } // namespace PRE

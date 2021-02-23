@@ -67,14 +67,11 @@ static void Shutdown()
 
 class FooComponent : public PRE::GameObjectSubsystem::GameObjectComponent
 {
-private:
-    PRE::Core::TransformComponent* transform;
-
 protected:
     void OnStart() override
     {
         std::cout << "Start!" << std::endl;
-        transform = gameObject().GetComponent<PRE::Core::TransformComponent>();
+        _transform = gameObject().GetComponent<PRE::Core::TransformComponent>();
     }
 
     void OnUpdate() override
@@ -87,6 +84,9 @@ protected:
     {
         std::cout << "Destroy!" << std::endl;
     }
+
+private:
+    PRE::Core::TransformComponent* _transform = nullptr;
 };
 
 class FooTemplate : public PRE::GameObjectSubsystem::GameObjectTemplate
