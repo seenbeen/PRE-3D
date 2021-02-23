@@ -7,22 +7,28 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\application.cpp" />
     <ClCompile Include="src\core\components\transformcomponent.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\subsystems\gameobject\gameobject.cpp" />
-    <ClCompile Include="src\subsystems\gameobject\gameobjectcomponent.cpp" />
-    <ClCompile Include="src\subsystems\gameobject\gameobjecttemplate.cpp" />
-    <ClCompile Include="src\subsystems\gameobject\gameobjectworld.cpp" />
+    <ClCompile Include="src\modules\gameobject\gameobject.cpp" />
+    <ClCompile Include="src\modules\gameobject\gameobjectcomponent.cpp" />
+    <ClCompile Include="src\modules\gameobject\gameobjecttemplate.cpp" />
+    <ClCompile Include="src\modules\gameobject\gameobjectworld.cpp" />
+    <ClCompile Include="src\modules\time\time.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\core\application.h" />
     <ClInclude Include="src\core\components\transformcomponent.h" />
     <ClInclude Include="src\include\core.h" />
-    <ClInclude Include="src\include\subsystems\gameobject.h" />
-    <ClInclude Include="src\subsystems\gameobject\gameobject.h" />
-    <ClInclude Include="src\subsystems\gameobject\gameobjectcomponent.h" />
-    <ClInclude Include="src\subsystems\gameobject\gameobjecttemplate.h" />
-    <ClInclude Include="src\subsystems\gameobject\gameobjectworld.h" />
-    <ClInclude Include="src\subsystems\transform\transform.h" />
+    <ClInclude Include="src\include\modules\gameobject.h" />
+    <ClInclude Include="src\include\modules\time.h" />
+    <ClInclude Include="src\include\modules\transform.h" />
+    <ClInclude Include="src\modules\gameobject\gameobject.h" />
+    <ClInclude Include="src\modules\gameobject\gameobjectcomponent.h" />
+    <ClInclude Include="src\modules\gameobject\gameobjecttemplate.h" />
+    <ClInclude Include="src\modules\gameobject\gameobjectworld.h" />
+    <ClInclude Include="src\modules\time\time.h" />
+    <ClInclude Include="src\modules\transform\transform.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

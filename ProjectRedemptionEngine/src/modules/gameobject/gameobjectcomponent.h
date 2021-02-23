@@ -1,7 +1,7 @@
 #pragma once
 namespace PRE
 {
-	namespace GameObjectSubsystem
+	namespace GameObjectModule
 	{
 		class GameObject;
 

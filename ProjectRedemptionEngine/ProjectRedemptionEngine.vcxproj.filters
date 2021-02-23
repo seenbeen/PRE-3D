@@ -13,18 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\Subsystems">
-      <UniqueIdentifier>{2a0982d8-d4c9-4739-b71c-e69c0ebbc777}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Subsystems\GameObject">
-      <UniqueIdentifier>{638d6e77-a840-4606-a9d1-ff4242b64d0a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Subsystems">
-      <UniqueIdentifier>{adccbc8b-8b66-43c1-9cee-886933b128f2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Subsystems\GameObject">
-      <UniqueIdentifier>{7a4423a8-79f0-4e27-b079-2796c42f3a9f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Core">
       <UniqueIdentifier>{d8d8c8cd-4fd3-4d72-ad12-c2ad45c8211e}</UniqueIdentifier>
     </Filter>
@@ -40,25 +28,43 @@
     <Filter Include="Header Files\Include">
       <UniqueIdentifier>{0ffd31d4-3df1-4d52-b01b-6ff241ee9f1e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Include\Subsystems">
-      <UniqueIdentifier>{686bae6d-bbc1-44ce-926e-57dff7eefdf1}</UniqueIdentifier>
+    <Filter Include="Header Files\Modules">
+      <UniqueIdentifier>{2a0982d8-d4c9-4739-b71c-e69c0ebbc777}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Subsystems\Transform">
+    <Filter Include="Header Files\Modules\GameObject">
+      <UniqueIdentifier>{638d6e77-a840-4606-a9d1-ff4242b64d0a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Modules\Transform">
       <UniqueIdentifier>{055cb775-9760-40e8-977e-9a05405263b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Modules\Time">
+      <UniqueIdentifier>{bf9dfb5f-d92d-4266-850d-3265caa84603}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Modules">
+      <UniqueIdentifier>{adccbc8b-8b66-43c1-9cee-886933b128f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Modules\GameObject">
+      <UniqueIdentifier>{7a4423a8-79f0-4e27-b079-2796c42f3a9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Modules\Time">
+      <UniqueIdentifier>{4880d9d2-c0d2-4e65-8b57-5a876c8d54ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Include\Modules">
+      <UniqueIdentifier>{686bae6d-bbc1-44ce-926e-57dff7eefdf1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\subsystems\gameobject\gameobject.h">
-      <Filter>Header Files\Subsystems\GameObject</Filter>
+    <ClInclude Include="src\modules\gameobject\gameobject.h">
+      <Filter>Header Files\Modules\GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="src\subsystems\gameobject\gameobjectcomponent.h">
-      <Filter>Header Files\Subsystems\GameObject</Filter>
+    <ClInclude Include="src\modules\gameobject\gameobjectcomponent.h">
+      <Filter>Header Files\Modules\GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="src\subsystems\gameobject\gameobjecttemplate.h">
-      <Filter>Header Files\Subsystems\GameObject</Filter>
+    <ClInclude Include="src\modules\gameobject\gameobjecttemplate.h">
+      <Filter>Header Files\Modules\GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="src\subsystems\gameobject\gameobjectworld.h">
-      <Filter>Header Files\Subsystems\GameObject</Filter>
+    <ClInclude Include="src\modules\gameobject\gameobjectworld.h">
+      <Filter>Header Files\Modules\GameObject</Filter>
     </ClInclude>
     <ClInclude Include="src\core\components\transformcomponent.h">
       <Filter>Header Files\Core\Components</Filter>
@@ -66,31 +72,49 @@
     <ClInclude Include="src\include\core.h">
       <Filter>Header Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="src\include\subsystems\gameobject.h">
-      <Filter>Header Files\Include\Subsystems</Filter>
+    <ClInclude Include="src\modules\transform\transform.h">
+      <Filter>Header Files\Modules\Transform</Filter>
     </ClInclude>
-    <ClInclude Include="src\subsystems\transform\transform.h">
-      <Filter>Header Files\Subsystems\Transform</Filter>
+    <ClInclude Include="src\core\application.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\time\time.h">
+      <Filter>Header Files\Modules\Time</Filter>
+    </ClInclude>
+    <ClInclude Include="src\include\modules\gameobject.h">
+      <Filter>Header Files\Include\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\include\modules\transform.h">
+      <Filter>Header Files\Include\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\include\modules\time.h">
+      <Filter>Header Files\Include\Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\subsystems\gameobject\gameobject.cpp">
-      <Filter>Source Files\Subsystems\GameObject</Filter>
+    <ClCompile Include="src\modules\gameobject\gameobject.cpp">
+      <Filter>Source Files\Modules\GameObject</Filter>
     </ClCompile>
-    <ClCompile Include="src\subsystems\gameobject\gameobjecttemplate.cpp">
-      <Filter>Source Files\Subsystems\GameObject</Filter>
+    <ClCompile Include="src\modules\gameobject\gameobjecttemplate.cpp">
+      <Filter>Source Files\Modules\GameObject</Filter>
     </ClCompile>
-    <ClCompile Include="src\subsystems\gameobject\gameobjectworld.cpp">
-      <Filter>Source Files\Subsystems\GameObject</Filter>
+    <ClCompile Include="src\modules\gameobject\gameobjectworld.cpp">
+      <Filter>Source Files\Modules\GameObject</Filter>
     </ClCompile>
-    <ClCompile Include="src\subsystems\gameobject\gameobjectcomponent.cpp">
-      <Filter>Source Files\Subsystems\GameObject</Filter>
+    <ClCompile Include="src\modules\gameobject\gameobjectcomponent.cpp">
+      <Filter>Source Files\Modules\GameObject</Filter>
     </ClCompile>
     <ClCompile Include="src\core\components\transformcomponent.cpp">
       <Filter>Source Files\Core\Components</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\time\time.cpp">
+      <Filter>Source Files\Modules\Time</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\application.cpp">
+      <Filter>Source Files\Core</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

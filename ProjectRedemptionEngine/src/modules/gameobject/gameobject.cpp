@@ -1,14 +1,15 @@
+#include <modules/gameobject/gameobject.h>
+
 #include <typeindex>
 #include <typeinfo>
 #include <unordered_map>
 
-#include <subsystems/gameobject/gameobjectworld.h>
-#include <subsystems/gameobject/gameobject.h>
-#include <subsystems/gameobject/gameobjectcomponent.h>
+#include <modules/gameobject/gameobjectworld.h>
+#include <modules/gameobject/gameobjectcomponent.h>
 
 namespace PRE
 {
-	namespace GameObjectSubsystem
+	namespace GameObjectModule
 	{
 		GameObject& GameObject::Instantiate(GameObjectTemplate& gameObjectTemplate)
 		{

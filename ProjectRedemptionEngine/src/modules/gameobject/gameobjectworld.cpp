@@ -1,12 +1,13 @@
+#include <modules/gameobject/gameobjectworld.h>
+
 #include <unordered_set>
 
-#include <subsystems/gameobject/gameobjectworld.h>
-#include <subsystems/gameobject/gameobjecttemplate.h>
-#include <subsystems/gameobject/gameobject.h>
+#include <modules/gameobject/gameobjecttemplate.h>
+#include <modules/gameobject/gameobject.h>
 
 namespace PRE
 {
-	namespace GameObjectSubsystem
+	namespace GameObjectModule
 	{
 		GameObjectWorld::~GameObjectWorld()
 		{

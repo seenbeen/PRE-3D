@@ -2,13 +2,13 @@
 #include <typeindex>
 #include <unordered_map>
 
-#include <subsystems/gameobject/gameobjectcomponent.h>
+#include <modules/gameobject/gameobjectcomponent.h>
 
 using std::unordered_map;
 using std::type_index;
 namespace PRE
 {
-	namespace GameObjectSubsystem
+	namespace GameObjectModule
 	{
 		class GameObjectWorld;
 		class GameObjectTemplate;

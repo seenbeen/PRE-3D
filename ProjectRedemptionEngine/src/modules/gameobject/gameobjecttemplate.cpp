@@ -1,10 +1,11 @@
-#include <subsystems/gameobject/gameobjectworld.h>
-#include <subsystems/gameobject/gameobjecttemplate.h>
-#include <subsystems/gameobject/gameobject.h>
+#include <modules/gameobject/gameobjecttemplate.h>
+
+#include <modules/gameobject/gameobjectworld.h>
+#include <modules/gameobject/gameobject.h>
 
 namespace PRE
 {
-	namespace GameObjectSubsystem
+	namespace GameObjectModule
 	{
 		GameObject* GameObjectTemplate::InstantiateGameObject(GameObjectWorld& gameObjectWorld)
 		{

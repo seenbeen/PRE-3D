@@ -11,7 +11,7 @@ using std::list;
 
 namespace PRE
 {
-	namespace TransformSubsystem
+	namespace TransformModule
 	{
 		template<class TNodeAssociation>
 		class Transform

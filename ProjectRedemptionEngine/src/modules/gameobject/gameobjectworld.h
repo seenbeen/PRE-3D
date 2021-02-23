@@ -5,7 +5,7 @@ using std::unordered_set;
 
 namespace PRE
 {
-	namespace GameObjectSubsystem
+	namespace GameObjectModule
 	{
 		class GameObjectTemplate;
 		class GameObject;

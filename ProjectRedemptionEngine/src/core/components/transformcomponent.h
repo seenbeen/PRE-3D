@@ -4,13 +4,13 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include <include/subsystems/gameobject.h>
-#include <subsystems/transform/transform.h>
+#include <include/modules/gameobject.h>
+#include <include/modules/transform.h>
 
 using std::list;
 
-using PRE::GameObjectSubsystem::GameObjectComponent;
-using PRE::TransformSubsystem::Transform;
+using PRE::GameObjectModule::GameObjectComponent;
+using PRE::TransformModule::Transform;
 
 namespace PRE
 {

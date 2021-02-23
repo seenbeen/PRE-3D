@@ -1,3 +1,5 @@
+#include <core/components/transformcomponent.h>
+
 #include <iterator>
 #include <list>
 
@@ -6,12 +8,11 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
-#include <core/components/transformcomponent.h>
-#include <subsystems/transform/transform.h>
+#include <include/modules/transform.h>
 
 using std::list;
 
-using PRE::TransformSubsystem::Transform;
+using PRE::TransformModule::Transform;
 
 namespace PRE
 {

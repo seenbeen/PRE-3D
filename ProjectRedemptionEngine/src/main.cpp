@@ -7,7 +7,8 @@
 #include <iostream>
 #include <stdlib.h>
 
-#include <include/subsystems/gameobject.h>
+#include <include/modules/gameobject.h>
+#include <include/modules/time.h>
 #include <include/core.h>
 
 const auto SCREEN_WIDTH = 800;
@@ -65,7 +66,7 @@ static void Shutdown()
     std::cout << "Program Terminated." << std::endl;
 }
 
-class FooComponent : public PRE::GameObjectSubsystem::GameObjectComponent
+class FooComponent : public PRE::GameObjectModule::GameObjectComponent
 {
 protected:
     void OnStart() override
@@ -89,7 +90,7 @@ private:
     PRE::Core::TransformComponent* _transform = nullptr;
 };
 
-class FooTemplate : public PRE::GameObjectSubsystem::GameObjectTemplate
+class FooTemplate : public PRE::GameObjectModule::GameObjectTemplate
 {
 protected:
     void Instantiate() override
@@ -122,8 +123,9 @@ int main(int argc, char* argv[])
 
     Shutdown();
 #endif*/
-
-    PRE::GameObjectSubsystem::GameObjectWorld world;
+    PRE::TimeModule::Time time;
+    time.Update();
+    PRE::GameObjectModule::GameObjectWorld world;
     FooTemplate fooTemplate;
     std::cout << "Instantiate" << std::endl;
     auto& gameObject = world.Instantiate(fooTemplate);
@@ -133,6 +135,7 @@ int main(int argc, char* argv[])
     world.Update();
     std::cout << "--------------------------" << std::endl;
     world.Update();
-
+    time.Update();
+    std::cout << time.GetDeltaTime() << std::endl;
     return 0;
 }

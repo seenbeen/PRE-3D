@@ -1,9 +1,9 @@
 #pragma once
-#include <subsystems/gameobject/gameobject.h>
+#include <modules/gameobject/gameobject.h>
 
 namespace PRE
 {
-	namespace GameObjectSubsystem
+	namespace GameObjectModule
 	{
 		class GameObjectWorld;
 		class GameObjectComponent;

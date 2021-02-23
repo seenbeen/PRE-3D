@@ -1,8 +1,8 @@
-#include <subsystems/gameobject/gameobjectcomponent.h>
+#include <modules/gameobject/gameobjectcomponent.h>
 
 namespace PRE
 {
-	namespace GameObjectSubsystem
+	namespace GameObjectModule
 	{
 		GameObject& GameObjectComponent::gameObject()
 		{
