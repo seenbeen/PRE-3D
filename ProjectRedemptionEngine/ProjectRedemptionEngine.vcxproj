@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Native|x64">
+      <Configuration>Native</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\core\components\transformcomponent.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\subsystems\gameobject\gameobject.cpp" />
+    <ClCompile Include="src\subsystems\gameobject\gameobjectcomponent.cpp" />
+    <ClCompile Include="src\subsystems\gameobject\gameobjecttemplate.cpp" />
+    <ClCompile Include="src\subsystems\gameobject\gameobjectworld.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\core\components\transformcomponent.h" />
+    <ClInclude Include="src\include\core.h" />
+    <ClInclude Include="src\include\subsystems\gameobject.h" />
+    <ClInclude Include="src\subsystems\gameobject\gameobject.h" />
+    <ClInclude Include="src\subsystems\gameobject\gameobjectcomponent.h" />
+    <ClInclude Include="src\subsystems\gameobject\gameobjecttemplate.h" />
+    <ClInclude Include="src\subsystems\gameobject\gameobjectworld.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{daa0b639-bdee-413d-915a-f67f47e791ed}</ProjectGuid>
+    <RootNamespace>ProjectRedemptionEngine</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>ProjectRedemptionEngine</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Native|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Native|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Native|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\ProjectRedemptionEngine\src;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\include;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\lib\x64;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)Build\</OutDir>
+    <IntDir>$(SolutionDir)Build\Intermediate\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Native|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>Default</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /Y "$(SolutionDir)Deps\SDL2-2.0.14\lib\x64\SDL2.dll" "$(SolutionDir)Build\SDL2.dll"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

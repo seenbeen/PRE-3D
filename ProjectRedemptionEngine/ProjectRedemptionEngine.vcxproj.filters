@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Subsystems">
+      <UniqueIdentifier>{2a0982d8-d4c9-4739-b71c-e69c0ebbc777}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Subsystems\GameObject">
+      <UniqueIdentifier>{638d6e77-a840-4606-a9d1-ff4242b64d0a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Subsystems">
+      <UniqueIdentifier>{adccbc8b-8b66-43c1-9cee-886933b128f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Subsystems\GameObject">
+      <UniqueIdentifier>{7a4423a8-79f0-4e27-b079-2796c42f3a9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Core">
+      <UniqueIdentifier>{d8d8c8cd-4fd3-4d72-ad12-c2ad45c8211e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Core">
+      <UniqueIdentifier>{83a14b4c-63f1-49a6-9ba6-1e1bcbb0a8fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Core\Components">
+      <UniqueIdentifier>{e66db723-b7b2-494e-91c8-04ba2163c42b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Core\Components">
+      <UniqueIdentifier>{cee8ef14-1097-405d-9a51-e5d9ab0501f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Include">
+      <UniqueIdentifier>{0ffd31d4-3df1-4d52-b01b-6ff241ee9f1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Include\Subsystems">
+      <UniqueIdentifier>{686bae6d-bbc1-44ce-926e-57dff7eefdf1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\subsystems\gameobject\gameobject.h">
+      <Filter>Header Files\Subsystems\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="src\subsystems\gameobject\gameobjectcomponent.h">
+      <Filter>Header Files\Subsystems\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="src\subsystems\gameobject\gameobjecttemplate.h">
+      <Filter>Header Files\Subsystems\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="src\subsystems\gameobject\gameobjectworld.h">
+      <Filter>Header Files\Subsystems\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\components\transformcomponent.h">
+      <Filter>Header Files\Core\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\include\core.h">
+      <Filter>Header Files\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\include\subsystems\gameobject.h">
+      <Filter>Header Files\Include\Subsystems</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\subsystems\gameobject\gameobject.cpp">
+      <Filter>Source Files\Subsystems\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="src\subsystems\gameobject\gameobjecttemplate.cpp">
+      <Filter>Source Files\Subsystems\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="src\subsystems\gameobject\gameobjectworld.cpp">
+      <Filter>Source Files\Subsystems\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="src\subsystems\gameobject\gameobjectcomponent.cpp">
+      <Filter>Source Files\Subsystems\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\components\transformcomponent.cpp">
+      <Filter>Source Files\Core\Components</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
