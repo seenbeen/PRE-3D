@@ -27,8 +27,8 @@ namespace PRE
 			void Quit();
 
 		private:
-			const PREApplicationConfig::OnInitialize _onInitialize;
-			const PREApplicationConfig::OnShutdown _onShutdown;
+			PREApplicationConfig::OnInitialize _onInitialize;
+			PREApplicationConfig::OnShutdown _onShutdown;
 
 			PREApplication& _application;
 

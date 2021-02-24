@@ -6,12 +6,12 @@ namespace PRE
 	{
 		PRERendering::PRERendering()
 		{
-			throw "unimplemented.";
+			// throw "unimplemented.";
 		}
 		
 		PRERendering::~PRERendering()
 		{
-			throw "unimplemented.";
+			// throw "unimplemented.";
 		}
 
 		void PRERendering::Initialize()

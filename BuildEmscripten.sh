@@ -1,9 +1,9 @@
 #!/bin/bash
-SRC_DIR="ProjectRedemption/src"
+SRC_DIR="ProjectRedemptionEngine/src"
 source ../emsdk/emsdk_env.sh
-rm -rf Embuild
-mkdir Embuild
-mkdir Embuild/temp
-emcc -c $SRC_DIR/main.cpp -O1 -s USE_SDL=2 -o Embuild/temp/main.o
-emcc -g Embuild/temp/main.o -O1 -s USE_SDL=2 -o Embuild/main.html
-rm -rf Embuild/temp
+rm -rf ./Embuild
+mkdir ./Embuild
+mkdir ./Embuild/obj
+find ./ProjectRedemptionEngine -name '*.cpp' -exec emcc -c {} -O1 -s USE_SDL=2 -I ./ProjectRedemptionEngine/src -I ./deps \;
+mv *.o ./Embuild/obj
+emcc -g $(find ./Embuild/obj -name '*.o' | tr '\n' ' ') -O1 -s USE_SDL=2 -o Embuild/main.html

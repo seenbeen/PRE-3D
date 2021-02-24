@@ -31,6 +31,7 @@ protected:
         if (_derp >= 3.0f)
         {
             std::cout << "3 seconds, i'm out." << std::endl;
+            std::cout << _transform->GetEuler().x << std::endl;
             applicationContext->Quit();
         }
     }

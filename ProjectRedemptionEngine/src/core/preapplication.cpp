@@ -40,15 +40,18 @@ namespace PRE
 
 			_isRunning = true;
 #ifdef __EMSCRIPTEN__
-			emscripten_set_main_loop(
-				[&]() {
-					if (!_isRunning) {
-						_applicationContext.Shutdown();
+			emscripten_set_main_loop_arg(
+				[](void* pVoidApplication)
+				{
+					auto pApplication = static_cast<PREApplication*>(pVoidApplication);
+					if (!pApplication->_isRunning) {
+						pApplication->_applicationContext.Shutdown();
 						emscripten_cancel_main_loop();
 						return;
 					}
-					_applicationContext.Update();
+					pApplication->_applicationContext.Update();
 				},
+				static_cast<void*>(this),
 				0,
 				true
 			);
