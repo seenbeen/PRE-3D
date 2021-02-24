@@ -49,7 +49,7 @@ private:
 class FooTemplate : public GameObjectTemplate
 {
 protected:
-    void Instantiate() override
+    void OnInstantiate() override
     {
         AddComponent<PRE::Core::TransformComponent>();
         AddComponent<FooComponent>();

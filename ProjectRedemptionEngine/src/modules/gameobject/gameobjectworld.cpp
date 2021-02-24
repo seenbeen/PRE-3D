@@ -24,9 +24,9 @@ namespace PRE
 
 		GameObject& GameObjectWorld::Instantiate(GameObjectTemplate& gameObjectTemplate)
 		{
-			auto gameObject = gameObjectTemplate.InstantiateGameObject(*this);
-			_startingObjects.insert(gameObject);
-			return *gameObject;
+			auto& gameObject = gameObjectTemplate.InstantiateGameObject(*this);
+			_startingObjects.insert(&gameObject);
+			return gameObject;
 		}
 
 		void GameObjectWorld::Update()

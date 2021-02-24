@@ -17,23 +17,27 @@ namespace PRE
 			friend class GameObject;
 
 		protected:
-			GameObjectTemplate() = default;
+			GameObjectTemplate();
 
 			template<class TGameObjectComponent>
 			TGameObjectComponent* AddComponent()
 			{
-				return _currentObject->AddComponent<TGameObjectComponent>();
+				return _currentGameObject->AddComponent<TGameObjectComponent>();
 			}
 
-			virtual void Instantiate() = 0;
+			GameObject& Instantiate(GameObjectTemplate& gameObjectTemplate);
+
+			virtual void OnInstantiate() = 0;
+
 
 		private:
-			GameObject* _currentObject = nullptr;
+			GameObjectWorld* _currentGameObjectWorld;
+			GameObject* _currentGameObject;
 
 			/**
 				* Produces a game object from this template.
 				**/
-			GameObject* InstantiateGameObject(GameObjectWorld& gameObjectWorld);
+			GameObject& InstantiateGameObject(GameObjectWorld& gameObjectWorld);
 		};
 	} // namespace GameObjectSubsystem
 } // namespace PRE

@@ -7,13 +7,25 @@ namespace PRE
 {
 	namespace GameObjectModule
 	{
-		GameObject* GameObjectTemplate::InstantiateGameObject(GameObjectWorld& gameObjectWorld)
+		GameObjectTemplate::GameObjectTemplate()
 		{
-			_currentObject = new GameObject(gameObjectWorld);
-			Instantiate();
-			auto temp = _currentObject;
-			_currentObject = nullptr;
-			return temp;
+			_currentGameObjectWorld = nullptr;
+			_currentGameObject = nullptr;
+		}
+
+		GameObject& GameObjectTemplate::Instantiate(GameObjectTemplate& gameObjectTemplate)
+		{
+			return _currentGameObjectWorld->Instantiate(gameObjectTemplate);
+		}
+
+		GameObject& GameObjectTemplate::InstantiateGameObject(GameObjectWorld& gameObjectWorld)
+		{
+			_currentGameObjectWorld = &gameObjectWorld;
+			_currentGameObject = new GameObject(gameObjectWorld);
+			OnInstantiate();
+			auto temp = _currentGameObject;
+			_currentGameObject = nullptr;
+			return *temp;
 		}
 	} // namespace GameObjectSubsystem
 } // namespace PRE
