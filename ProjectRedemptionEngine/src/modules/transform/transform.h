@@ -21,7 +21,7 @@ namespace PRE
 
 		public:
 			Transform(TNodeAssociation& association)
-				: _association(&association)
+				: _association(association)
 			{
 				_parentTransform = nullptr;
 			}
@@ -35,7 +35,7 @@ namespace PRE
 				SetParent(nullptr, true);
 			}
 
-			TNodeAssociation* GetAssociation()
+			TNodeAssociation& GetAssociation()
 			{
 				return _association;
 			}
@@ -198,7 +198,7 @@ namespace PRE
 			}
 
 		private:
-			TNodeAssociation* _association;
+			TNodeAssociation& _association;
 
 			Transform* _parentTransform;
 			list<Transform*> _childTransforms;

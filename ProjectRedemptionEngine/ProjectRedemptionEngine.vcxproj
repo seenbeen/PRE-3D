@@ -1,15 +1,21 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Native|x64">
-      <Configuration>Native</Configuration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\core\application.cpp" />
+    <ClCompile Include="src\application\main.cpp" />
+    <ClCompile Include="src\core\preapplication.cpp" />
     <ClCompile Include="src\core\components\transformcomponent.cpp" />
-    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\core\preapplicationconfig.cpp" />
+    <ClCompile Include="src\core\preapplicationcontext.cpp" />
+    <ClCompile Include="src\core\subsystems\physics\prephysics.cpp" />
+    <ClCompile Include="src\core\subsystems\rendering\prerendering.cpp" />
+    <ClCompile Include="src\core\subsystems\time\pretime.cpp" />
+    <ClCompile Include="src\core\subsystems\world\preworld.cpp" />
     <ClCompile Include="src\modules\gameobject\gameobject.cpp" />
     <ClCompile Include="src\modules\gameobject\gameobjectcomponent.cpp" />
     <ClCompile Include="src\modules\gameobject\gameobjecttemplate.cpp" />
@@ -17,8 +23,14 @@
     <ClCompile Include="src\modules\time\time.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\core\application.h" />
+    <ClInclude Include="src\core\preapplication.h" />
     <ClInclude Include="src\core\components\transformcomponent.h" />
+    <ClInclude Include="src\core\preapplicationconfig.h" />
+    <ClInclude Include="src\core\preapplicationcontext.h" />
+    <ClInclude Include="src\core\subsystems\physics\prephysics.h" />
+    <ClInclude Include="src\core\subsystems\rendering\prerendering.h" />
+    <ClInclude Include="src\core\subsystems\time\pretime.h" />
+    <ClInclude Include="src\core\subsystems\world\preworld.h" />
     <ClInclude Include="src\include\core.h" />
     <ClInclude Include="src\include\modules\gameobject.h" />
     <ClInclude Include="src\include\modules\time.h" />
@@ -39,7 +51,7 @@
     <ProjectName>ProjectRedemptionEngine</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Native|x64'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
@@ -51,18 +63,18 @@
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Native|x64'">
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Native|x64'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\ProjectRedemptionEngine\src;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\include;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\lib\x64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)Build\</OutDir>
     <IntDir>$(SolutionDir)Build\Intermediate\</IntDir>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Native|x64'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>

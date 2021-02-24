@@ -52,6 +52,54 @@
     <Filter Include="Header Files\Include\Modules">
       <UniqueIdentifier>{686bae6d-bbc1-44ce-926e-57dff7eefdf1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Core\Subsystems">
+      <UniqueIdentifier>{838c7dd5-fa97-49df-8752-f7808fb550b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Core\Subsystems">
+      <UniqueIdentifier>{1a5401a6-6975-412a-8300-c7a6342d5615}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Core\Subsystems\World">
+      <UniqueIdentifier>{899182db-f2f4-414c-b05a-9e129b3c1338}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Core\Subsystems\Time">
+      <UniqueIdentifier>{dfeb8ba9-1854-45c3-83b0-40b9ff0ee576}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Core\Subsystems\Rendering">
+      <UniqueIdentifier>{a895d933-518a-4344-af99-e8e86a782274}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Core\Subsystems\World">
+      <UniqueIdentifier>{c6550d14-bc7f-4f3d-81b8-930df3d37137}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Core\Subsystems\Time">
+      <UniqueIdentifier>{688d6c8a-b6e5-4f00-ae46-ae5d48194123}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Core\Subsystems\Rendering">
+      <UniqueIdentifier>{f11623a5-4c5c-4b00-823d-9b1ce272600c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Core\Subsystems\Physics">
+      <UniqueIdentifier>{8ab90ae1-4926-4d32-b1ba-20e8ef736fd0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Core\Subsystems\Physics">
+      <UniqueIdentifier>{35ada952-efeb-4587-b346-02706d34ce59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Modules\Rendering">
+      <UniqueIdentifier>{5b5cbf1b-51b2-4937-92e6-431d1b357863}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Modules\Physics">
+      <UniqueIdentifier>{efb16321-5215-4ea9-af3a-8e8dc4ac250a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Modules\Rendering">
+      <UniqueIdentifier>{bb5b4e30-9600-425f-a39a-4a0a43e8e7ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Modules\Physics">
+      <UniqueIdentifier>{5d6ba8bb-9701-4daf-a180-8fd2764da3c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Modules\Transform">
+      <UniqueIdentifier>{b49cab35-4672-4664-b537-1617a73d8016}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Application">
+      <UniqueIdentifier>{2fa3314b-c4ef-47a0-b95f-146e9a5461ed}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\modules\gameobject\gameobject.h">
@@ -69,26 +117,44 @@
     <ClInclude Include="src\core\components\transformcomponent.h">
       <Filter>Header Files\Core\Components</Filter>
     </ClInclude>
-    <ClInclude Include="src\include\core.h">
-      <Filter>Header Files\Include</Filter>
-    </ClInclude>
     <ClInclude Include="src\modules\transform\transform.h">
       <Filter>Header Files\Modules\Transform</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\application.h">
-      <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\modules\time\time.h">
       <Filter>Header Files\Modules\Time</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\preapplicationconfig.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\preapplication.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\subsystems\time\pretime.h">
+      <Filter>Header Files\Core\Subsystems\Time</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\subsystems\world\preworld.h">
+      <Filter>Header Files\Core\Subsystems\World</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\subsystems\rendering\prerendering.h">
+      <Filter>Header Files\Core\Subsystems\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\subsystems\physics\prephysics.h">
+      <Filter>Header Files\Core\Subsystems\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\preapplicationcontext.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
     <ClInclude Include="src\include\modules\gameobject.h">
+      <Filter>Header Files\Include\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\include\modules\time.h">
       <Filter>Header Files\Include\Modules</Filter>
     </ClInclude>
     <ClInclude Include="src\include\modules\transform.h">
       <Filter>Header Files\Include\Modules</Filter>
     </ClInclude>
-    <ClInclude Include="src\include\modules\time.h">
-      <Filter>Header Files\Include\Modules</Filter>
+    <ClInclude Include="src\include\core.h">
+      <Filter>Header Files\Include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -107,14 +173,32 @@
     <ClCompile Include="src\core\components\transformcomponent.cpp">
       <Filter>Source Files\Core\Components</Filter>
     </ClCompile>
-    <ClCompile Include="src\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\modules\time\time.cpp">
       <Filter>Source Files\Modules\Time</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\application.cpp">
+    <ClCompile Include="src\core\preapplication.cpp">
       <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\rendering\prerendering.cpp">
+      <Filter>Source Files\Core\Subsystems\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\time\pretime.cpp">
+      <Filter>Source Files\Core\Subsystems\Time</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\world\preworld.cpp">
+      <Filter>Source Files\Core\Subsystems\World</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\preapplicationconfig.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\physics\prephysics.cpp">
+      <Filter>Source Files\Core\Subsystems\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\preapplicationcontext.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\application\main.cpp">
+      <Filter>Source Files\Application</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

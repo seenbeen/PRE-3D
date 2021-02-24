@@ -13,18 +13,13 @@ namespace PRE
 		{
 			for (auto it = _startingObjects.begin(); it != _startingObjects.end(); ++it)
 			{
-				delete* it;
+				delete *it;
 			}
 			for (auto it = _runningObjects.begin(); it != _runningObjects.end(); ++it)
 			{
-				(*it)->Destroy();
-				delete* it;
+				delete *it;
 			}
-			for (auto it = _destroyedObjects.begin(); it != _destroyedObjects.end(); ++it)
-			{
-				(*it)->Destroy();
-				delete* it;
-			}
+			// note: destroyed objects were cleared along with running objects
 		}
 
 		GameObject& GameObjectWorld::Instantiate(GameObjectTemplate& gameObjectTemplate)
@@ -86,6 +81,22 @@ namespace PRE
 				throw "GameObject does not belonging to GameObjectWorld.";
 			}
 			_destroyedObjects.insert(pGameObject);
+		}
+
+		void GameObjectWorld::Shutdown()
+		{
+			for (auto it = _startingObjects.begin(); it != _startingObjects.end(); ++it)
+			{
+				delete *it;
+			}
+			_startingObjects.clear();
+			for (auto it = _runningObjects.begin(); it != _runningObjects.end(); ++it)
+			{
+				(*it)->Destroy();
+				delete *it;
+			}
+			_runningObjects.clear();
+			// note: destroyed objects were cleared along with running objects
 		}
 	} // namespace GameObjectSubsystem
 } // namespace PRE

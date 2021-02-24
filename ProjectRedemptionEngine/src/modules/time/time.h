@@ -7,6 +7,9 @@ namespace PRE
 	{
 		class Time
 		{
+			Time& operator=(const Time&) = delete;
+			Time(const Time&) = delete;
+
 		public:
 			Time();
 			~Time();
@@ -18,7 +21,7 @@ namespace PRE
 		private:
 			const long double MILLIS_IN_SECOND = 1000.0l;
 			float _deltaTime;
-			long double _lastFrameMillis;
+			long long _lastFrameMillis;
 		};
 	}
 }

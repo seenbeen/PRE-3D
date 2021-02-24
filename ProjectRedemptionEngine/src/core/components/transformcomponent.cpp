@@ -25,7 +25,7 @@ namespace PRE
 #pragma region Relations
 		TransformComponent* TransformComponent::GetParent()
 		{
-			return _transform.GetParent()->GetAssociation();
+			return &_transform.GetParent()->GetAssociation();
 		}
 
 		void TransformComponent::SetParent(TransformComponent* transform, bool worldPositionStays)
@@ -44,7 +44,7 @@ namespace PRE
 				children.begin(),
 				children.end(),
 				std::back_inserter(result),
-				[](auto transform) { return transform->GetAssociation(); }
+				[](auto transform) { return &transform->GetAssociation(); }
 			);
 			return result;
 		}

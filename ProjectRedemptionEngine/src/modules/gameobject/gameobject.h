@@ -6,6 +6,7 @@
 
 using std::unordered_map;
 using std::type_index;
+
 namespace PRE
 {
 	namespace GameObjectModule

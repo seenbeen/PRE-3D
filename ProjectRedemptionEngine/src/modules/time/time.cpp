@@ -13,7 +13,7 @@ namespace PRE
 		Time::Time()
 		{
 			_deltaTime = 0.0f;
-			_lastFrameMillis = 0.0;
+			_lastFrameMillis = 0l;
 		}
 
 		Time::~Time() {}
@@ -33,7 +33,7 @@ namespace PRE
 			)
 			.count();
 			_deltaTime = (currentFrameMillis - _lastFrameMillis) / Time::MILLIS_IN_SECOND;
-			currentFrameMillis = _lastFrameMillis;
+			_lastFrameMillis = currentFrameMillis;
 		}
 
 		float Time::GetDeltaTime()

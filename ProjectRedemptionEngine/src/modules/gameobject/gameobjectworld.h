@@ -23,6 +23,7 @@ namespace PRE
 			void Update();
 			void Destroy(GameObject& gameObject);
 
+			void Shutdown();
 		private:
 			unordered_set<GameObject*> _startingObjects;
 			unordered_set<GameObject*> _runningObjects;

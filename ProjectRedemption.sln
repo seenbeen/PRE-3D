@@ -7,11 +7,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProjectRedemptionEngine", "
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Native|x64 = Native|x64
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DAA0B639-BDEE-413D-915A-F67F47E791ED}.Native|x64.ActiveCfg = Native|x64
-		{DAA0B639-BDEE-413D-915A-F67F47E791ED}.Native|x64.Build.0 = Native|x64
+		{DAA0B639-BDEE-413D-915A-F67F47E791ED}.Release|x64.ActiveCfg = Release|x64
+		{DAA0B639-BDEE-413D-915A-F67F47E791ED}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
