@@ -100,6 +100,12 @@
     <Filter Include="Source Files\Application">
       <UniqueIdentifier>{2fa3314b-c4ef-47a0-b95f-146e9a5461ed}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Modules\Rendering\Camera">
+      <UniqueIdentifier>{357e6dd7-6df6-47d5-9d20-967234ae235f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Modules\Rendering\Camera">
+      <UniqueIdentifier>{54504b30-4e0a-4d1e-aa9a-cb642871bd19}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\modules\gameobject\gameobject.h">
@@ -156,6 +162,24 @@
     <ClInclude Include="src\include\core.h">
       <Filter>Header Files\Include</Filter>
     </ClInclude>
+    <ClInclude Include="src\modules\rendering\renderer.h">
+      <Filter>Header Files\Modules\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\rendering\renderable.h">
+      <Filter>Header Files\Modules\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\rendering\compositingnode.h">
+      <Filter>Header Files\Modules\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\rendering\camera\camera.h">
+      <Filter>Header Files\Modules\Rendering\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\rendering\camera\orthographiccamera.h">
+      <Filter>Header Files\Modules\Rendering\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\rendering\camera\perspectivecamera.h">
+      <Filter>Header Files\Modules\Rendering\Camera</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\modules\gameobject\gameobject.cpp">
@@ -199,6 +223,24 @@
     </ClCompile>
     <ClCompile Include="src\application\main.cpp">
       <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\rendering\renderer.cpp">
+      <Filter>Source Files\Modules\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\rendering\renderable.cpp">
+      <Filter>Source Files\Modules\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\rendering\compositingnode.cpp">
+      <Filter>Source Files\Modules\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\rendering\camera\camera.cpp">
+      <Filter>Source Files\Modules\Rendering\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\rendering\camera\orthographiccamera.cpp">
+      <Filter>Source Files\Modules\Rendering\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\rendering\camera\perspectivecamera.cpp">
+      <Filter>Source Files\Modules\Rendering\Camera</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

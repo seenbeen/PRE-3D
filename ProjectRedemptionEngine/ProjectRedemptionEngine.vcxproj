@@ -20,6 +20,12 @@
     <ClCompile Include="src\modules\gameobject\gameobjectcomponent.cpp" />
     <ClCompile Include="src\modules\gameobject\gameobjecttemplate.cpp" />
     <ClCompile Include="src\modules\gameobject\gameobjectworld.cpp" />
+    <ClCompile Include="src\modules\rendering\camera\camera.cpp" />
+    <ClCompile Include="src\modules\rendering\camera\orthographiccamera.cpp" />
+    <ClCompile Include="src\modules\rendering\camera\perspectivecamera.cpp" />
+    <ClCompile Include="src\modules\rendering\compositingnode.cpp" />
+    <ClCompile Include="src\modules\rendering\renderable.cpp" />
+    <ClCompile Include="src\modules\rendering\renderer.cpp" />
     <ClCompile Include="src\modules\time\time.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -39,6 +45,12 @@
     <ClInclude Include="src\modules\gameobject\gameobjectcomponent.h" />
     <ClInclude Include="src\modules\gameobject\gameobjecttemplate.h" />
     <ClInclude Include="src\modules\gameobject\gameobjectworld.h" />
+    <ClInclude Include="src\modules\rendering\camera\camera.h" />
+    <ClInclude Include="src\modules\rendering\camera\orthographiccamera.h" />
+    <ClInclude Include="src\modules\rendering\camera\perspectivecamera.h" />
+    <ClInclude Include="src\modules\rendering\compositingnode.h" />
+    <ClInclude Include="src\modules\rendering\renderable.h" />
+    <ClInclude Include="src\modules\rendering\renderer.h" />
     <ClInclude Include="src\modules\time\time.h" />
     <ClInclude Include="src\modules\transform\transform.h" />
   </ItemGroup>
@@ -80,7 +92,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;GLM_FORCE_PURE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
