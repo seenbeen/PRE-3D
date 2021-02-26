@@ -1,6 +1,4 @@
 #pragma once
-#include <glm/glm.hpp>
-
 #include <modules/rendering/camera/camera.h>
 
 namespace PRE
@@ -11,7 +9,7 @@ namespace PRE
 		{
 		public:
 			OrthographicCamera(float size, float aspectRatio, float renderDistance);
-			~OrthographicCamera();
+			~OrthographicCamera() override;
 
 			float GetSize();
 			void SetSize(float size);
@@ -22,15 +20,10 @@ namespace PRE
 			float GetRenderDistance();
 			void SetRenderDistance(float renderDistance);
 
-		protected:
-			const glm::mat4& GetProjectionMatrix() override;
-
 		private:
 			float _size;
 			float _aspectRatio;
 			float _renderDistance;
-
-			glm::mat4 _projectionMatrix;
 
 			void RefreshProjectionMatrix();
 		};

@@ -7,13 +7,28 @@ namespace PRE
 	namespace RenderingModule
 	{
 		Camera::Camera()
-			: transform(*this), _projectionMatrix() {}
+			:
+			_viewMatrix(),
+			_projectionMatrix(),
+			_viewProjectionMatrix() {}
 
 		Camera::~Camera() {}
 
-		glm::mat4 Camera::GetTransform()
+		void Camera::SetViewMatrix(const glm::mat4& viewMatrix)
 		{
-			return GetProjectionMatrix() * transform.GetInverseMatrix();
+			_viewMatrix = viewMatrix;
+			_viewProjectionMatrix = _projectionMatrix * _viewMatrix;
+		}
+
+		const glm::mat4& Camera::GetViewProjectionMatrix() const
+		{
+			return _viewProjectionMatrix;
+		}
+
+		void Camera::SetProjectionMatrix(const glm::mat4& projectionMatrix)
+		{
+			_projectionMatrix = projectionMatrix;
+			_viewProjectionMatrix = _projectionMatrix * _viewMatrix;
 		}
 	} // namespace RenderingModule
 } // namespace PRE

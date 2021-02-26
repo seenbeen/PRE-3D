@@ -7,6 +7,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Deps\glad\src\glad.c" />
     <ClCompile Include="src\application\main.cpp" />
     <ClCompile Include="src\core\preapplication.cpp" />
     <ClCompile Include="src\core\components\transformcomponent.cpp" />
@@ -23,9 +24,13 @@
     <ClCompile Include="src\modules\rendering\camera\camera.cpp" />
     <ClCompile Include="src\modules\rendering\camera\orthographiccamera.cpp" />
     <ClCompile Include="src\modules\rendering\camera\perspectivecamera.cpp" />
-    <ClCompile Include="src\modules\rendering\compositingnode.cpp" />
-    <ClCompile Include="src\modules\rendering\renderable.cpp" />
+    <ClCompile Include="src\modules\rendering\compositing\compositingnode.cpp" />
+    <ClCompile Include="src\modules\rendering\compositing\compositingtarget.cpp" />
+    <ClCompile Include="src\modules\rendering\rendermodel.cpp" />
     <ClCompile Include="src\modules\rendering\renderer.cpp" />
+    <ClCompile Include="src\modules\rendering\shader\renderfragmentshader.cpp" />
+    <ClCompile Include="src\modules\rendering\shader\rendershaderprogram.cpp" />
+    <ClCompile Include="src\modules\rendering\shader\rendervertexshader.cpp" />
     <ClCompile Include="src\modules\time\time.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -48,9 +53,13 @@
     <ClInclude Include="src\modules\rendering\camera\camera.h" />
     <ClInclude Include="src\modules\rendering\camera\orthographiccamera.h" />
     <ClInclude Include="src\modules\rendering\camera\perspectivecamera.h" />
-    <ClInclude Include="src\modules\rendering\compositingnode.h" />
-    <ClInclude Include="src\modules\rendering\renderable.h" />
+    <ClInclude Include="src\modules\rendering\compositing\compositingnode.h" />
+    <ClInclude Include="src\modules\rendering\compositing\compositingtarget.h" />
+    <ClInclude Include="src\modules\rendering\rendermodel.h" />
     <ClInclude Include="src\modules\rendering\renderer.h" />
+    <ClInclude Include="src\modules\rendering\shader\renderfragmentshader.h" />
+    <ClInclude Include="src\modules\rendering\shader\rendershaderprogram.h" />
+    <ClInclude Include="src\modules\rendering\shader\rendervertexshader.h" />
     <ClInclude Include="src\modules\time\time.h" />
     <ClInclude Include="src\modules\transform\transform.h" />
   </ItemGroup>
@@ -81,7 +90,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\ProjectRedemptionEngine\src;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\include;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\ProjectRedemptionEngine\src;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\include;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\glad\include;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\lib\x64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)Build\</OutDir>
     <IntDir>$(SolutionDir)Build\Intermediate\</IntDir>

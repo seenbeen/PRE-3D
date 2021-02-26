@@ -2,14 +2,14 @@
 
 #include <chrono>
 
-using std::chrono::duration_cast;
-using std::chrono::milliseconds;
-using std::chrono::system_clock;
-
 namespace PRE
 {
 	namespace TimeModule
 	{
+		using std::chrono::duration_cast;
+		using std::chrono::milliseconds;
+		using std::chrono::system_clock;
+
 		Time::Time()
 		{
 			_deltaTime = 0.0f;

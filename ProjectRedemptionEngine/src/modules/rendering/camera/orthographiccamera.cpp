@@ -1,6 +1,7 @@
 #include <modules/rendering/camera/orthographiccamera.h>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace PRE
 {
@@ -13,8 +14,7 @@ namespace PRE
 		) : 
 			_size(size),
 			_aspectRatio(aspectRatio),
-			_renderDistance(renderDistance),
-			_projectionMatrix()
+			_renderDistance(renderDistance)
 		{
 			RefreshProjectionMatrix();
 		}
@@ -54,21 +54,18 @@ namespace PRE
 			RefreshProjectionMatrix();
 		}
 
-		const glm::mat4& OrthographicCamera::GetProjectionMatrix()
-		{
-			return _projectionMatrix;
-		}
-
 		void OrthographicCamera::RefreshProjectionMatrix()
 		{
 			auto hAspect = _size * _aspectRatio;
-			_projectionMatrix = glm::ortho(
-				-_size,
-				_size,
-				-hAspect,
-				hAspect,
-				0.0f,
-				_renderDistance
+			SetProjectionMatrix(
+				glm::ortho(
+					-_size,
+					_size,
+					-hAspect,
+					hAspect,
+					0.0f,
+					_renderDistance
+				)
 			);
 		}
 	} // RenderingModule

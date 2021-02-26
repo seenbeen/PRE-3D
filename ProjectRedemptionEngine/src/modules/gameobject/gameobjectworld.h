@@ -1,14 +1,14 @@
 #pragma once
 #include <unordered_set>
 
-using std::unordered_set;
-
 namespace PRE
 {
 	namespace GameObjectModule
 	{
 		class GameObjectTemplate;
 		class GameObject;
+
+		using std::unordered_set;
 
 		class GameObjectWorld
 		{

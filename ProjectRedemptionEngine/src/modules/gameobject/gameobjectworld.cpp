@@ -78,7 +78,7 @@ namespace PRE
 			// Only allow destruction of what exists
 			it = _runningObjects.find(pGameObject);
 			if (it == _runningObjects.end()) {
-				throw "GameObject does not belonging to GameObjectWorld.";
+				throw "GameObject does not belong to GameObjectWorld.";
 			}
 			_destroyedObjects.insert(pGameObject);
 		}

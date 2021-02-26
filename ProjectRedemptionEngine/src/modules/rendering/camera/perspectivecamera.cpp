@@ -1,6 +1,7 @@
 #include <modules/rendering/camera/perspectivecamera.h>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace PRE
 {
@@ -15,8 +16,7 @@ namespace PRE
 			_size(size),
 			_aspectRatio(aspectRatio),
 			_nearClippingPlane(nearClippingPlane),
-			_farClippingPlane(farClippingPlane),
-			_projectionMatrix()
+			_farClippingPlane(farClippingPlane)
 		{
 			RefreshProjectionMatrix();
 		}
@@ -67,18 +67,15 @@ namespace PRE
 			RefreshProjectionMatrix();
 		}
 
-		const glm::mat4& PerspectiveCamera::GetProjectionMatrix()
-		{
-			return _projectionMatrix;
-		}
-
 		void PerspectiveCamera::RefreshProjectionMatrix()
 		{
-			_projectionMatrix = glm::perspective(
-				_size,
-				_aspectRatio,
-				_nearClippingPlane,
-				_farClippingPlane
+			SetProjectionMatrix(
+				glm::perspective(
+					_size,
+					_aspectRatio,
+					_nearClippingPlane,
+					_farClippingPlane
+				)
 			);
 		}
 	} // RenderingModule

@@ -1,27 +1,27 @@
 #pragma once
 #include <glm/glm.hpp>
-#include <modules/transform/transform.h>
 
 namespace PRE
 {
 	namespace RenderingModule
 	{
-		using PRE::TransformModule::Transform;
-
 		class Camera
 		{
 		public:
 			Camera();
-			~Camera();
+			virtual ~Camera() = 0;
 
-			Transform<Camera> transform;
-			glm::mat4 GetTransform();
+			void SetViewMatrix(const glm::mat4& viewMatrix);
+
+			const glm::mat4& GetViewProjectionMatrix() const;
 
 		protected:
-			virtual const glm::mat4& GetProjectionMatrix() = 0;
+			void SetProjectionMatrix(const glm::mat4& projectionMatrix);
 
 		private:
+			glm::mat4 _viewMatrix;
 			glm::mat4 _projectionMatrix;
+			glm::mat4 _viewProjectionMatrix;
 		};
 	} // namespace RenderingModule
 } // namespace PRE

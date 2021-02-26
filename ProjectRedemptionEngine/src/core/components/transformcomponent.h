@@ -7,15 +7,15 @@
 #include <include/modules/gameobject.h>
 #include <include/modules/transform.h>
 
-using std::list;
-
-using PRE::GameObjectModule::GameObjectComponent;
-using PRE::TransformModule::Transform;
-
 namespace PRE
 {
 	namespace Core
 	{
+		using std::list;
+
+		using PRE::GameObjectModule::GameObjectComponent;
+		using PRE::TransformModule::Transform;
+
 		class TransformComponent : public GameObjectComponent
 		{
 		public:
@@ -58,8 +58,8 @@ namespace PRE
 			void SetLocalScale(const glm::vec3& localScale);
 #pragma endregion
 
-			const glm::mat4& GetMatrix();
-			const glm::mat4& GetInverseMatrix();
+			const glm::mat4& GetMatrix() const;
+			const glm::mat4& GetInverseMatrix() const;
 
 		protected:
 			void OnDestroy() override;

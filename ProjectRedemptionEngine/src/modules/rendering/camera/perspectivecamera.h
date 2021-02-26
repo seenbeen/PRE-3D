@@ -1,6 +1,4 @@
 #pragma once
-#include <glm/glm.hpp>
-
 #include <modules/rendering/camera/camera.h>
 
 namespace PRE
@@ -16,7 +14,7 @@ namespace PRE
 				float nearClippingPlane,
 				float farClippingPlane
 			);
-			~PerspectiveCamera();
+			~PerspectiveCamera() override;
 
 			float GetSize();
 			void SetSize(float size);
@@ -30,16 +28,11 @@ namespace PRE
 			float GetFarClippingPlane();
 			void SetFarClippingPlane(float farClippingPlane);
 
-		protected:
-			const glm::mat4& GetProjectionMatrix() override;
-
 		private:
 			float _size;
 			float _aspectRatio;
 			float _nearClippingPlane;
 			float _farClippingPlane;
-
-			glm::mat4 _projectionMatrix;
 
 			void RefreshProjectionMatrix();
 		};

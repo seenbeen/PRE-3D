@@ -4,16 +4,16 @@
 
 #include <modules/gameobject/gameobjectcomponent.h>
 
-using std::unordered_map;
-using std::type_index;
-
 namespace PRE
 {
 	namespace GameObjectModule
 	{
 		class GameObjectWorld;
 		class GameObjectTemplate;
-
+		
+		using std::unordered_map;
+		using std::type_index;
+		
 		class GameObject
 		{
 			GameObject& operator=(const GameObject&) = delete;

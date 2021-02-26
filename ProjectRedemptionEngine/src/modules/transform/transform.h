@@ -7,12 +7,12 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
-using std::list;
-
 namespace PRE
 {
 	namespace TransformModule
 	{
+		using std::list;
+
 		template<class TNodeAssociation>
 		class Transform
 		{
@@ -187,12 +187,12 @@ namespace PRE
 			}
 #pragma endregion
 
-			const glm::mat4& GetMatrix()
+			const glm::mat4& GetMatrix() const
 			{
 				return _matrix;
 			}
 
-			const glm::mat4& GetInverseMatrix()
+			const glm::mat4& GetInverseMatrix() const
 			{
 				return _inverseMatrix;
 			}

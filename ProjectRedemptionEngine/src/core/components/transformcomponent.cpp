@@ -11,15 +11,15 @@
 
 #include <include/modules/transform.h>
 
-using std::list;
-using std::queue;
-
-using PRE::TransformModule::Transform;
-
 namespace PRE
 {
 	namespace Core
 	{
+		using std::list;
+		using std::queue;
+
+		using PRE::TransformModule::Transform;
+
 		TransformComponent::TransformComponent() : _transform(*this) {}
 
 #pragma region Relations
@@ -136,12 +136,12 @@ namespace PRE
 		}
 #pragma endregion
 
-		const glm::mat4& TransformComponent::GetMatrix()
+		const glm::mat4& TransformComponent::GetMatrix() const
 		{
 			return _transform.GetMatrix();
 		}
 
-		const glm::mat4& TransformComponent::GetInverseMatrix()
+		const glm::mat4& TransformComponent::GetInverseMatrix() const
 		{
 			return _transform.GetInverseMatrix();
 		}
