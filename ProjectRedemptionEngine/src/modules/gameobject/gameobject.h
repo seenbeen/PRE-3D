@@ -50,15 +50,18 @@ namespace PRE
 			TGameObjectComponent* AddComponent()
 			{
 				auto& typeId = typeid(TGameObjectComponent);
+
+#ifdef __PRE_DEBUG__
 				if (_gameObjectComponents.find(typeId) != _gameObjectComponents.end())
 				{
 					throw "GameObjectComponent already exists.";
 				}
+#endif
 
-				auto newComponent = new TGameObjectComponent();
-				newComponent->_pGameObject = this;
-				_gameObjectComponents[typeId] = newComponent;
-				return newComponent;
+				auto pNewComponent = new TGameObjectComponent();
+				pNewComponent->_pGameObject = this;
+				_gameObjectComponents[typeId] = pNewComponent;
+				return pNewComponent;
 			}
 
 			void Start();

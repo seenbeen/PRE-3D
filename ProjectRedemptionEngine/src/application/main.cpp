@@ -69,7 +69,7 @@ void OnShutdown(PREApplicationContext* applicationContext)
     std::cout << "ON SHUTDOWN" << std::endl;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
     PREApplication::Run(
         PREApplicationConfig(

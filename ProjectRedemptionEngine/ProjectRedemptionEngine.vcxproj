@@ -1,6 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
@@ -25,8 +29,11 @@
     <ClCompile Include="src\modules\rendering\camera\orthographiccamera.cpp" />
     <ClCompile Include="src\modules\rendering\camera\perspectivecamera.cpp" />
     <ClCompile Include="src\modules\rendering\compositing\compositingnode.cpp" />
-    <ClCompile Include="src\modules\rendering\compositing\compositingtarget.cpp" />
-    <ClCompile Include="src\modules\rendering\rendermodel.cpp" />
+    <ClCompile Include="src\modules\rendering\model\compositingtarget.cpp" />
+    <ClCompile Include="src\modules\rendering\model\rendermaterial.cpp" />
+    <ClCompile Include="src\modules\rendering\model\rendermesh.cpp" />
+    <ClCompile Include="src\modules\rendering\model\rendermodel.cpp" />
+    <ClCompile Include="src\modules\rendering\model\rendertexture.cpp" />
     <ClCompile Include="src\modules\rendering\renderer.cpp" />
     <ClCompile Include="src\modules\rendering\shader\renderfragmentshader.cpp" />
     <ClCompile Include="src\modules\rendering\shader\rendershaderprogram.cpp" />
@@ -55,7 +62,10 @@
     <ClInclude Include="src\modules\rendering\camera\perspectivecamera.h" />
     <ClInclude Include="src\modules\rendering\compositing\compositingnode.h" />
     <ClInclude Include="src\modules\rendering\compositing\compositingtarget.h" />
-    <ClInclude Include="src\modules\rendering\rendermodel.h" />
+    <ClInclude Include="src\modules\rendering\model\rendermaterial.h" />
+    <ClInclude Include="src\modules\rendering\model\rendermesh.h" />
+    <ClInclude Include="src\modules\rendering\model\rendermodel.h" />
+    <ClInclude Include="src\modules\rendering\model\rendertexture.h" />
     <ClInclude Include="src\modules\rendering\renderer.h" />
     <ClInclude Include="src\modules\rendering\shader\renderfragmentshader.h" />
     <ClInclude Include="src\modules\rendering\shader\rendershaderprogram.h" />
@@ -79,6 +89,13 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
@@ -87,8 +104,18 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\ProjectRedemptionEngine\src;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\include;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\glad\include;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\lib\x64;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)Build\</OutDir>
+    <IntDir>$(SolutionDir)Build\Intermediate\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\ProjectRedemptionEngine\src;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\include;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\glad\include;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\lib\x64;$(LibraryPath)</LibraryPath>
@@ -101,7 +128,29 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;GLM_FORCE_PURE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLM_FORCE_PURE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>Default</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /Y "$(SolutionDir)Deps\SDL2-2.0.14\lib\x64\SDL2.dll" "$(SolutionDir)Build\SDL2.dll"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>__PRE_DEBUG__;GLM_FORCE_PURE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>Default</LanguageStandard>
     </ClCompile>

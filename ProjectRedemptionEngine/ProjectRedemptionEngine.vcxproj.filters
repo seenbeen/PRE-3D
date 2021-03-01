@@ -121,6 +121,12 @@
     <Filter Include="Additional Dependencies">
       <UniqueIdentifier>{89d411dc-97d3-4767-a0b5-1a3246432c21}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Modules\Rendering\Model">
+      <UniqueIdentifier>{b911c14d-33bc-4028-b0a0-38be00e1fd39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Modules\Rendering\Model">
+      <UniqueIdentifier>{8c3c23f7-9bd8-41e7-ac44-603426ff2ce5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\modules\gameobject\gameobject.h">
@@ -192,12 +198,6 @@
     <ClInclude Include="src\modules\rendering\compositing\compositingnode.h">
       <Filter>Header Files\Modules\Rendering\Compositing</Filter>
     </ClInclude>
-    <ClInclude Include="src\modules\rendering\compositing\compositingtarget.h">
-      <Filter>Header Files\Modules\Rendering\Compositing</Filter>
-    </ClInclude>
-    <ClInclude Include="src\modules\rendering\rendermodel.h">
-      <Filter>Header Files\Modules\Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="src\modules\rendering\shader\rendervertexshader.h">
       <Filter>Header Files\Modules\Rendering\Shader</Filter>
     </ClInclude>
@@ -206,6 +206,21 @@
     </ClInclude>
     <ClInclude Include="src\modules\rendering\shader\rendershaderprogram.h">
       <Filter>Header Files\Modules\Rendering\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\rendering\model\rendermodel.h">
+      <Filter>Header Files\Modules\Rendering\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\rendering\model\rendermaterial.h">
+      <Filter>Header Files\Modules\Rendering\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\rendering\model\rendermesh.h">
+      <Filter>Header Files\Modules\Rendering\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\rendering\model\rendertexture.h">
+      <Filter>Header Files\Modules\Rendering\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\rendering\compositing\compositingtarget.h">
+      <Filter>Header Files\Modules\Rendering\Compositing</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -266,12 +281,6 @@
     <ClCompile Include="src\modules\rendering\compositing\compositingnode.cpp">
       <Filter>Source Files\Modules\Rendering\Compositing</Filter>
     </ClCompile>
-    <ClCompile Include="src\modules\rendering\compositing\compositingtarget.cpp">
-      <Filter>Source Files\Modules\Rendering\Compositing</Filter>
-    </ClCompile>
-    <ClCompile Include="src\modules\rendering\rendermodel.cpp">
-      <Filter>Source Files\Modules\Rendering</Filter>
-    </ClCompile>
     <ClCompile Include="src\modules\rendering\shader\rendervertexshader.cpp">
       <Filter>Source Files\Modules\Rendering\Shader</Filter>
     </ClCompile>
@@ -283,6 +292,21 @@
     </ClCompile>
     <ClCompile Include="..\Deps\glad\src\glad.c">
       <Filter>Additional Dependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\rendering\model\rendermodel.cpp">
+      <Filter>Source Files\Modules\Rendering\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\rendering\model\rendermesh.cpp">
+      <Filter>Source Files\Modules\Rendering\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\rendering\model\rendertexture.cpp">
+      <Filter>Source Files\Modules\Rendering\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\rendering\model\rendermaterial.cpp">
+      <Filter>Source Files\Modules\Rendering\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\rendering\model\compositingtarget.cpp">
+      <Filter>Source Files\Modules\Rendering\Compositing</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

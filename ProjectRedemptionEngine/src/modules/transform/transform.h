@@ -48,11 +48,14 @@ namespace PRE
 
 			void SetParent(Transform* transform, bool worldPositionStays)
 			{
+#ifdef __PRE_DEBUG__
 				if (transform == this)
 				{
 					throw "Cannot set Parent to self.";
 				}
-				else if (transform == _parentTransform)
+				else
+#endif
+				if (transform == _parentTransform)
 				{
 					return;
 				}

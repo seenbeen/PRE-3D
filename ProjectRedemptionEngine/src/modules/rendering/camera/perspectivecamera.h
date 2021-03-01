@@ -7,6 +7,9 @@ namespace PRE
 	{
 		class PerspectiveCamera : public Camera
 		{
+			PerspectiveCamera& operator=(const PerspectiveCamera&) = delete;
+			PerspectiveCamera(const PerspectiveCamera&) = delete;
+
 		public:
 			PerspectiveCamera(
 				float size,

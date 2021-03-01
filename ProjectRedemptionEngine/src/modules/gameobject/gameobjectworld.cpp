@@ -75,11 +75,14 @@ namespace PRE
 				return;
 			}
 
+#ifdef __PRE_DEBUG__
 			// Only allow destruction of what exists
 			it = _runningObjects.find(pGameObject);
 			if (it == _runningObjects.end()) {
 				throw "GameObject does not belong to GameObjectWorld.";
 			}
+#endif
+
 			_destroyedObjects.insert(pGameObject);
 		}
 

@@ -10,27 +10,41 @@ namespace PRE
 	{
 		using std::string;
 
-		RenderFragmentShader::RenderFragmentShader(const string& shaderSource)
-			: _shaderId(glCreateShader(GL_FRAGMENT_SHADER))
+		RenderFragmentShader::Impl& RenderFragmentShader::Impl::MakeImpl(const std::string& shaderSource)
 		{
-			const GLchar* glCharSource = shaderSource.c_str();
-			glShaderSource(_shaderId, 1, &glCharSource, NULL);
-			glCompileShader(_shaderId);
+			const GLchar* cShaderSource = shaderSource.c_str();
+			auto shaderId = glCreateShader(GL_FRAGMENT_SHADER);
+			glShaderSource(shaderId, 1, &cShaderSource, NULL);
+			glCompileShader(shaderId);
 
+#ifdef __PRE_DEBUG__
 			// check compile errors, throw on failure
 			GLint success;
-			glGetShaderiv(_shaderId, GL_COMPILE_STATUS, &success);
+			glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success);
 			if (!success)
 			{
 				GLchar infoLog[1024];
-				glGetProgramInfoLog(_shaderId, 1024, NULL, infoLog);
+				glGetProgramInfoLog(shaderId, 1024, NULL, infoLog);
 				throw string(infoLog);
 			}
+#endif
+
+			return *(new Impl(shaderId));
 		}
+
+		RenderFragmentShader::Impl::Impl(GLuint shaderId) : shaderId(shaderId) {}
+
+		RenderFragmentShader::Impl::~Impl()
+		{
+			glDeleteShader(shaderId);
+		}
+
+		RenderFragmentShader::RenderFragmentShader(const string& shaderSource)
+			: _impl(Impl::MakeImpl(shaderSource)) {}
 
 		RenderFragmentShader::~RenderFragmentShader()
 		{
-			glDeleteShader(_shaderId);
+			delete &_impl;
 		}
 	} // namespace RenderingModule
 } // namespace PRE

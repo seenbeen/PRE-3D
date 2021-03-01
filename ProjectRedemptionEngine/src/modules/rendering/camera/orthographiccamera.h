@@ -7,6 +7,9 @@ namespace PRE
 	{
 		class OrthographicCamera : public Camera
 		{
+			OrthographicCamera& operator=(const OrthographicCamera&) = delete;
+			OrthographicCamera(const OrthographicCamera&) = delete;
+
 		public:
 			OrthographicCamera(float size, float aspectRatio, float renderDistance);
 			~OrthographicCamera() override;

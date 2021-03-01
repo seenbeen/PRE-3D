@@ -10,27 +10,41 @@ namespace PRE
 	{
 		using std::string;
 
-		RenderVertexShader::RenderVertexShader(const string& shaderSource)
-			: _shaderId(glCreateShader(GL_VERTEX_SHADER))
+		RenderVertexShader::Impl& RenderVertexShader::Impl::MakeImpl(const std::string& shaderSource)
 		{
-			const GLchar* glCharSource = shaderSource.c_str();
-			glShaderSource(_shaderId, 1, &glCharSource, NULL);
-			glCompileShader(_shaderId);
+			const GLchar* cShaderSource = shaderSource.c_str();
+			auto shaderId = glCreateShader(GL_VERTEX_SHADER);
+			glShaderSource(shaderId, 1, &cShaderSource, NULL);
+			glCompileShader(shaderId);
 
+#ifdef __PRE_DEBUG__
 			// check compile errors, throw on failure
 			GLint success;
-			glGetShaderiv(_shaderId, GL_COMPILE_STATUS, &success);
+			glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success);
 			if (!success)
 			{
 				GLchar infoLog[1024];
-				glGetProgramInfoLog(_shaderId, 1024, NULL, infoLog);
+				glGetProgramInfoLog(shaderId, 1024, NULL, infoLog);
 				throw string(infoLog);
 			}
+#endif
+
+			return *(new Impl(shaderId));
 		}
+
+		RenderVertexShader::Impl::Impl(GLuint shaderId) : shaderId(shaderId) {}
+		
+		RenderVertexShader::Impl::~Impl()
+		{
+			glDeleteShader(shaderId);
+		}
+
+		RenderVertexShader::RenderVertexShader(const string& shaderSource)
+			: _impl(Impl::MakeImpl(shaderSource)) {}
 
 		RenderVertexShader::~RenderVertexShader()
 		{
-			glDeleteShader(_shaderId);
+			delete &_impl;
 		}
 	} // namespace RenderingModule
 } // namespace PRE
