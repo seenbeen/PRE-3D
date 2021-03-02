@@ -1,6 +1,8 @@
 #pragma once
 #include <include/modules/input.h>
 
+#include <core/subsystems/input/prekeycode.h>
+
 namespace PRE
 {
 	namespace Core
@@ -39,10 +41,10 @@ namespace PRE
 			int MouseWheelHScroll();
 			int MouseWheelVScroll();
 
-			bool KeyState(unsigned int keyCode);
+			bool KeyState(PREKeyCode keyCode);
 
-			bool KeyPressed(unsigned int keyCode);
-			bool KeyReleased(unsigned int keyCode);
+			bool KeyPressed(PREKeyCode keyCode);
+			bool KeyReleased(PREKeyCode keyCode);
 
 		private:
 			Input& _input;

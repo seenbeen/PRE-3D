@@ -251,6 +251,12 @@
     <ClInclude Include="src\include\modules\input.h">
       <Filter>Header Files\Include\Modules</Filter>
     </ClInclude>
+    <ClInclude Include="src\modules\input\keycode.h">
+      <Filter>Header Files\Modules\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\subsystems\input\prekeycode.h">
+      <Filter>Header Files\Core\Subsystems\Input</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\modules\gameobject\gameobject.cpp">
@@ -348,6 +354,9 @@
     </ClCompile>
     <ClCompile Include="src\core\subsystems\input\preinput.cpp">
       <Filter>Source Files\Core\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\input\keycode.cpp">
+      <Filter>Source Files\Modules\Input</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

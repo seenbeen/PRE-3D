@@ -4,6 +4,7 @@
 #include <include/modules/gameobject.h>
 
 using PRE::Core::PREApplication;
+using PRE::Core::PREKeyCode;
 using PRE::Core::PREApplicationConfig;
 using PRE::Core::PREApplicationContext;
 
@@ -65,7 +66,7 @@ protected:
             GetInput()->MousePosition(x, y);
             std::cout << "RELEASED AT (" << x << ", " << y << ")" << std::endl;
         }
-        if (GetInput()->KeyPressed(SDL_SCANCODE_SPACE))
+        if (GetInput()->KeyPressed(PREKeyCode::SPACE))
         {
             std::cout << "~" << 1 / GetTime()->GetDeltaTime() << " FPS." << std::endl;
         }

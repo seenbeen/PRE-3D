@@ -5,6 +5,7 @@
 
 // subsystems
 #include <core/subsystems/input/preinput.h>
+#include <core/subsystems/input/prekeycode.h>
 #include <core/subsystems/rendering/prerendering.h>
 #include <core/subsystems/time/pretime.h>
 #include <core/subsystems/world/preworld.h>

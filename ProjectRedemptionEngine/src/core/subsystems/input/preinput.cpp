@@ -2,6 +2,8 @@
 
 #include <include/modules/input.h>
 
+#include <core/subsystems/input/prekeycode.h>
+
 namespace PRE
 {
 	namespace Core
@@ -73,19 +75,19 @@ namespace PRE
 			return _input.MouseWheelVScroll();
 		}
 
-		bool PREInput::KeyState(unsigned int keyCode)
+		bool PREInput::KeyState(PREKeyCode keyCode)
 		{
-			return _input.KeyState(keyCode);
+			return _input.KeyState((unsigned int)keyCode);
 		}
 
-		bool PREInput::KeyPressed(unsigned int keyCode)
+		bool PREInput::KeyPressed(PREKeyCode keyCode)
 		{
-			return _input.KeyPressed(keyCode);
+			return _input.KeyPressed((unsigned int)keyCode);
 		}
 
-		bool PREInput::KeyReleased(unsigned int keyCode)
+		bool PREInput::KeyReleased(PREKeyCode keyCode)
 		{
-			return _input.KeyReleased(keyCode);
+			return _input.KeyReleased((unsigned int)keyCode);
 		}
 
 		PREInput::PREInput()
