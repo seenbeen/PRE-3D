@@ -4,6 +4,7 @@
 
 #include <core/preapplicationcontext.h>
 
+#include <core/subsystems/input/preinput.h>
 #include <core/subsystems/rendering/prerendering.h>
 #include <core/subsystems/time/pretime.h>
 #include <core/subsystems/world/preworld.h>
@@ -12,6 +13,11 @@ namespace PRE
 {
 	namespace Core
 	{
+		PREInput* PREGameObjectComponent::GetInput()
+		{
+			return _preApplicationContext->input;
+		}
+
 		PRERendering* PREGameObjectComponent::GetRendering()
 		{
 			return _preApplicationContext->rendering;

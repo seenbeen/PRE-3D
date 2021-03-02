@@ -3,6 +3,7 @@
 #include <core/preapplicationconfig.h>
 #include <core/preapplication.h>
 
+#include <core/subsystems/input/preinput.h>
 #include <core/subsystems/rendering/prerendering.h>
 #include <core/subsystems/time/pretime.h>
 #include <core/subsystems/world/preworld.h>
@@ -20,6 +21,11 @@ namespace PRE
 			const PREApplicationConfig& applicationConfig,
 			PREApplication& application
 		) :
+			input(
+				applicationConfig._options & (int)PREApplicationConfig::Options::USE_RENDERING
+				? new PREInput()
+				: nullptr
+			),
 			// applicationConfig._options & (int)PREApplicationConfig::Options::USE_PHYSICS
 			// ? new PREPhysics()
 			// : nullptr,
@@ -43,10 +49,16 @@ namespace PRE
 			delete world;
 			delete time;
 			delete rendering;
+			delete input;
 		}
 
 		void PREApplicationContext::Initialize()
 		{
+			if (input != nullptr)
+			{
+				input->Initialize();
+			}
+
 			if (time != nullptr)
 			{
 				time->Initialize();
@@ -64,6 +76,11 @@ namespace PRE
 
 		void PREApplicationContext::Update()
 		{
+			if (input != nullptr)
+			{
+				input->Update();
+			}
+
 			if (time != nullptr)
 			{
 				time->Update();
@@ -91,6 +108,11 @@ namespace PRE
 			if (time != nullptr)
 			{
 				time->Shutdown();
+			}
+
+			if (input != nullptr)
+			{
+				input->Shutdown();
 			}
 		}
 	}

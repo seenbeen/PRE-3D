@@ -123,6 +123,18 @@
     <Filter Include="Header Files\Other Dependencies">
       <UniqueIdentifier>{e4a17a19-47ce-4724-b502-92c1b6b2fc23}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Modules\Input">
+      <UniqueIdentifier>{623a401b-966d-4a1f-9e45-7075ebbebd9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Modules\Input">
+      <UniqueIdentifier>{02447f8d-f7a9-493a-a281-b3afabe7fd73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Core\Subsystems\Input">
+      <UniqueIdentifier>{68837b9c-420a-4918-893e-5ef2014aca34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Core\Input">
+      <UniqueIdentifier>{4ef87957-f99e-4892-af46-eaafdcd1e90e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\modules\gameobject\gameobject.h">
@@ -230,6 +242,15 @@
     <ClInclude Include="src\core\subsystems\world\pregameobjectcomponent.h">
       <Filter>Header Files\Core\Subsystems\World</Filter>
     </ClInclude>
+    <ClInclude Include="src\modules\input\input.h">
+      <Filter>Header Files\Modules\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\subsystems\input\preinput.h">
+      <Filter>Header Files\Core\Subsystems\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\include\modules\input.h">
+      <Filter>Header Files\Include\Modules</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\modules\gameobject\gameobject.cpp">
@@ -321,6 +342,12 @@
     </ClCompile>
     <ClCompile Include="src\core\subsystems\world\pregameobjectcomponent.cpp">
       <Filter>Source Files\Core\Subsystems\World</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\input\input.cpp">
+      <Filter>Source Files\Modules\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\input\preinput.cpp">
+      <Filter>Source Files\Core\Input</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

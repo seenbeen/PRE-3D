@@ -7,6 +7,7 @@ namespace PRE
 	{
 		class PREApplication;
 
+		class PREInput;
 		// class PREPhysics;
 		class PRERendering;
 		class PRETime;
@@ -20,6 +21,7 @@ namespace PRE
 			friend class PREApplication;
 
 		public:
+			PREInput* const input;
 			// const PREPhysics* physics;
 			PRERendering* const rendering;
 			PRETime* const time;

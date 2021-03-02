@@ -29,7 +29,7 @@ protected:
         {
             std::cout << "3 seconds, i'm out." << std::endl;
             std::cout << _transform->GetEuler().x << std::endl;
-            Quit();
+            gameObject().Destroy(gameObject());
         }
     }
 
@@ -43,21 +43,60 @@ private:
     float _derp = 0;
 };
 
-class FooTemplate : public PREGameObjectTemplate
+class BarComponent : public PREGameObjectComponent
 {
 protected:
-    void OnInstantiate() override
+    void OnUpdate() override
     {
-        AddPREComponent<PRETransformComponent>();
-        AddPREComponent<FooComponent>();
+        if (GetInput()->ApplicationHasQuit())
+        {
+            std::cout << "Application Quitting..." << std::endl;
+            Quit();
+        }
+        if (GetInput()->MouseButtonLeftPressed())
+        {
+            int x, y;
+            GetInput()->MousePosition(x, y);
+            std::cout << "PRESSED AT (" << x << ", " << y << ")" << std::endl;
+        }
+        if (GetInput()->MouseButtonLeftReleased())
+        {
+            int x, y;
+            GetInput()->MousePosition(x, y);
+            std::cout << "RELEASED AT (" << x << ", " << y << ")" << std::endl;
+        }
+        if (GetInput()->KeyPressed(SDL_SCANCODE_SPACE))
+        {
+            std::cout << "~" << 1 / GetTime()->GetDeltaTime() << " FPS." << std::endl;
+        }
     }
 };
 
 void OnInitialize(PREApplicationContext* applicationContext)
 {
     std::cout << "ON INITIALIZE" << std::endl;
-    FooTemplate fooTemplate;
-    auto& obj = applicationContext->world->Instantiate(fooTemplate);
+
+    class : public PREGameObjectTemplate
+    {
+    protected:
+        void OnInstantiate() override
+        {
+            AddPREComponent<PRETransformComponent>();
+            AddPREComponent<FooComponent>();
+        }
+    } fooTemplate;
+
+    class : public PREGameObjectTemplate
+    {
+    protected:
+        void OnInstantiate() override
+        {
+            AddPREComponent<BarComponent>();
+        }
+    } barTemplate;
+
+    applicationContext->world->Instantiate(fooTemplate);
+    applicationContext->world->Instantiate(barTemplate);
 }
 
 void OnShutdown(PREApplicationContext* applicationContext)

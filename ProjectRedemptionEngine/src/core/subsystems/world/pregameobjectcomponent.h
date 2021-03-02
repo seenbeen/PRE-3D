@@ -7,6 +7,7 @@ namespace PRE
 	{
 		class PREApplicationContext;
 
+		class PREInput;
 		class PRERendering;
 		class PRETime;
 		class PREWorld;
@@ -20,10 +21,11 @@ namespace PRE
 			friend class PREGameObjectTemplate;
 
 		protected:
+			PREInput* GetInput();
 			PRERendering* GetRendering();
 			PRETime* GetTime();
-
 			PREWorld* GetWorld();
+
 			void Quit();
 
 		private:

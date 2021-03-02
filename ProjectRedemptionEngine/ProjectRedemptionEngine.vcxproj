@@ -18,6 +18,7 @@
     <ClCompile Include="src\core\components\pretransformcomponent.cpp" />
     <ClCompile Include="src\core\preapplicationconfig.cpp" />
     <ClCompile Include="src\core\preapplicationcontext.cpp" />
+    <ClCompile Include="src\core\subsystems\input\preinput.cpp" />
     <ClCompile Include="src\core\subsystems\physics\prephysics.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\prerendering.cpp" />
     <ClCompile Include="src\core\subsystems\time\pretime.cpp" />
@@ -27,6 +28,7 @@
     <ClCompile Include="src\modules\gameobject\gameobjectcomponent.cpp" />
     <ClCompile Include="src\modules\gameobject\gameobjecttemplate.cpp" />
     <ClCompile Include="src\modules\gameobject\gameobjectworld.cpp" />
+    <ClCompile Include="src\modules\input\input.cpp" />
     <ClCompile Include="src\modules\rendering\camera\camera.cpp" />
     <ClCompile Include="src\modules\rendering\camera\orthographiccamera.cpp" />
     <ClCompile Include="src\modules\rendering\camera\perspectivecamera.cpp" />
@@ -48,6 +50,7 @@
     <ClInclude Include="src\core\components\pretransformcomponent.h" />
     <ClInclude Include="src\core\preapplicationconfig.h" />
     <ClInclude Include="src\core\preapplicationcontext.h" />
+    <ClInclude Include="src\core\subsystems\input\preinput.h" />
     <ClInclude Include="src\core\subsystems\physics\prephysics.h" />
     <ClInclude Include="src\core\subsystems\rendering\prerendering.h" />
     <ClInclude Include="src\core\subsystems\time\pretime.h" />
@@ -56,6 +59,7 @@
     <ClInclude Include="src\core\subsystems\world\preworld.h" />
     <ClInclude Include="src\include\core.h" />
     <ClInclude Include="src\include\modules\gameobject.h" />
+    <ClInclude Include="src\include\modules\input.h" />
     <ClInclude Include="src\include\modules\rendering.h" />
     <ClInclude Include="src\include\modules\time.h" />
     <ClInclude Include="src\include\modules\transform.h" />
@@ -63,6 +67,7 @@
     <ClInclude Include="src\modules\gameobject\gameobjectcomponent.h" />
     <ClInclude Include="src\modules\gameobject\gameobjecttemplate.h" />
     <ClInclude Include="src\modules\gameobject\gameobjectworld.h" />
+    <ClInclude Include="src\modules\input\input.h" />
     <ClInclude Include="src\modules\rendering\camera\camera.h" />
     <ClInclude Include="src\modules\rendering\camera\orthographiccamera.h" />
     <ClInclude Include="src\modules\rendering\camera\perspectivecamera.h" />

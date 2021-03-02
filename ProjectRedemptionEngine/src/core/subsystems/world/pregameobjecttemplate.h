@@ -27,7 +27,7 @@ namespace PRE
 			}
 
 		private:
-			PREApplicationContext* _preApplicationContext;
+			PREApplicationContext* _preApplicationContext = nullptr;
 
 			using GameObjectTemplate::AddComponent;
 		};

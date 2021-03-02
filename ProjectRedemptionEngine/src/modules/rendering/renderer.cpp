@@ -72,11 +72,7 @@ namespace PRE
 
 			auto glContext = SDL_GL_CreateContext(pWindow);
 
-			////Use Vsync
-			//if (SDL_GL_SetSwapInterval(1) < 0)
-			//{
-			//	throw string("Unable to set VSync! ") + SDL_GetError();
-			//}
+			SDL_GL_SetSwapInterval(0); // unlimited powaaaa
 
 			if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
 				throw "Failed to initialize GLAD";

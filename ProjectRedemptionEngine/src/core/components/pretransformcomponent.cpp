@@ -153,7 +153,17 @@ namespace PRE
 			SetParent(nullptr, true);
 			queue<PRETransformComponent*> transformQueue;
 
-			transformQueue.push(this);
+			// need to remove our own children without double-destroying ourselves
+			{
+				auto children = GetChildren();
+				for (auto it = children.begin(); it != children.end(); ++it)
+				{
+					auto pChild = *it;
+					pChild->SetParent(nullptr, true);
+					transformQueue.push(pChild);
+				}
+			}
+
 			while (!transformQueue.empty())
 			{
 				auto top = transformQueue.front();
@@ -167,7 +177,6 @@ namespace PRE
 					transformQueue.push(pChild);
 				}
 
-				// this is fine; re-destruction of parent = no-op
 				gameObject().Destroy(top->gameObject());
 			}
 		}
