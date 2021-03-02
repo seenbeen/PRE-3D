@@ -4,8 +4,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include <include/modules/gameobject.h>
 #include <include/modules/transform.h>
+
+#include <core/subsystems/world/pregameobjectcomponent.h>
 
 namespace PRE
 {
@@ -13,19 +14,18 @@ namespace PRE
 	{
 		using std::list;
 
-		using PRE::GameObjectModule::GameObjectComponent;
 		using PRE::TransformModule::Transform;
 
-		class TransformComponent : public GameObjectComponent
+		class PRETransformComponent : public PREGameObjectComponent
 		{
 		public:
-			TransformComponent();
+			PRETransformComponent();
 
 #pragma region Relations
-			TransformComponent* GetParent();
-			void SetParent(TransformComponent* transform, bool worldPositionStays);
+			PRETransformComponent* GetParent();
+			void SetParent(PRETransformComponent* transform, bool worldPositionStays);
 
-			list<TransformComponent*> GetChildren();
+			list<PRETransformComponent*> GetChildren();
 #pragma endregion
 
 #pragma region Position
@@ -65,7 +65,7 @@ namespace PRE
 			void OnDestroy() override;
 
 		private:
-			Transform<TransformComponent> _transform;
+			Transform<PRETransformComponent> _transform;
 		};
 	} // namespace Core
 } // namespace PRE

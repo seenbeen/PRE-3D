@@ -8,8 +8,9 @@ namespace PRE
 	{
 		using PRE::RenderingModule::Renderer;
 
-		PRERendering::PRERendering()
+		PRERendering::PRERendering(PREApplicationContext& preApplicationContext)
 			:
+			_preApplicationContext(preApplicationContext),
 			_renderer(Renderer::MakeRenderer("Yes hi.", 800, 600)) {}
 		
 		PRERendering::~PRERendering()

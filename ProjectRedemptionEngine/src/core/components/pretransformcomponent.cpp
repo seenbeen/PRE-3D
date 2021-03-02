@@ -1,4 +1,4 @@
-#include <core/components/transformcomponent.h>
+#include <core/components/pretransformcomponent.h>
 
 #include <iterator>
 #include <list>
@@ -11,6 +11,8 @@
 
 #include <include/modules/transform.h>
 
+#include <core/subsystems/world/pregameobjectcomponent.h>
+
 namespace PRE
 {
 	namespace Core
@@ -20,15 +22,15 @@ namespace PRE
 
 		using PRE::TransformModule::Transform;
 
-		TransformComponent::TransformComponent() : _transform(*this) {}
+		PRETransformComponent::PRETransformComponent() : _transform(*this) {}
 
 #pragma region Relations
-		TransformComponent* TransformComponent::GetParent()
+		PRETransformComponent* PRETransformComponent::GetParent()
 		{
 			return &_transform.GetParent()->GetAssociation();
 		}
 
-		void TransformComponent::SetParent(TransformComponent* transform, bool worldPositionStays)
+		void PRETransformComponent::SetParent(PRETransformComponent* transform, bool worldPositionStays)
 		{
 			_transform.SetParent(
 				transform != nullptr ? &transform->_transform : nullptr,
@@ -36,10 +38,10 @@ namespace PRE
 			);
 		}
 
-		list<TransformComponent*> TransformComponent::GetChildren()
+		list<PRETransformComponent*> PRETransformComponent::GetChildren()
 		{
 			auto children = _transform.GetChildren();
-			list<TransformComponent*> result;
+			list<PRETransformComponent*> result;
 			std::transform(
 				children.begin(),
 				children.end(),
@@ -51,105 +53,105 @@ namespace PRE
 #pragma endregion
 
 #pragma region Position
-		const glm::vec3& TransformComponent::GetPosition()
+		const glm::vec3& PRETransformComponent::GetPosition()
 		{
 			return _transform.GetPosition();
 		}
 
-		const glm::vec3& TransformComponent::GetLocalPosition()
+		const glm::vec3& PRETransformComponent::GetLocalPosition()
 		{
 			return _transform.GetLocalPosition();
 		}
 
-		void TransformComponent::SetPosition(const glm::vec3& position)
+		void PRETransformComponent::SetPosition(const glm::vec3& position)
 		{
 			_transform.SetPosition(position);
 		}
 
-		void TransformComponent::SetLocalPosition(const glm::vec3& localPosition)
+		void PRETransformComponent::SetLocalPosition(const glm::vec3& localPosition)
 		{
 			_transform.SetLocalPosition(localPosition);
 		}
 #pragma endregion
 
 #pragma region Rotation
-		const glm::fquat& TransformComponent::GetRotation()
+		const glm::fquat& PRETransformComponent::GetRotation()
 		{
 			return _transform.GetRotation();
 		}
 
-		const glm::fquat& TransformComponent::GetLocalRotation()
+		const glm::fquat& PRETransformComponent::GetLocalRotation()
 		{
 			return _transform.GetLocalRotation();
 		}
 
-		void TransformComponent::SetRotation(const glm::fquat& rotation)
+		void PRETransformComponent::SetRotation(const glm::fquat& rotation)
 		{
 			_transform.SetRotation(rotation);
 		}
 
-		void TransformComponent::SetLocalRotation(const glm::fquat& localRotation)
+		void PRETransformComponent::SetLocalRotation(const glm::fquat& localRotation)
 		{
 			_transform.SetLocalRotation(localRotation);
 		}
 
-		const glm::vec3& TransformComponent::GetEuler()
+		const glm::vec3& PRETransformComponent::GetEuler()
 		{
 			return _transform.GetEuler();
 		}
 
-		const glm::vec3& TransformComponent::GetLocalEuler()
+		const glm::vec3& PRETransformComponent::GetLocalEuler()
 		{
 			return _transform.GetLocalEuler();
 		}
 
-		void TransformComponent::SetEuler(const glm::vec3& euler)
+		void PRETransformComponent::SetEuler(const glm::vec3& euler)
 		{
 			_transform.SetEuler(euler);
 		}
 
-		void TransformComponent::SetLocalEuler(const glm::vec3& localEuler)
+		void PRETransformComponent::SetLocalEuler(const glm::vec3& localEuler)
 		{
 			_transform.SetLocalEuler(localEuler);
 		}
 #pragma endregion
 
 #pragma region Scale
-		const glm::vec3& TransformComponent::GetScale()
+		const glm::vec3& PRETransformComponent::GetScale()
 		{
 			return _transform.GetScale();
 		}
 
-		const glm::vec3& TransformComponent::GetLocalScale()
+		const glm::vec3& PRETransformComponent::GetLocalScale()
 		{
 			return _transform.GetLocalScale();
 		}
 
-		void TransformComponent::SetScale(const glm::vec3& scale)
+		void PRETransformComponent::SetScale(const glm::vec3& scale)
 		{
 			_transform.SetScale(scale);
 		}
 
-		void TransformComponent::SetLocalScale(const glm::vec3& localScale)
+		void PRETransformComponent::SetLocalScale(const glm::vec3& localScale)
 		{
 			_transform.SetLocalScale(localScale);
 		}
 #pragma endregion
 
-		const glm::mat4& TransformComponent::GetMatrix() const
+		const glm::mat4& PRETransformComponent::GetMatrix() const
 		{
 			return _transform.GetMatrix();
 		}
 
-		const glm::mat4& TransformComponent::GetInverseMatrix() const
+		const glm::mat4& PRETransformComponent::GetInverseMatrix() const
 		{
 			return _transform.GetInverseMatrix();
 		}
 
-		void TransformComponent::OnDestroy()
+		void PRETransformComponent::OnDestroy()
 		{
 			SetParent(nullptr, true);
-			queue<TransformComponent*> transformQueue;
+			queue<PRETransformComponent*> transformQueue;
 
 			transformQueue.push(this);
 			while (!transformQueue.empty())

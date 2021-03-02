@@ -13,13 +13,15 @@
   <ItemGroup>
     <ClCompile Include="..\Deps\glad\src\glad.c" />
     <ClCompile Include="src\application\main.cpp" />
+    <ClCompile Include="src\core\components\premodelrenderercomponent.cpp" />
     <ClCompile Include="src\core\preapplication.cpp" />
-    <ClCompile Include="src\core\components\transformcomponent.cpp" />
+    <ClCompile Include="src\core\components\pretransformcomponent.cpp" />
     <ClCompile Include="src\core\preapplicationconfig.cpp" />
     <ClCompile Include="src\core\preapplicationcontext.cpp" />
     <ClCompile Include="src\core\subsystems\physics\prephysics.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\prerendering.cpp" />
     <ClCompile Include="src\core\subsystems\time\pretime.cpp" />
+    <ClCompile Include="src\core\subsystems\world\pregameobjectcomponent.cpp" />
     <ClCompile Include="src\core\subsystems\world\preworld.cpp" />
     <ClCompile Include="src\modules\gameobject\gameobject.cpp" />
     <ClCompile Include="src\modules\gameobject\gameobjectcomponent.cpp" />
@@ -41,13 +43,16 @@
     <ClCompile Include="src\modules\time\time.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\core\components\premodelrenderercomponent.h" />
     <ClInclude Include="src\core\preapplication.h" />
-    <ClInclude Include="src\core\components\transformcomponent.h" />
+    <ClInclude Include="src\core\components\pretransformcomponent.h" />
     <ClInclude Include="src\core\preapplicationconfig.h" />
     <ClInclude Include="src\core\preapplicationcontext.h" />
     <ClInclude Include="src\core\subsystems\physics\prephysics.h" />
     <ClInclude Include="src\core\subsystems\rendering\prerendering.h" />
     <ClInclude Include="src\core\subsystems\time\pretime.h" />
+    <ClInclude Include="src\core\subsystems\world\pregameobjectcomponent.h" />
+    <ClInclude Include="src\core\subsystems\world\pregameobjecttemplate.h" />
     <ClInclude Include="src\core\subsystems\world\preworld.h" />
     <ClInclude Include="src\include\core.h" />
     <ClInclude Include="src\include\modules\gameobject.h" />

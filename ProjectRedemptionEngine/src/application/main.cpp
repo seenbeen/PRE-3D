@@ -3,36 +3,33 @@
 #include <include/core.h>
 #include <include/modules/gameobject.h>
 
+using PRE::Core::PREApplication;
 using PRE::Core::PREApplicationConfig;
 using PRE::Core::PREApplicationContext;
-using PRE::Core::PREApplication;
 
-using PRE::Core::TransformComponent;
+using PRE::Core::PRETransformComponent;
 
-using PRE::GameObjectModule::GameObjectTemplate;
-using PRE::GameObjectModule::GameObjectComponent;
+using PRE::Core::PREGameObjectTemplate;
+using PRE::Core::PREGameObjectComponent;
 
-class FooComponent : public GameObjectComponent
+class FooComponent : public PREGameObjectComponent
 {
-public:
-    PREApplicationContext* applicationContext = nullptr;
-
 protected:
     void OnStart() override
     {
         std::cout << "Start!" << std::endl;
-        _transform = gameObject().GetComponent<TransformComponent>();
+        _transform = gameObject().GetComponent<PRETransformComponent>();
         _derp = 0;
     }
 
     void OnUpdate() override
     {
-        _derp += applicationContext->time->GetDeltaTime();
+        _derp += GetTime()->GetDeltaTime();
         if (_derp >= 3.0f)
         {
             std::cout << "3 seconds, i'm out." << std::endl;
             std::cout << _transform->GetEuler().x << std::endl;
-            applicationContext->Quit();
+            Quit();
         }
     }
 
@@ -42,17 +39,17 @@ protected:
     }
 
 private:
-    TransformComponent* _transform = nullptr;
+    PRETransformComponent* _transform = nullptr;
     float _derp = 0;
 };
 
-class FooTemplate : public GameObjectTemplate
+class FooTemplate : public PREGameObjectTemplate
 {
 protected:
     void OnInstantiate() override
     {
-        AddComponent<PRE::Core::TransformComponent>();
-        AddComponent<FooComponent>();
+        AddPREComponent<PRETransformComponent>();
+        AddPREComponent<FooComponent>();
     }
 };
 
@@ -61,7 +58,6 @@ void OnInitialize(PREApplicationContext* applicationContext)
     std::cout << "ON INITIALIZE" << std::endl;
     FooTemplate fooTemplate;
     auto& obj = applicationContext->world->Instantiate(fooTemplate);
-    obj.GetComponent<FooComponent>()->applicationContext = applicationContext;
 }
 
 void OnShutdown(PREApplicationContext* applicationContext)

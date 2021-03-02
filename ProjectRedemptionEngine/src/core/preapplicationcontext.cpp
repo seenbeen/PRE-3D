@@ -25,7 +25,7 @@ namespace PRE
 			// : nullptr,
 			rendering(
 				applicationConfig._options & (int)PREApplicationConfig::Options::USE_RENDERING
-				? new PRERendering()
+				? new PRERendering(*this)
 				: nullptr
 			),
 			time(
@@ -33,7 +33,7 @@ namespace PRE
 				? new PRETime()
 				: nullptr
 			),
-			world(new PREWorld()),
+			world(new PREWorld(*this)),
 			_application(application),
 			_onInitialize(applicationConfig._onInitialize),
 			_onShutdown(applicationConfig._onShutdown) {}

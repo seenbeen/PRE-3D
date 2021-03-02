@@ -3,6 +3,8 @@
 
 #include <glad/glad.h>
 
+#include <glm/glm.hpp>
+
 namespace PRE
 {
 	namespace RenderingModule
@@ -51,7 +53,7 @@ namespace PRE
 			void SetShaderProgram(RenderShaderProgram& shaderProgram);
 			void SetTextureBinding(RenderTexture* renderTexture, GLenum bindUnit);
 
-			void Bind(const Camera& camera);
+			void Bind(const glm::mat4& mvp);
 		};
 	} // namespace RenderingModule
 } // namespace PRE

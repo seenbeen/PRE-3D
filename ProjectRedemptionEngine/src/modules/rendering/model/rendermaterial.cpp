@@ -2,6 +2,8 @@
 
 #include <glad/glad.h>
 
+#include <glm/glm.hpp>
+
 #include <modules/rendering/camera/camera.h>
 
 #include <modules/rendering/shader/rendershaderprogram.h>
@@ -52,7 +54,7 @@ namespace PRE
 			}
 		}
 
-		void RenderMaterial::Bind(const Camera& camera)
+		void RenderMaterial::Bind(const glm::mat4& mvp)
 		{
 			for (auto it = _impl.textureBindings.begin(); it != _impl.textureBindings.end(); ++it)
 			{
@@ -60,7 +62,7 @@ namespace PRE
 				it->second->Bind();
 			}
 			_impl.shaderProgram->Bind();
-			_impl.shaderProgram->SetMat4("PRE_MVP", camera.GetViewProjectionMatrix());
+			_impl.shaderProgram->SetMat4("PRE_MVP", mvp);
 		}
 	} // namespace RenderingModule
 } // namespace PRE

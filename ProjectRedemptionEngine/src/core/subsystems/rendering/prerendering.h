@@ -17,9 +17,10 @@ namespace PRE
 			friend class PREApplicationContext;
 
 		private:
+			PREApplicationContext& _preApplicationContext;
 			Renderer& _renderer;
 
-			PRERendering();
+			PRERendering(PREApplicationContext& preApplicationContext);
 			~PRERendering();
 
 			void Initialize();

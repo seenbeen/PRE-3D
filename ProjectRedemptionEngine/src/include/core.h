@@ -7,6 +7,9 @@
 #include <core/subsystems/rendering/prerendering.h>
 #include <core/subsystems/time/pretime.h>
 #include <core/subsystems/world/preworld.h>
+#include <core/subsystems/world/pregameobjecttemplate.h>
+#include <core/subsystems/world/pregameobjectcomponent.h>
 
 // components
-#include <core/components/transformcomponent.h>
+#include <core/components/pretransformcomponent.h>
+#include <core/components/premodelrenderercomponent.h>

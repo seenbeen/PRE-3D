@@ -1,14 +1,17 @@
 #include <core/subsystems/world/preworld.h>
 
+#include <core/subsystems/world/pregameobjecttemplate.h>
+
 #include <include/modules/gameobject.h>
 
 namespace PRE
 {
 	namespace Core
 	{
-		GameObject& PREWorld::Instantiate(GameObjectTemplate& gameObjectTemplate)
+		GameObject& PREWorld::Instantiate(PREGameObjectTemplate& preGameObjectTemplate)
 		{
-			return _gameObjectWorld->Instantiate(gameObjectTemplate);
+			preGameObjectTemplate._preApplicationContext = &_preApplicationContext;
+			return _gameObjectWorld->Instantiate(preGameObjectTemplate);
 		}
 
 		void PREWorld::Destroy(GameObject& gameObject)
@@ -16,8 +19,10 @@ namespace PRE
 			_gameObjectWorld->Destroy(gameObject);
 		}
 
-		PREWorld::PREWorld()
-			: _gameObjectWorld(new GameObjectWorld()) {}
+		PREWorld::PREWorld(PREApplicationContext& preApplicationContext)
+			:
+			_preApplicationContext(preApplicationContext),
+			_gameObjectWorld(new GameObjectWorld()) {}
 
 		PREWorld::~PREWorld()
 		{

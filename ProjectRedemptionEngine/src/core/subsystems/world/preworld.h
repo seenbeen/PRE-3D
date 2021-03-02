@@ -5,7 +5,6 @@ namespace PRE
 	namespace GameObjectModule
 	{
 		class GameObjectWorld;
-		class GameObjectTemplate;
 		class GameObject;
 		class GameObjectComponent;
 	} // namespace GameObjectModule
@@ -16,9 +15,9 @@ namespace PRE
 	namespace Core
 	{
 		class PREApplicationContext;
-		
+		class PREGameObjectTemplate;
+
 		using PRE::GameObjectModule::GameObjectWorld;
-		using PRE::GameObjectModule::GameObjectTemplate;
 		using PRE::GameObjectModule::GameObject;
 		using PRE::GameObjectModule::GameObjectComponent;
 
@@ -30,13 +29,14 @@ namespace PRE
 			friend class PREApplicationContext;
 
 		public:
-			GameObject& Instantiate(GameObjectTemplate& gameObjectTemplate);
+			GameObject& Instantiate(PREGameObjectTemplate& preGameObjectTemplate);
 			void Destroy(GameObject& gameObject);
 
 		private:
+			PREApplicationContext& _preApplicationContext;
 			GameObjectWorld* const _gameObjectWorld;
 
-			PREWorld();
+			PREWorld(PREApplicationContext& preApplicationContext);
 			~PREWorld();
 
 			void Initialize();

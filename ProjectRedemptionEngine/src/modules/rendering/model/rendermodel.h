@@ -1,8 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
 
-#include <modules/transform/transform.h>
-
 namespace PRE
 {
 	namespace RenderingModule
@@ -14,8 +12,6 @@ namespace PRE
 
 		class Camera;
 		class Renderer;
-
-		using PRE::TransformModule::Transform;
 
 		class RenderModel
 		{
@@ -42,7 +38,7 @@ namespace PRE
 			};
 
 		public:
-			Transform<RenderModel> transform;
+			glm::mat4 modelMatrix;
 
 		private:
 			Impl& _impl;

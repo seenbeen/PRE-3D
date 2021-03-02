@@ -32,7 +32,7 @@ namespace PRE
 			:
 			_impl(Impl::MakeImpl(mesh, material)),
 			_renderTag(renderTag),
-			transform(*this) {}
+			modelMatrix() {}
 
 		RenderModel::~RenderModel()
 		{
@@ -51,7 +51,7 @@ namespace PRE
 
 		void RenderModel::Render(const Camera& camera)
 		{
-			_impl.material->Bind(camera);
+			_impl.material->Bind(camera.GetViewProjectionMatrix() * modelMatrix);
 			_impl.mesh->Render();
 		}
 	} // namespace RenderingModule
