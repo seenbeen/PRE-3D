@@ -4,11 +4,13 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include <SDL.h>
-
 #include <glad/glad.h>
 
 #include <modules/rendering/compositing/compositingnode.h>
+
+// TODO: migrate SDL to its own namespace to reduce global clutter
+struct SDL_Window;
+typedef void* SDL_GLContext;
 
 namespace PRE
 {

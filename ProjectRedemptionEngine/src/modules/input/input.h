@@ -1,5 +1,4 @@
 #pragma once
-#include <SDL.h>
 
 namespace PRE
 {
@@ -44,6 +43,8 @@ namespace PRE
 			bool KeyReleased(unsigned int keyCode);
 
 		private:
+			static const int SDL_NUM_SCANCODES = 512;
+
 			bool _applicationHasQuit;
 
 			int _mouseX;
@@ -61,8 +62,8 @@ namespace PRE
 			int _mouseHScroll;
 			int _mouseVScroll;
 
-			Uint8 _keyPreviousState[SDL_NUM_SCANCODES];
-			Uint8 _keyState[SDL_NUM_SCANCODES];
+			bool _keyPreviousState[SDL_NUM_SCANCODES];
+			bool _keyState[SDL_NUM_SCANCODES];
 		};
 	} // namespace InputModule
 } // namespace PRE

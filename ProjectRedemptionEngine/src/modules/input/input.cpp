@@ -37,7 +37,7 @@ namespace PRE
 			_mousePreviousWheel = _mouseWheel;
 			_mousePreviousRight = _mouseRight;
 
-			std::memcpy(_keyPreviousState, _keyState, SDL_NUM_SCANCODES * sizeof(Uint8));
+			std::memcpy(_keyPreviousState, _keyState, SDL_NUM_SCANCODES * sizeof(bool));
 
 			SDL_PumpEvents();
 
@@ -46,7 +46,11 @@ namespace PRE
 			_mouseWheel = mouseButtons & SDL_BUTTON_MMASK;
 			_mouseRight = mouseButtons & SDL_BUTTON_RMASK;
 
-			std::memcpy(_keyState, SDL_GetKeyboardState(nullptr), SDL_NUM_SCANCODES * sizeof(Uint8));
+			auto keyState = SDL_GetKeyboardState(nullptr);
+			for (auto i = 0; i < SDL_NUM_SCANCODES; ++i)
+			{
+				_keyState[i] = keyState[i];
+			}
 
 			SDL_Event evt;
 			while (SDL_PollEvent(&evt))
