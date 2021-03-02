@@ -62,7 +62,7 @@ namespace PRE
 				SDL_WINDOWPOS_CENTERED,
 				windowWidth,
 				windowHeight,
-				SDL_WINDOW_OPENGL
+				SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL
 			);
 
 			if (pWindow == nullptr)
@@ -75,23 +75,27 @@ namespace PRE
 			////Use Vsync
 			//if (SDL_GL_SetSwapInterval(1) < 0)
 			//{
-			//	printf("Warning: Unable to set VSync! SDL Error: %s\n", SDL_GetError());
+			//	throw string("Unable to set VSync! ") + SDL_GetError();
 			//}
 
 			if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
 				throw "Failed to initialize GLAD";
 			}
 
+			glViewport(0, 0, windowWidth, windowHeight);
 			return *(new Renderer(*pWindow, glContext));
 		}
 
 		void Renderer::SetActiveRenderer(Renderer& renderer)
 		{
-			SDL_GL_MakeCurrent(&renderer._window, renderer._glContext);
+			// Note: idk why this seems to fudge up the display when called
+			//SDL_GL_MakeCurrent(&renderer._window, renderer._glContext);
 		}
 
 		void Renderer::ShutdownRenderer(Renderer& renderer)
 		{
+			SDL_GL_DeleteContext(renderer._glContext);
+			SDL_DestroyWindow(&renderer._window);
 			delete &renderer;
 		}
 
@@ -105,6 +109,7 @@ namespace PRE
 			for (auto it = _rootCompositingNodes.begin(); it != _rootCompositingNodes.end(); ++it)
 			{
 				auto& currentNode = **it;
+
 #ifdef __PRE_DEBUG__
 				UpdateRecurse(currentNode, visited);
 #else

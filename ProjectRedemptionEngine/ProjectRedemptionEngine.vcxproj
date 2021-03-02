@@ -29,7 +29,7 @@
     <ClCompile Include="src\modules\rendering\camera\orthographiccamera.cpp" />
     <ClCompile Include="src\modules\rendering\camera\perspectivecamera.cpp" />
     <ClCompile Include="src\modules\rendering\compositing\compositingnode.cpp" />
-    <ClCompile Include="src\modules\rendering\model\compositingtarget.cpp" />
+    <ClCompile Include="src\modules\rendering\compositing\compositingtarget.cpp" />
     <ClCompile Include="src\modules\rendering\model\rendermaterial.cpp" />
     <ClCompile Include="src\modules\rendering\model\rendermesh.cpp" />
     <ClCompile Include="src\modules\rendering\model\rendermodel.cpp" />
@@ -51,6 +51,7 @@
     <ClInclude Include="src\core\subsystems\world\preworld.h" />
     <ClInclude Include="src\include\core.h" />
     <ClInclude Include="src\include\modules\gameobject.h" />
+    <ClInclude Include="src\include\modules\rendering.h" />
     <ClInclude Include="src\include\modules\time.h" />
     <ClInclude Include="src\include\modules\transform.h" />
     <ClInclude Include="src\modules\gameobject\gameobject.h" />

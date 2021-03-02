@@ -1,32 +1,36 @@
 #include <core/subsystems/rendering/prerendering.h>
 
+#include <include/modules/rendering.h>
+
 namespace PRE
 {
 	namespace Core
 	{
+		using PRE::RenderingModule::Renderer;
+
 		PRERendering::PRERendering()
-		{
-			// throw "unimplemented.";
-		}
+			:
+			_renderer(Renderer::MakeRenderer("Yes hi.", 800, 600)) {}
 		
 		PRERendering::~PRERendering()
 		{
-			// throw "unimplemented.";
+			Renderer::ShutdownRenderer(_renderer);
 		}
 
 		void PRERendering::Initialize()
 		{
-			throw "unimplemented.";
+			
 		}
 
 		void PRERendering::Update()
 		{
-			throw "unimplemented.";
+			Renderer::SetActiveRenderer(_renderer);
+			_renderer.Update();
 		}
 
 		void PRERendering::Shutdown()
 		{
-			throw "unimplemented.";
+
 		}
 	}
 }

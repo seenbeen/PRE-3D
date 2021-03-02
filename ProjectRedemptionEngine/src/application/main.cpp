@@ -73,7 +73,8 @@ int main(int argc, char *argv[])
 {
     PREApplication::Run(
         PREApplicationConfig(
-            (int)PREApplicationConfig::Options::USE_TIME,
+            (int) PREApplicationConfig::Options::USE_TIME |
+            (int) PREApplicationConfig::Options::USE_RENDERING,
             OnInitialize,
             OnShutdown
         )

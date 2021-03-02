@@ -9,10 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="Source Files\Core">
       <UniqueIdentifier>{d8d8c8cd-4fd3-4d72-ad12-c2ad45c8211e}</UniqueIdentifier>
     </Filter>
@@ -118,14 +114,14 @@
     <Filter Include="Source Files\Modules\Rendering\Shader">
       <UniqueIdentifier>{57be1e6a-d7cc-4e80-8852-ca8da420f8eb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Additional Dependencies">
-      <UniqueIdentifier>{89d411dc-97d3-4767-a0b5-1a3246432c21}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Modules\Rendering\Model">
       <UniqueIdentifier>{b911c14d-33bc-4028-b0a0-38be00e1fd39}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Modules\Rendering\Model">
       <UniqueIdentifier>{8c3c23f7-9bd8-41e7-ac44-603426ff2ce5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Other Dependencies">
+      <UniqueIdentifier>{e4a17a19-47ce-4724-b502-92c1b6b2fc23}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -222,6 +218,9 @@
     <ClInclude Include="src\modules\rendering\compositing\compositingtarget.h">
       <Filter>Header Files\Modules\Rendering\Compositing</Filter>
     </ClInclude>
+    <ClInclude Include="src\include\modules\rendering.h">
+      <Filter>Header Files\Include\Modules</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\modules\gameobject\gameobject.cpp">
@@ -290,9 +289,6 @@
     <ClCompile Include="src\modules\rendering\shader\rendershaderprogram.cpp">
       <Filter>Source Files\Modules\Rendering\Shader</Filter>
     </ClCompile>
-    <ClCompile Include="..\Deps\glad\src\glad.c">
-      <Filter>Additional Dependencies</Filter>
-    </ClCompile>
     <ClCompile Include="src\modules\rendering\model\rendermodel.cpp">
       <Filter>Source Files\Modules\Rendering\Model</Filter>
     </ClCompile>
@@ -305,8 +301,11 @@
     <ClCompile Include="src\modules\rendering\model\rendermaterial.cpp">
       <Filter>Source Files\Modules\Rendering\Model</Filter>
     </ClCompile>
-    <ClCompile Include="src\modules\rendering\model\compositingtarget.cpp">
+    <ClCompile Include="src\modules\rendering\compositing\compositingtarget.cpp">
       <Filter>Source Files\Modules\Rendering\Compositing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Deps\glad\src\glad.c">
+      <Filter>Header Files\Other Dependencies</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,10 +1,13 @@
 #pragma once
+#include <include/modules/rendering.h>
 
 namespace PRE
 {
 	namespace Core
 	{
 		class PREApplicationContext;
+
+		using PRE::RenderingModule::Renderer;
 
 		class PRERendering
 		{
@@ -14,6 +17,8 @@ namespace PRE
 			friend class PREApplicationContext;
 
 		private:
+			Renderer& _renderer;
+
 			PRERendering();
 			~PRERendering();
 
