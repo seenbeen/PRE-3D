@@ -132,7 +132,7 @@
     <Filter Include="Header Files\Core\Subsystems\Input">
       <UniqueIdentifier>{68837b9c-420a-4918-893e-5ef2014aca34}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Core\Input">
+    <Filter Include="Source Files\Core\Subsystems\Input">
       <UniqueIdentifier>{4ef87957-f99e-4892-af46-eaafdcd1e90e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -257,6 +257,27 @@
     <ClInclude Include="src\core\subsystems\input\prekeycode.h">
       <Filter>Header Files\Core\Subsystems\Input</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\subsystems\rendering\premesh.h">
+      <Filter>Header Files\Core\Subsystems\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\subsystems\rendering\prematerial.h">
+      <Filter>Header Files\Core\Subsystems\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\subsystems\rendering\preshader.h">
+      <Filter>Header Files\Core\Subsystems\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\subsystems\rendering\prerenderingconfig.h">
+      <Filter>Header Files\Core\Subsystems\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\subsystems\input\preinputconfig.h">
+      <Filter>Header Files\Core\Subsystems\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\subsystems\time\pretimeconfig.h">
+      <Filter>Header Files\Core\Subsystems\Time</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\subsystems\world\preworldconfig.h">
+      <Filter>Header Files\Core\Subsystems\World</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\modules\gameobject\gameobject.cpp">
@@ -353,10 +374,22 @@
       <Filter>Source Files\Modules\Input</Filter>
     </ClCompile>
     <ClCompile Include="src\core\subsystems\input\preinput.cpp">
-      <Filter>Source Files\Core\Input</Filter>
+      <Filter>Source Files\Core\Subsystems\Input</Filter>
     </ClCompile>
     <ClCompile Include="src\modules\input\keycode.cpp">
       <Filter>Source Files\Modules\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\rendering\prerenderingconfig.cpp">
+      <Filter>Source Files\Core\Subsystems\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\input\preinputconfig.cpp">
+      <Filter>Source Files\Core\Subsystems\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\time\pretimeconfig.cpp">
+      <Filter>Source Files\Core\Subsystems\Time</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\world\preworldconfig.cpp">
+      <Filter>Source Files\Core\Subsystems\World</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,19 +1,18 @@
 #pragma once
 #include <core/subsystems/world/pregameobjectcomponent.h>
-#include <include/modules/rendering.h>
 
 namespace PRE
 {
 	namespace Core
 	{
-		using PRE::RenderingModule::RenderMesh;
-		using PRE::RenderingModule::RenderMaterial;
-		using PRE::RenderingModule::RenderModel;
+		class PREMaterial;
+		class PREMesh;
 
 		class PREModelRendererComponent : public PREGameObjectComponent
 		{
 		public:
-			
+			PREMaterial* material = nullptr;
+			PREMesh* mesh = nullptr;
 
 		protected:
 			void OnStart() override;

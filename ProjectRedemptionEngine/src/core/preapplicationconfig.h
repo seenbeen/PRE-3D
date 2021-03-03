@@ -1,4 +1,8 @@
 #pragma once
+#include <core/subsystems/input/preinputconfig.h>
+#include <core/subsystems/rendering/prerenderingconfig.h>
+#include <core/subsystems/time/pretimeconfig.h>
+#include <core/subsystems/world/preworldconfig.h>
 
 namespace PRE
 {
@@ -12,23 +16,28 @@ namespace PRE
 			PREApplicationConfig& operator=(const PREApplicationConfig&) = delete;
 			PREApplicationConfig(const PREApplicationConfig&) = delete;
 
-			using OnInitialize = void(&)(PREApplicationContext*);
-			using OnShutdown = void(&)(PREApplicationContext*);
+			using OnInitialize = void(&)(PREApplicationContext&);
+			using OnShutdown = void(&)(PREApplicationContext&);
 
 			friend class PREApplicationContext;
 			friend class PREApplication;
 
 		public:
-			enum class Options {
-				//USE_PHYSICS = 1 << 0,
-				USE_RENDERING = 1 << 1,
-				USE_TIME = 1 << 2
-			};
-
-			PREApplicationConfig(int options, OnInitialize& onInitialize, OnShutdown& onShutdown);
+			PREApplicationConfig(
+				const PREInputConfig& inputConfig,
+				const PRERenderingConfig& renderingConfig,
+				const PRETimeConfig& timeConfig,
+				const PREWorldConfig& worldConfig,
+				OnInitialize& onInitialize,
+				OnShutdown& onShutdown
+			);
 
 		private:
-			const int _options;
+			const PREInputConfig _inputConfig;
+			const PRERenderingConfig _renderingConfig;
+			const PRETimeConfig _timeConfig;
+			const PREWorldConfig _worldConfig;
+
 			OnInitialize& _onInitialize;
 			OnShutdown& _onShutdown;
 		};

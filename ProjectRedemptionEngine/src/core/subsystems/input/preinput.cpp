@@ -2,6 +2,7 @@
 
 #include <include/modules/input.h>
 
+#include <core/subsystems/input/preinputconfig.h>
 #include <core/subsystems/input/prekeycode.h>
 
 namespace PRE
@@ -75,24 +76,37 @@ namespace PRE
 			return _input.MouseWheelVScroll();
 		}
 
-		bool PREInput::KeyState(PREKeyCode keyCode)
+		bool PREInput::KeyState(const PREKeyCode& keyCode)
 		{
 			return _input.KeyState((unsigned int)keyCode);
 		}
 
-		bool PREInput::KeyPressed(PREKeyCode keyCode)
+		bool PREInput::KeyPressed(const PREKeyCode& keyCode)
 		{
 			return _input.KeyPressed((unsigned int)keyCode);
 		}
 
-		bool PREInput::KeyReleased(PREKeyCode keyCode)
+		bool PREInput::KeyReleased(const PREKeyCode& keyCode)
 		{
 			return _input.KeyReleased((unsigned int)keyCode);
 		}
 
-		PREInput::PREInput()
+		PREInput& PREInput::MakePREInput(
+			const PREInputConfig& inputConfig,
+			PREApplicationContext& applicationContext
+		)
+		{
+			auto& input = *(new Input());
+			return *(new PREInput(applicationContext, input));
+		}
+
+		PREInput::PREInput(
+			PREApplicationContext& applicationContext,
+			Input& input
+		)
 			:
-			_input(*(new Input())) {}
+			_applicationContext(applicationContext),
+			_input(input) {}
 
 		PREInput::~PREInput()
 		{

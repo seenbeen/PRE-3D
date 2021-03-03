@@ -2,26 +2,41 @@
 
 #include <include/modules/rendering.h>
 
+#include <core/subsystems/rendering/prerenderingconfig.h>
+
 namespace PRE
 {
 	namespace Core
 	{
 		using PRE::RenderingModule::Renderer;
 
-		PRERendering::PRERendering(PREApplicationContext& preApplicationContext)
+		PRERendering& PRERendering::MakePRERendering(
+			const PRERenderingConfig& renderingConfig,
+			PREApplicationContext& preApplicationContext
+		)
+		{
+			auto& renderer = Renderer::MakeRenderer(
+				renderingConfig.windowTitle,
+				renderingConfig.windowWidth,
+				renderingConfig.windowHeight
+			);
+			return *(new PRERendering(preApplicationContext, renderer));
+		}
+
+		PRERendering::PRERendering(
+			PREApplicationContext& preApplicationContext,
+			Renderer& renderer
+		)
 			:
 			_preApplicationContext(preApplicationContext),
-			_renderer(Renderer::MakeRenderer("Yes hi.", 800, 600)) {}
+			_renderer(renderer) {}
 		
 		PRERendering::~PRERendering()
 		{
 			Renderer::ShutdownRenderer(_renderer);
 		}
 
-		void PRERendering::Initialize()
-		{
-			
-		}
+		void PRERendering::Initialize() {}
 
 		void PRERendering::Update()
 		{
@@ -29,9 +44,6 @@ namespace PRE
 			_renderer.Update();
 		}
 
-		void PRERendering::Shutdown()
-		{
-
-		}
+		void PRERendering::Shutdown() {}
 	}
 }

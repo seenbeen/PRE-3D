@@ -1,13 +1,15 @@
 #pragma once
 #include <include/modules/input.h>
 
-#include <core/subsystems/input/prekeycode.h>
-
 namespace PRE
 {
 	namespace Core
 	{
+		struct PREInputConfig;
+
 		class PREApplicationContext;
+
+		enum class PREKeyCode;
 
 		using PRE::InputModule::Input;
 
@@ -41,15 +43,21 @@ namespace PRE
 			int MouseWheelHScroll();
 			int MouseWheelVScroll();
 
-			bool KeyState(PREKeyCode keyCode);
+			bool KeyState(const PREKeyCode& keyCode);
 
-			bool KeyPressed(PREKeyCode keyCode);
-			bool KeyReleased(PREKeyCode keyCode);
+			bool KeyPressed(const PREKeyCode& keyCode);
+			bool KeyReleased(const PREKeyCode& keyCode);
 
 		private:
+			static PREInput& MakePREInput(
+				const PREInputConfig& inputConfig,
+				PREApplicationContext& applicationContext
+			);
+
+			PREApplicationContext& _applicationContext;
 			Input& _input;
 
-			PREInput();
+			PREInput(PREApplicationContext& applicationContext, Input& input);
 			~PREInput();
 
 			void Initialize();

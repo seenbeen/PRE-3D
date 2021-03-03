@@ -5,13 +5,12 @@ namespace PRE
 {
 	namespace Core
 	{
-		class PREApplication;
-
 		class PREInput;
-		// class PREPhysics;
 		class PRERendering;
 		class PRETime;
 		class PREWorld;
+
+		class PREApplication;
 
 		class PREApplicationContext
 		{
@@ -21,11 +20,10 @@ namespace PRE
 			friend class PREApplication;
 
 		public:
-			PREInput* const input;
-			// const PREPhysics* physics;
-			PRERendering* const rendering;
-			PRETime* const time;
-			PREWorld* const world;
+			PREInput& input;
+			PRERendering& rendering;
+			PRETime& time;
+			PREWorld& world;
 			void Quit();
 
 		private:

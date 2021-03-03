@@ -1,17 +1,12 @@
 #pragma once
-
-namespace PRE
-{
-	namespace TimeModule
-	{
-		class Time;
-	} // namespace TimeModule
-} // namespace PRE
+#include <include/modules/time.h>
 
 namespace PRE
 {
 	namespace Core
 	{
+		struct PRETimeConfig;
+
 		class PREApplicationContext;
 
 		using PRE::TimeModule::Time;
@@ -27,9 +22,15 @@ namespace PRE
 			float GetDeltaTime();
 
 		private:
-			Time* const _time;
+			static PRETime& MakePRETime(
+				const PRETimeConfig& timeConfig,
+				PREApplicationContext& applicationContext
+			);
 
-			PRETime();
+			PREApplicationContext& _applicationContext;
+			Time& _time;
+
+			PRETime(PREApplicationContext& applicationContext, Time& time);
 			~PRETime();
 
 			void Initialize();

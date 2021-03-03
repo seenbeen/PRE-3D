@@ -3,6 +3,8 @@
 #include <core/preapplicationconfig.h>
 #include <core/preapplication.h>
 
+#include <core/preapplicationconfig.h>
+
 #include <core/subsystems/input/preinput.h>
 #include <core/subsystems/rendering/prerendering.h>
 #include <core/subsystems/time/pretime.h>
@@ -22,98 +24,67 @@ namespace PRE
 			PREApplication& application
 		) :
 			input(
-				applicationConfig._options & (int)PREApplicationConfig::Options::USE_RENDERING
-				? new PREInput()
-				: nullptr
+				PREInput::MakePREInput(
+					applicationConfig._inputConfig,
+					*this
+				)
 			),
-			// applicationConfig._options & (int)PREApplicationConfig::Options::USE_PHYSICS
-			// ? new PREPhysics()
-			// : nullptr,
 			rendering(
-				applicationConfig._options & (int)PREApplicationConfig::Options::USE_RENDERING
-				? new PRERendering(*this)
-				: nullptr
+				PRERendering::MakePRERendering(
+					applicationConfig._renderingConfig,
+					*this
+				)
 			),
 			time(
-				applicationConfig._options& (int)PREApplicationConfig::Options::USE_TIME
-				? new PRETime()
-				: nullptr
+				PRETime::MakePRETime(
+					applicationConfig._timeConfig,
+					*this
+				)
 			),
-			world(new PREWorld(*this)),
+			world(
+				PREWorld::MakePREWorld(
+					applicationConfig._worldConfig,
+					*this
+				)
+			),
 			_application(application),
 			_onInitialize(applicationConfig._onInitialize),
 			_onShutdown(applicationConfig._onShutdown) {}
 
 		PREApplicationContext::~PREApplicationContext()
 		{
-			delete world;
-			delete time;
-			delete rendering;
-			delete input;
+			delete &world;
+			delete &time;
+			delete &rendering;
+			delete &input;
 		}
 
 		void PREApplicationContext::Initialize()
 		{
-			if (input != nullptr)
-			{
-				input->Initialize();
-			}
+			input.Initialize();
+			time.Initialize();
+			world.Initialize();
+			rendering.Initialize();
 
-			if (time != nullptr)
-			{
-				time->Initialize();
-			}
-
-			world->Initialize();
-
-			if (rendering != nullptr)
-			{
-				rendering->Initialize();
-			}
-
-			_onInitialize(this);
+			_onInitialize(*this);
 		}
 
 		void PREApplicationContext::Update()
 		{
-			if (input != nullptr)
-			{
-				input->Update();
-			}
-
-			if (time != nullptr)
-			{
-				time->Update();
-			}
-
-			world->Update();
-
-			if (rendering != nullptr)
-			{
-				rendering->Update();
-			}
+			input.Update();
+			time.Update();
+			world.Update();
+			rendering.Update();
 		}
 
 		void PREApplicationContext::Shutdown()
 		{			
-			_onShutdown(this);
-			
-			if (rendering != nullptr)
-			{
-				rendering->Shutdown();
-			}
-			
-			world->Shutdown();
+			_onShutdown(*this);
 
-			if (time != nullptr)
-			{
-				time->Shutdown();
-			}
-
-			if (input != nullptr)
-			{
-				input->Shutdown();
-			}
+			rendering.Shutdown();
+			world.Shutdown();
+			time.Shutdown();
+			input.Shutdown();
 		}
 	}
 }

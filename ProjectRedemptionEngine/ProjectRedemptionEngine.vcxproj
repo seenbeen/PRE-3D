@@ -19,11 +19,15 @@
     <ClCompile Include="src\core\preapplicationconfig.cpp" />
     <ClCompile Include="src\core\preapplicationcontext.cpp" />
     <ClCompile Include="src\core\subsystems\input\preinput.cpp" />
+    <ClCompile Include="src\core\subsystems\input\preinputconfig.cpp" />
     <ClCompile Include="src\core\subsystems\physics\prephysics.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\prerendering.cpp" />
+    <ClCompile Include="src\core\subsystems\rendering\prerenderingconfig.cpp" />
     <ClCompile Include="src\core\subsystems\time\pretime.cpp" />
+    <ClCompile Include="src\core\subsystems\time\pretimeconfig.cpp" />
     <ClCompile Include="src\core\subsystems\world\pregameobjectcomponent.cpp" />
     <ClCompile Include="src\core\subsystems\world\preworld.cpp" />
+    <ClCompile Include="src\core\subsystems\world\preworldconfig.cpp" />
     <ClCompile Include="src\modules\gameobject\gameobject.cpp" />
     <ClCompile Include="src\modules\gameobject\gameobjectcomponent.cpp" />
     <ClCompile Include="src\modules\gameobject\gameobjecttemplate.cpp" />
@@ -52,13 +56,20 @@
     <ClInclude Include="src\core\preapplicationconfig.h" />
     <ClInclude Include="src\core\preapplicationcontext.h" />
     <ClInclude Include="src\core\subsystems\input\preinput.h" />
+    <ClInclude Include="src\core\subsystems\input\preinputconfig.h" />
     <ClInclude Include="src\core\subsystems\input\prekeycode.h" />
     <ClInclude Include="src\core\subsystems\physics\prephysics.h" />
+    <ClInclude Include="src\core\subsystems\rendering\prematerial.h" />
+    <ClInclude Include="src\core\subsystems\rendering\premesh.h" />
     <ClInclude Include="src\core\subsystems\rendering\prerendering.h" />
+    <ClInclude Include="src\core\subsystems\rendering\prerenderingconfig.h" />
+    <ClInclude Include="src\core\subsystems\rendering\preshader.h" />
     <ClInclude Include="src\core\subsystems\time\pretime.h" />
+    <ClInclude Include="src\core\subsystems\time\pretimeconfig.h" />
     <ClInclude Include="src\core\subsystems\world\pregameobjectcomponent.h" />
     <ClInclude Include="src\core\subsystems\world\pregameobjecttemplate.h" />
     <ClInclude Include="src\core\subsystems\world\preworld.h" />
+    <ClInclude Include="src\core\subsystems\world\preworldconfig.h" />
     <ClInclude Include="src\include\core.h" />
     <ClInclude Include="src\include\modules\gameobject.h" />
     <ClInclude Include="src\include\modules\input.h" />
@@ -142,7 +153,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>GLM_FORCE_PURE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
@@ -164,7 +175,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>__PRE_DEBUG__;GLM_FORCE_PURE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>__PRE_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>Default</LanguageStandard>
     </ClCompile>

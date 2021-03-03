@@ -11,34 +11,46 @@ namespace PRE
 		GameObject& PREWorld::Instantiate(PREGameObjectTemplate& preGameObjectTemplate)
 		{
 			preGameObjectTemplate._preApplicationContext = &_preApplicationContext;
-			return _gameObjectWorld->Instantiate(preGameObjectTemplate);
+			return _gameObjectWorld.Instantiate(preGameObjectTemplate);
 		}
 
 		void PREWorld::Destroy(GameObject& gameObject)
 		{
-			_gameObjectWorld->Destroy(gameObject);
+			_gameObjectWorld.Destroy(gameObject);
 		}
 
-		PREWorld::PREWorld(PREApplicationContext& preApplicationContext)
+		PREWorld& PREWorld::MakePREWorld(
+			const PREWorldConfig& worldConfig,
+			PREApplicationContext& applicationContext
+		)
+		{
+			auto& gameObjectWorld = *(new GameObjectWorld());
+			return *(new PREWorld(applicationContext, gameObjectWorld));
+		}
+
+		PREWorld::PREWorld(
+			PREApplicationContext& preApplicationContext,
+			GameObjectWorld& gameObjectWorld
+		)
 			:
 			_preApplicationContext(preApplicationContext),
-			_gameObjectWorld(new GameObjectWorld()) {}
+			_gameObjectWorld(gameObjectWorld) {}
 
 		PREWorld::~PREWorld()
 		{
-			delete _gameObjectWorld;
+			delete &_gameObjectWorld;
 		}
 
 		void PREWorld::Initialize() {}
 
 		void PREWorld::Update()
 		{
-			_gameObjectWorld->Update();
+			_gameObjectWorld.Update();
 		}
 
 		void PREWorld::Shutdown()
 		{
-			_gameObjectWorld->Shutdown();
+			_gameObjectWorld.Shutdown();
 		}
 	}
 }

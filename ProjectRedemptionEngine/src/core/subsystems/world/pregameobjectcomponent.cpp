@@ -13,22 +13,22 @@ namespace PRE
 {
 	namespace Core
 	{
-		PREInput* PREGameObjectComponent::GetInput()
+		PREInput& PREGameObjectComponent::GetInput()
 		{
 			return _preApplicationContext->input;
 		}
 
-		PRERendering* PREGameObjectComponent::GetRendering()
+		PRERendering& PREGameObjectComponent::GetRendering()
 		{
 			return _preApplicationContext->rendering;
 		}
 
-		PRETime* PREGameObjectComponent::GetTime()
+		PRETime& PREGameObjectComponent::GetTime()
 		{
 			return _preApplicationContext->time;
 		}
 
-		PREWorld* PREGameObjectComponent::GetWorld()
+		PREWorld& PREGameObjectComponent::GetWorld()
 		{
 			return _preApplicationContext->world;
 		}

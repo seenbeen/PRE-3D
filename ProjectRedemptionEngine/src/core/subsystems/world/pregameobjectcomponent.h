@@ -21,10 +21,10 @@ namespace PRE
 			friend class PREGameObjectTemplate;
 
 		protected:
-			PREInput* GetInput();
-			PRERendering* GetRendering();
-			PRETime* GetTime();
-			PREWorld* GetWorld();
+			PREInput& GetInput();
+			PRERendering& GetRendering();
+			PRETime& GetTime();
+			PREWorld& GetWorld();
 
 			void Quit();
 

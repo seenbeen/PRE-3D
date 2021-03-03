@@ -3,15 +3,7 @@
 #include <include/core.h>
 #include <include/modules/gameobject.h>
 
-using PRE::Core::PREApplication;
-using PRE::Core::PREKeyCode;
-using PRE::Core::PREApplicationConfig;
-using PRE::Core::PREApplicationContext;
-
-using PRE::Core::PRETransformComponent;
-
-using PRE::Core::PREGameObjectTemplate;
-using PRE::Core::PREGameObjectComponent;
+using namespace PRE::Core;
 
 class FooComponent : public PREGameObjectComponent
 {
@@ -25,7 +17,7 @@ protected:
 
     void OnUpdate() override
     {
-        _derp += GetTime()->GetDeltaTime();
+        _derp += GetTime().GetDeltaTime();
         if (_derp >= 3.0f)
         {
             std::cout << "3 seconds, i'm out." << std::endl;
@@ -49,31 +41,31 @@ class BarComponent : public PREGameObjectComponent
 protected:
     void OnUpdate() override
     {
-        if (GetInput()->ApplicationHasQuit())
+        if (GetInput().ApplicationHasQuit())
         {
             std::cout << "Application Quitting..." << std::endl;
             Quit();
         }
-        if (GetInput()->MouseButtonLeftPressed())
+        if (GetInput().MouseButtonLeftPressed())
         {
             int x, y;
-            GetInput()->MousePosition(x, y);
+            GetInput().MousePosition(x, y);
             std::cout << "PRESSED AT (" << x << ", " << y << ")" << std::endl;
         }
-        if (GetInput()->MouseButtonLeftReleased())
+        if (GetInput().MouseButtonLeftReleased())
         {
             int x, y;
-            GetInput()->MousePosition(x, y);
+            GetInput().MousePosition(x, y);
             std::cout << "RELEASED AT (" << x << ", " << y << ")" << std::endl;
         }
-        if (GetInput()->KeyPressed(PREKeyCode::SPACE))
+        if (GetInput().KeyPressed(PREKeyCode::SPACE))
         {
-            std::cout << "~" << 1 / GetTime()->GetDeltaTime() << " FPS." << std::endl;
+            std::cout << "~" << 1 / GetTime().GetDeltaTime() << " FPS." << std::endl;
         }
     }
 };
 
-void OnInitialize(PREApplicationContext* applicationContext)
+void OnInitialize(PREApplicationContext& applicationContext)
 {
     std::cout << "ON INITIALIZE" << std::endl;
 
@@ -96,11 +88,11 @@ void OnInitialize(PREApplicationContext* applicationContext)
         }
     } barTemplate;
 
-    applicationContext->world->Instantiate(fooTemplate);
-    applicationContext->world->Instantiate(barTemplate);
+    applicationContext.world.Instantiate(fooTemplate);
+    applicationContext.world.Instantiate(barTemplate);
 }
 
-void OnShutdown(PREApplicationContext* applicationContext)
+void OnShutdown(PREApplicationContext& applicationContext)
 {
     std::cout << "ON SHUTDOWN" << std::endl;
 }
@@ -109,8 +101,14 @@ int main(int argc, char *argv[])
 {
     PREApplication::Run(
         PREApplicationConfig(
-            (int) PREApplicationConfig::Options::USE_TIME |
-            (int) PREApplicationConfig::Options::USE_RENDERING,
+            PREInputConfig(),
+            PRERenderingConfig(
+                "Yes hi.",
+                800,
+                600
+            ),
+            PRETimeConfig(),
+            PREWorldConfig(),
             OnInitialize,
             OnShutdown
         )

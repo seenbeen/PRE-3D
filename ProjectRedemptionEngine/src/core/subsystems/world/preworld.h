@@ -1,19 +1,12 @@
 #pragma once
-
-namespace PRE
-{
-	namespace GameObjectModule
-	{
-		class GameObjectWorld;
-		class GameObject;
-		class GameObjectComponent;
-	} // namespace GameObjectModule
-} // namespace PRE
+#include <include/modules/gameobject.h>
 
 namespace PRE
 {
 	namespace Core
 	{
+		struct PREWorldConfig;
+
 		class PREApplicationContext;
 		class PREGameObjectTemplate;
 
@@ -33,10 +26,18 @@ namespace PRE
 			void Destroy(GameObject& gameObject);
 
 		private:
-			PREApplicationContext& _preApplicationContext;
-			GameObjectWorld* const _gameObjectWorld;
+			static PREWorld& MakePREWorld(
+				const PREWorldConfig& worldConfig,
+				PREApplicationContext& applicationContext
+			);
 
-			PREWorld(PREApplicationContext& preApplicationContext);
+			PREApplicationContext& _preApplicationContext;
+			GameObjectWorld& _gameObjectWorld;
+
+			PREWorld(
+				PREApplicationContext& preApplicationContext,
+				GameObjectWorld& gameObjectWorld
+			);
 			~PREWorld();
 
 			void Initialize();
