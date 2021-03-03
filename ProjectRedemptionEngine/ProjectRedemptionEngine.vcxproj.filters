@@ -96,12 +96,6 @@
     <Filter Include="Source Files\Application">
       <UniqueIdentifier>{2fa3314b-c4ef-47a0-b95f-146e9a5461ed}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Modules\Rendering\Camera">
-      <UniqueIdentifier>{357e6dd7-6df6-47d5-9d20-967234ae235f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Modules\Rendering\Camera">
-      <UniqueIdentifier>{54504b30-4e0a-4d1e-aa9a-cb642871bd19}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Modules\Rendering\Compositing">
       <UniqueIdentifier>{fde18cc3-34c0-4be8-9ab1-ef4c2cdf7883}</UniqueIdentifier>
     </Filter>
@@ -197,15 +191,6 @@
     <ClInclude Include="src\modules\rendering\renderer.h">
       <Filter>Header Files\Modules\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="src\modules\rendering\camera\camera.h">
-      <Filter>Header Files\Modules\Rendering\Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="src\modules\rendering\camera\orthographiccamera.h">
-      <Filter>Header Files\Modules\Rendering\Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="src\modules\rendering\camera\perspectivecamera.h">
-      <Filter>Header Files\Modules\Rendering\Camera</Filter>
-    </ClInclude>
     <ClInclude Include="src\modules\rendering\compositing\compositingnode.h">
       <Filter>Header Files\Modules\Rendering\Compositing</Filter>
     </ClInclude>
@@ -287,6 +272,12 @@
     <ClInclude Include="..\Deps\stb\stb_image.h">
       <Filter>Header Files\Other Dependencies\stb</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\components\precameracomponent.h">
+      <Filter>Header Files\Core\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\rendering\rendercamera.h">
+      <Filter>Header Files\Modules\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\modules\gameobject\gameobject.cpp">
@@ -330,15 +321,6 @@
     </ClCompile>
     <ClCompile Include="src\modules\rendering\renderer.cpp">
       <Filter>Source Files\Modules\Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="src\modules\rendering\camera\camera.cpp">
-      <Filter>Source Files\Modules\Rendering\Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="src\modules\rendering\camera\orthographiccamera.cpp">
-      <Filter>Source Files\Modules\Rendering\Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="src\modules\rendering\camera\perspectivecamera.cpp">
-      <Filter>Source Files\Modules\Rendering\Camera</Filter>
     </ClCompile>
     <ClCompile Include="src\modules\rendering\compositing\compositingnode.cpp">
       <Filter>Source Files\Modules\Rendering\Compositing</Filter>
@@ -402,6 +384,9 @@
     </ClCompile>
     <ClCompile Include="src\core\subsystems\world\pregameobjecttemplate.cpp">
       <Filter>Source Files\Core\Subsystems\World</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\rendering\rendercamera.cpp">
+      <Filter>Source Files\Modules\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

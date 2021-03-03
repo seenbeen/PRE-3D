@@ -5,14 +5,11 @@ namespace PRE
 {
 	namespace RenderingModule
 	{
-		class CompositingTarget;
+		class Renderer;
 
 		class RenderMesh;
 		class RenderMaterial;
-
-		class Camera;
-		class Renderer;
-
+	
 		class RenderModel
 		{
 			RenderModel& operator=(const RenderModel&) = delete;
@@ -51,7 +48,7 @@ namespace PRE
 			void SetMesh(RenderMesh& mesh);
 			void SetMaterial(RenderMaterial& material);
 
-			void Render(const Camera& camera);
+			void Render(const glm::mat4& viewProjectionMatrix);
 		};
 	} // namespace RenderingModule
 } // namespace PRE

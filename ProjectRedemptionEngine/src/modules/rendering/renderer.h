@@ -4,9 +4,12 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include <glm/glm.hpp>
+
 #include <glad/glad.h>
 
 #include <modules/rendering/compositing/compositingnode.h>
+#include <modules/rendering/rendercamera.h>
 
 // TODO: migrate SDL to its own namespace to reduce global clutter
 struct SDL_Window;
@@ -23,11 +26,8 @@ namespace PRE
 		class RenderMesh;
 		class RenderTexture;
 		class RenderMaterial;
-		class RenderModel;
 
-		class Camera;
-		class OrthographicCamera;
-		class PerspectiveCamera;
+		class RenderModel;
 
 		using std::list;
 		using std::string;
@@ -49,6 +49,42 @@ namespace PRE
 			static void ShutdownRenderer(Renderer& renderer);
 
 			void Update();
+
+			CompositingNode& AllocateCompositingNode(
+				unsigned int renderTag,
+				unsigned int width,
+				unsigned int height
+			);
+			void AttachRootCompositingNodeDependency(CompositingNode& dependency);
+			void DetachRootCompositingNodeDependency(CompositingNode& dependency);
+			void AttachCompositingNodeDependency(
+				CompositingNode& dependent,
+				CompositingNode& dependency
+			);
+			void DetachCompositingNodeDependency(
+				CompositingNode& dependent,
+				CompositingNode& dependency
+			);
+			void DeallocateCompositingNode(CompositingNode& compositingNode);
+
+			RenderCamera& AllocateCamera(
+				const RenderCamera::Kind& kind,
+				float size,
+				float aspectRatio,
+				float nearClippingPlane,
+				float farClippingPlane
+			);
+			void DeallocateCamera(RenderCamera& camera);
+
+			void BindCompositingPair(
+				RenderCamera& camera,
+				CompositingNode& compositingNode
+			);
+
+			void UnbindCompositingPair(
+				RenderCamera& camera,
+				CompositingNode& compositingNode
+			);
 
 			const RenderVertexShader& AllocateVertexShader(const string& shaderSource);
 			void DeallocateVertexShader(const RenderVertexShader& vertexShader);
@@ -87,57 +123,34 @@ namespace PRE
 			void SetModelMesh(RenderModel& model, RenderMesh& mesh);
 			void SetModelMaterial(RenderModel& model, RenderMaterial& material);
 			void DeallocateModel(RenderModel& model);
-			
-			OrthographicCamera& AllocateOrthographicCamera(
-				float size,
-				float aspectRatio,
-				float renderDistance
-			);
-			PerspectiveCamera& AllocatePerspectiveCamera(
-				float size,
-				float aspectRatio,
-				float nearClippingPlane,
-				float farClippingPlane
-			);
-			void DeallocateCamera(Camera& camera);
-
-			CompositingNode& AllocateCompositingNode(
-				const Camera& camera,
-				unsigned int renderTag,
-				unsigned int width,
-				unsigned int height
-			);
-			void AttachRootCompositingNodeDependency(CompositingNode& dependency);
-			void DetachRootCompositingNodeDependency(CompositingNode& dependency);
-			void AttachCompositingNodeDependency(
-				CompositingNode& dependent,
-				CompositingNode& dependency
-			);
-			void DetachCompositingNodeDependency(
-				CompositingNode& dependent,
-				CompositingNode& dependency
-			);
-			void DeallocateCompositingNode(CompositingNode& compositingNode);
 
 		private:
+			static const glm::mat4 MAT4_IDENTITY;
+
 			SDL_Window& _window;
 			SDL_GLContext& _glContext;
 
 			unordered_set<CompositingNode*> _rootCompositingNodes;
+			unordered_set<CompositingNode*> _compositingNodes;
 
-			unordered_set<RenderVertexShader const*> _vertexShaders;
-			unordered_set<RenderFragmentShader const*> _fragmentShaders;
-			unordered_set<RenderShaderProgram const*> _shaderPrograms;
+			unordered_set<const RenderCamera*> _cameras;
 
-			unordered_set<RenderMesh*> _meshes;
-			unordered_set<RenderTexture*> _textures;
-			unordered_set<RenderMaterial*> _materials;
+			unordered_map<CompositingNode*, RenderCamera*> _compositingNodeCameraPairs;
+
+#ifdef __PRE_DEBUG__
+			// Note: this should be a 1:1 match at all times, used for debugging
+			unordered_map<RenderCamera*, CompositingNode*> _cameraCompositingNodePairs;
+#endif
+
+			unordered_set<const RenderVertexShader*> _vertexShaders;
+			unordered_set<const RenderFragmentShader*> _fragmentShaders;
+			unordered_set<const RenderShaderProgram*> _shaderPrograms;
+
+			unordered_set<const RenderMesh*> _meshes;
+			unordered_set<const RenderTexture*> _textures;
+			unordered_set<const RenderMaterial*> _materials;
 
 			unordered_map<unsigned int, unordered_set<RenderModel*>> _models;
-
-			unordered_set<const Camera*> _cameras;
-
-			unordered_set<CompositingNode*> _compositingNodes;
 
 			Renderer(SDL_Window& window, SDL_GLContext& glContext);
 			~Renderer();

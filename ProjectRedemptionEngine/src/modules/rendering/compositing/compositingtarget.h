@@ -7,8 +7,6 @@ namespace PRE
 	{
 		class RenderTexture;
 
-		class CompositingNode;
-		class RenderNode;
 		class Renderer;
 
 		class CompositingTarget
@@ -16,8 +14,6 @@ namespace PRE
 			CompositingTarget& operator=(const CompositingTarget&) = delete;
 			CompositingTarget(const CompositingTarget&) = delete;
 
-			friend class CompositingNode;
-			friend class RenderNode;
 			friend class Renderer;
 
 			class Impl

@@ -1,6 +1,5 @@
 #include <modules/rendering/renderer.h>
 
-#include <list>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -8,29 +7,29 @@
 
 #include <SDL.h>
 
+#include <glm/glm.hpp>
+
 #include <glad/glad.h>
+
+#include <modules/rendering/compositing/compositingtarget.h>
+#include <modules/rendering/compositing/compositingnode.h>
+
+#include <modules/rendering/rendercamera.h>
 
 #include <modules/rendering/shader/rendervertexshader.h>
 #include <modules/rendering/shader/renderfragmentshader.h>
 #include <modules/rendering/shader/rendershaderprogram.h>
 
-#include <modules/rendering/compositing/compositingtarget.h>
-#include <modules/rendering/compositing/compositingnode.h>
-
-#include <modules/rendering/camera/camera.h>
-#include <modules/rendering/camera/orthographiccamera.h>
-#include <modules/rendering/camera/perspectivecamera.h>
-
-#include <modules/rendering/model/rendermodel.h>
 #include <modules/rendering/model/rendermesh.h>
 #include <modules/rendering/model/rendertexture.h>
 #include <modules/rendering/model/rendermaterial.h>
+
+#include <modules/rendering/model/rendermodel.h>
 
 namespace PRE
 {
 	namespace RenderingModule
 	{
-		using std::list;
 		using std::string;
 		using std::unordered_map;
 		using std::unordered_set;
@@ -104,386 +103,52 @@ namespace PRE
 			unordered_set<CompositingNode*> visited;
 			for (auto it = _rootCompositingNodes.begin(); it != _rootCompositingNodes.end(); ++it)
 			{
-				auto& currentNode = **it;
+				auto pCurrentNode = *it;
 
 #ifdef __PRE_DEBUG__
-				UpdateRecurse(currentNode, visited);
+				UpdateRecurse(*pCurrentNode, visited);
 #else
-				UpdateRecurse(currentNode);
+				UpdateRecurse(*pCurrentNode);
 #endif
 
-				auto itTag = _models.find(currentNode._renderTag);
+				auto itTag = _models.find(pCurrentNode->_renderTag);
 				if (itTag == _models.end())
 				{
 					continue;
 				}
 
+				const glm::mat4* pViewMatrix = &MAT4_IDENTITY;
+
+				auto itCamera = _compositingNodeCameraPairs.find(pCurrentNode);
+				if (itCamera != _compositingNodeCameraPairs.end())
+				{
+					pViewMatrix = &itCamera->second->GetViewProjectionMatrix();
+				}
+				auto& viewMatrix = *pViewMatrix;
+
 				CompositingTarget::Bind(nullptr);
-				auto& tagModelList = itTag->second;
-				for (auto it = tagModelList.begin(); it != tagModelList.end(); ++it)
+				auto& tagModelSet = itTag->second;
+				for (auto it = tagModelSet.begin(); it != tagModelSet.end(); ++it)
 				{
 					auto& model = **it;
-					model.Render(currentNode._camera);
+					model.Render(viewMatrix);
 				}
+				CompositingTarget::Bind(nullptr);
 			}
 
 			SDL_GL_SwapWindow(&_window);
 		}
 
-		const RenderVertexShader& Renderer::AllocateVertexShader(const string& shaderSource)
-		{
-			auto vertexShader = new RenderVertexShader(shaderSource);
-			_vertexShaders.insert(vertexShader);
-			return *vertexShader;
-		}
-
-		void Renderer::DeallocateVertexShader(const RenderVertexShader& vertexShader)
-		{
-			auto pVertexShader = &vertexShader;
-
-#ifdef __PRE_DEBUG__
-			if (_vertexShaders.find(pVertexShader) == _vertexShaders.end())
-			{
-				throw "Cannot deallocate unknown RenderVertexShader";
-			}
-#endif
-
-			_vertexShaders.erase(pVertexShader);
-			delete pVertexShader;
-		}
-
-		const RenderFragmentShader& Renderer::AllocateFragmentShader(const string& shaderSource)
-		{
-			auto fragmentShader = new RenderFragmentShader(shaderSource);
-			_fragmentShaders.insert(fragmentShader);
-			return *fragmentShader;
-		}
-
-		void Renderer::DeallocateFragmentShader(const RenderFragmentShader& fragmentShader)
-		{
-			auto pFragmentShader = &fragmentShader;
-
-#ifdef __PRE_DEBUG__
-			if (_fragmentShaders.find(pFragmentShader) == _fragmentShaders.end())
-			{
-				throw "Cannot deallocate unknown RenderFragmentShader";
-			}
-#endif
-
-			_fragmentShaders.erase(pFragmentShader);
-			delete pFragmentShader;
-		}
-
-		const RenderShaderProgram& Renderer::AllocateShaderProgram(
-			const RenderVertexShader& vertexShader,
-			const RenderFragmentShader& fragmentShader
-		)
-		{
-			auto shaderProgram = new RenderShaderProgram(vertexShader, fragmentShader);
-			_shaderPrograms.insert(shaderProgram);
-			return *shaderProgram;
-		}
-
-		void Renderer::DeallocateShaderProgram(const RenderShaderProgram& shaderProgram)
-		{
-			auto pShaderProgram = &shaderProgram;
-
-#ifdef __PRE_DEBUG__
-			if (_shaderPrograms.find(pShaderProgram) == _shaderPrograms.end())
-			{
-				throw "Cannot deallocate unknown RenderShaderProgram";
-			}
-#endif
-
-			_shaderPrograms.erase(pShaderProgram);
-			delete pShaderProgram;
-		}
-
-		RenderMesh& Renderer::AllocateMesh()
-		{
-			auto mesh = new RenderMesh();
-			_meshes.insert(mesh);
-			return *mesh;
-		}
-
-		void Renderer::DeallocateMesh(RenderMesh& mesh)
-		{
-			auto pMesh = &mesh;
-
-#ifdef __PRE_DEBUG__
-			if (_meshes.find(pMesh) == _meshes.end())
-			{
-				throw "Cannot deallocate unknown RenderMesh";
-			}
-#endif
-
-			_meshes.erase(_meshes.find(pMesh));
-			delete pMesh;
-		}
-
-		RenderTexture& Renderer::AllocateTexture()
-		{
-			auto texture = new RenderTexture();
-			_textures.insert(texture);
-			return *texture;
-		}
-
-		void Renderer::DeallocateTexture(RenderTexture& texture)
-		{
-			auto pTexture = &texture;
-
-#ifdef __PRE_DEBUG__
-			if (_textures.find(pTexture) == _textures.end())
-			{
-				throw "Cannot deallocate unknown RenderTexture";
-			}
-#endif
-
-			_textures.erase(pTexture);
-			delete pTexture;
-		}
-
-		RenderMaterial& Renderer::AllocateMaterial(RenderShaderProgram& shaderProgram)
-		{
-			auto material = new RenderMaterial(shaderProgram);
-			_materials.insert(material);
-			return *material;
-		}
-
-		void Renderer::SetMaterialShader(RenderMaterial& material, RenderShaderProgram& shaderProgram)
-		{
-			auto pShaderProgram = &shaderProgram;
-
-#ifdef __PRE_DEBUG__
-			if (_materials.find(&material) == _materials.end())
-			{
-				throw "Cannot operate on unknown RenderMaterial";
-			}
-			if (_shaderPrograms.find(pShaderProgram) == _shaderPrograms.end())
-			{
-				throw "Cannot set unknown ShaderProgram to RenderMaterial";
-			}
-#endif
-
-			material.SetShaderProgram(shaderProgram);
-		}
-
-		void Renderer::SetMaterialTextureBinding(
-			RenderMaterial& material,
-			RenderTexture* pTexture,
-			GLenum bindUnit
-		)
-		{
-#ifdef __PRE_DEBUG__
-			if (_materials.find(&material) == _materials.end())
-			{
-				throw "Cannot operate on unknown RenderMaterial";
-			}
-			if (pTexture != nullptr && _textures.find(pTexture) == _textures.end())
-			{
-				throw "Cannot bind unknown RenderTexture to RenderMaterial";
-			}
-#endif
-
-			material.SetTextureBinding(pTexture, bindUnit);
-		}
-
-		void Renderer::SetMaterialTextureBinding(
-			RenderMaterial& material,
-			CompositingNode& compositingNode,
-			CompositingNode::CompositingAttachment attachment,
-			GLenum bindUnit
-		)
-		{
-#ifdef __PRE_DEBUG__
-			if (_materials.find(&material) == _materials.end())
-			{
-				throw "Cannot operate on unknown RenderMaterial";
-			}
-			if (_compositingNodes.find(&compositingNode) == _compositingNodes.end())
-			{
-				throw "Cannot bind unknown CompositingNode to RenderMaterial";
-			}
-#endif
-
-			material.SetTextureBinding(&compositingNode.GetAttachment(attachment), bindUnit);
-		}
-
-		void Renderer::DeallocateMaterial(RenderMaterial& material)
-		{
-			auto pMaterial = &material;
-
-#ifdef __PRE_DEBUG__
-			if (_materials.find(pMaterial) == _materials.end())
-			{
-				throw "Cannot deallocate unknown RenderMaterial";
-			}
-#endif
-
-			_materials.erase(pMaterial);
-			delete pMaterial;
-		}
-
-		RenderModel& Renderer::AllocateModel(unsigned int renderTag, RenderMesh& mesh, RenderMaterial& material)
-		{
-#ifdef __PRE_DEBUG__
-			if (_meshes.find(&mesh) == _meshes.end())
-			{
-				throw "Cannot allocate Model with unknown RenderMesh";
-			}
-			if (_materials.find(&material) == _materials.end())
-			{
-				throw "Cannot allocate Model with unknown RenderMaterial";
-			}
-#endif
-
-			auto model = new RenderModel(renderTag, mesh, material);
-			auto itTag = _models.find(renderTag);
-
-			if (itTag == _models.end())
-			{
-				itTag = _models.insert(
-					std::make_pair(
-						renderTag,
-						unordered_set<RenderModel*>()
-					)
-				).first;
-			}
-
-			auto& tagSet = itTag->second;
-			tagSet.insert(model);
-			return *model;
-		}
-
-		void Renderer::SetModelMesh(RenderModel& model, RenderMesh& mesh)
-		{
-#ifdef __PRE_DEBUG__
-			auto itTag = _models.find(model._renderTag);
-			if (itTag == _models.end())
-			{
-				throw "Cannot operate on unknown RenderModel";
-			}
-			auto& tagSet = itTag->second;
-			if (tagSet.find(&model) == tagSet.end())
-			{
-				throw "Cannot operate on unknown RenderModel";
-			}
-			if (_meshes.find(&mesh) == _meshes.end())
-			{
-				throw "Cannot set unknown RenderMesh to Model";
-			}
-#endif
-
-			model.SetMesh(mesh);
-		}
-
-		void Renderer::SetModelMaterial(RenderModel& model, RenderMaterial& material)
-		{
-#ifdef __PRE_DEBUG__
-			auto itTag = _models.find(model._renderTag);
-			if (itTag == _models.end())
-			{
-				throw "Cannot operate on unknown RenderModel";
-			}
-			auto& tagSet = itTag->second;
-			if (tagSet.find(&model) == tagSet.end())
-			{
-				throw "Cannot operate on unknown RenderModel";
-			}
-			if (_materials.find(&material) == _materials.end())
-			{
-				throw "Cannot set unknown RenderMaterial to Model";
-			}
-#endif
-
-			model.SetMaterial(material);
-		}
-
-		void Renderer::DeallocateModel(RenderModel& model)
-		{
-			auto pModel = &model;
-			auto itTag = _models.find(pModel->_renderTag);
-
-#ifdef __PRE_DEBUG__
-			if (itTag == _models.end())
-			{
-				throw "Cannot deallocate unknown RenderModel";
-			}
-#endif
-
-			auto& tagModelList = itTag->second;
-
-#ifdef __PRE_DEBUG__
-			if (tagModelList.find(pModel) == tagModelList.end())
-			{
-				throw "Cannot deallocate unknown RenderModel";
-			}
-#endif
-
-			tagModelList.erase(pModel);
-			delete pModel;
-		}
-
-		OrthographicCamera& Renderer::AllocateOrthographicCamera(
-			float size,
-			float aspectRatio,
-			float renderDistance
-		)
-		{
-			auto camera = new OrthographicCamera(size, aspectRatio, renderDistance);
-			_cameras.insert(camera);
-			return *camera;
-		}
-
-		PerspectiveCamera& Renderer::AllocatePerspectiveCamera(
-			float size,
-			float aspectRatio,
-			float nearClippingPlane,
-			float farClippingPlane
-		)
-		{
-			auto camera = new PerspectiveCamera(
-				size,
-				aspectRatio,
-				nearClippingPlane,
-				farClippingPlane
-			);
-			_cameras.insert(camera);
-			return *camera;
-		}
-
-		void Renderer::DeallocateCamera(Camera& camera)
-		{
-			auto pCamera = &camera;
-
-#ifdef __PRE_DEBUG__
-			if (_cameras.find(pCamera) == _cameras.end())
-			{
-				throw "Cannot deallocate unknown Camera";
-			}
-#endif
-
-			_cameras.erase(pCamera);
-			delete pCamera;
-		}
-
 		CompositingNode& Renderer::AllocateCompositingNode(
-			const Camera& camera,
 			unsigned int renderTag,
 			unsigned int width,
 			unsigned int height
 		)
 		{
-#ifdef __PRE_DEBUG__
-			if (_cameras.find(&camera) == _cameras.end())
-			{
-				throw "Cannot composite using unknown Camera";
-			}
-#endif
-
-			auto compositingNode = new CompositingNode(camera, renderTag, width, height);
-			_compositingNodes.insert(compositingNode);
-			return *compositingNode;
+			auto pCompositingTarget = new CompositingTarget(width, height);
+			auto pCompositingNode = new CompositingNode(renderTag, *pCompositingTarget);
+			_compositingNodes.insert(pCompositingNode);
+			return *pCompositingNode;
 		}
 
 		void Renderer::AttachRootCompositingNodeDependency(CompositingNode& dependency)
@@ -568,11 +233,429 @@ namespace PRE
 			{
 				throw "Cannot deallocate unknown CompositingNode";
 			}
+			if (_compositingNodeCameraPairs.find(pCompositingNode) != _compositingNodeCameraPairs.end())
+			{
+				throw "Cannot deallocate paired CompositingNode";
+			}
 #endif
 
 			_compositingNodes.erase(pCompositingNode);
+			delete &pCompositingNode->_compositingTarget;
 			delete pCompositingNode;
 		}
+
+		RenderCamera& Renderer::AllocateCamera(
+			const RenderCamera::Kind& kind,
+			float size,
+			float aspectRatio,
+			float nearClippingPlane,
+			float farClippingPlane
+		)
+		{
+			auto camera = new RenderCamera(
+				kind,
+				size,
+				aspectRatio,
+				nearClippingPlane,
+				farClippingPlane
+			);
+			_cameras.insert(camera);
+			return *camera;
+		}
+
+		void Renderer::DeallocateCamera(RenderCamera& camera)
+		{
+			auto pCamera = &camera;
+
+#ifdef __PRE_DEBUG__
+			if (_cameras.find(pCamera) == _cameras.end())
+			{
+				throw "Cannot deallocate unknown Camera";
+			}
+			if (_cameraCompositingNodePairs.find(pCamera) != _cameraCompositingNodePairs.end())
+			{
+				throw "Cannot deallocate paired Camera";
+			}
+#endif
+
+			_cameras.erase(pCamera);
+			delete pCamera;
+		}
+
+		void Renderer::BindCompositingPair(
+			RenderCamera& camera,
+			CompositingNode& compositingNode
+		)
+		{
+			auto pCamera = &camera;
+			auto pCompositingNode = &compositingNode;
+#ifdef __PRE_DEBUG__
+			if (_cameras.find(pCamera) == _cameras.end())
+			{
+				throw "Cannot bind unknown Camera";
+			}
+			if (_compositingNodes.find(pCompositingNode) == _compositingNodes.end())
+			{
+				throw "Cannot bind unknown CompositingNode";
+			}
+			if (_cameraCompositingNodePairs.find(pCamera) != _cameraCompositingNodePairs.end())
+			{
+				throw "Camera is already bound to a CompositingNode";
+			}
+			if (_compositingNodeCameraPairs.find(pCompositingNode) != _compositingNodeCameraPairs.end())
+			{
+				throw "CompositingNode is already bound to a Camera";
+			}
+#endif
+			_compositingNodeCameraPairs[pCompositingNode] = pCamera;
+			_cameraCompositingNodePairs[pCamera] = pCompositingNode;
+		}
+
+		void Renderer::UnbindCompositingPair(
+			RenderCamera& camera,
+			CompositingNode& compositingNode
+		)
+		{
+			auto itCameraPair = _cameraCompositingNodePairs.find(&camera);
+			auto itCompositingNodePair = _compositingNodeCameraPairs.find(&compositingNode);
+
+#ifdef __PRE_DEBUG__
+			if (_cameras.find(&camera) == _cameras.end())
+			{
+				throw "Cannot unbind unknown Camera";
+			}
+			if (_compositingNodes.find(&compositingNode) == _compositingNodes.end())
+			{
+				throw "Cannot unbind unknown CompositingNode";
+			}
+			
+			if (!(
+				itCameraPair != _cameraCompositingNodePairs.end() &&
+				itCameraPair->first == &camera &&
+				itCompositingNodePair != _compositingNodeCameraPairs.end() &&
+				itCompositingNodePair->first == &compositingNode
+			))
+			{
+				throw "Cannot unbind unknown compositing pair";
+			}
+#endif
+
+			_cameraCompositingNodePairs.erase(itCameraPair);
+			_compositingNodeCameraPairs.erase(itCompositingNodePair);
+		}
+
+		const RenderVertexShader& Renderer::AllocateVertexShader(const string& shaderSource)
+		{
+			auto vertexShader = new RenderVertexShader(shaderSource);
+			_vertexShaders.insert(vertexShader);
+			return *vertexShader;
+		}
+
+		void Renderer::DeallocateVertexShader(const RenderVertexShader& vertexShader)
+		{
+			auto pVertexShader = &vertexShader;
+
+#ifdef __PRE_DEBUG__
+			if (_vertexShaders.find(pVertexShader) == _vertexShaders.end())
+			{
+				throw "Cannot deallocate unknown VertexShader";
+			}
+#endif
+
+			_vertexShaders.erase(pVertexShader);
+			delete pVertexShader;
+		}
+
+		const RenderFragmentShader& Renderer::AllocateFragmentShader(const string& shaderSource)
+		{
+			auto fragmentShader = new RenderFragmentShader(shaderSource);
+			_fragmentShaders.insert(fragmentShader);
+			return *fragmentShader;
+		}
+
+		void Renderer::DeallocateFragmentShader(const RenderFragmentShader& fragmentShader)
+		{
+			auto pFragmentShader = &fragmentShader;
+
+#ifdef __PRE_DEBUG__
+			if (_fragmentShaders.find(pFragmentShader) == _fragmentShaders.end())
+			{
+				throw "Cannot deallocate unknown FragmentShader";
+			}
+#endif
+
+			_fragmentShaders.erase(pFragmentShader);
+			delete pFragmentShader;
+		}
+
+		const RenderShaderProgram& Renderer::AllocateShaderProgram(
+			const RenderVertexShader& vertexShader,
+			const RenderFragmentShader& fragmentShader
+		)
+		{
+			auto shaderProgram = new RenderShaderProgram(vertexShader, fragmentShader);
+			_shaderPrograms.insert(shaderProgram);
+			return *shaderProgram;
+		}
+
+		void Renderer::DeallocateShaderProgram(const RenderShaderProgram& shaderProgram)
+		{
+			auto pShaderProgram = &shaderProgram;
+
+#ifdef __PRE_DEBUG__
+			if (_shaderPrograms.find(pShaderProgram) == _shaderPrograms.end())
+			{
+				throw "Cannot deallocate unknown ShaderProgram";
+			}
+#endif
+
+			_shaderPrograms.erase(pShaderProgram);
+			delete pShaderProgram;
+		}
+
+		RenderMesh& Renderer::AllocateMesh()
+		{
+			auto mesh = new RenderMesh();
+			_meshes.insert(mesh);
+			return *mesh;
+		}
+
+		void Renderer::DeallocateMesh(RenderMesh& mesh)
+		{
+			auto pMesh = &mesh;
+
+#ifdef __PRE_DEBUG__
+			if (_meshes.find(pMesh) == _meshes.end())
+			{
+				throw "Cannot deallocate unknown Mesh";
+			}
+#endif
+
+			_meshes.erase(_meshes.find(pMesh));
+			delete pMesh;
+		}
+
+		RenderTexture& Renderer::AllocateTexture()
+		{
+			auto texture = new RenderTexture();
+			_textures.insert(texture);
+			return *texture;
+		}
+
+		void Renderer::DeallocateTexture(RenderTexture& texture)
+		{
+			auto pTexture = &texture;
+
+#ifdef __PRE_DEBUG__
+			if (_textures.find(pTexture) == _textures.end())
+			{
+				throw "Cannot deallocate unknown Texture";
+			}
+#endif
+
+			_textures.erase(pTexture);
+			delete pTexture;
+		}
+
+		RenderMaterial& Renderer::AllocateMaterial(RenderShaderProgram& shaderProgram)
+		{
+			auto material = new RenderMaterial(shaderProgram);
+			_materials.insert(material);
+			return *material;
+		}
+
+		void Renderer::SetMaterialShader(RenderMaterial& material, RenderShaderProgram& shaderProgram)
+		{
+			auto pShaderProgram = &shaderProgram;
+
+#ifdef __PRE_DEBUG__
+			if (_materials.find(&material) == _materials.end())
+			{
+				throw "Cannot operate on unknown Material";
+			}
+			if (_shaderPrograms.find(pShaderProgram) == _shaderPrograms.end())
+			{
+				throw "Cannot set unknown ShaderProgram to Material";
+			}
+#endif
+
+			material.SetShaderProgram(shaderProgram);
+		}
+
+		void Renderer::SetMaterialTextureBinding(
+			RenderMaterial& material,
+			RenderTexture* pTexture,
+			GLenum bindUnit
+		)
+		{
+#ifdef __PRE_DEBUG__
+			if (_materials.find(&material) == _materials.end())
+			{
+				throw "Cannot operate on unknown Material";
+			}
+			if (pTexture != nullptr && _textures.find(pTexture) == _textures.end())
+			{
+				throw "Cannot bind unknown Texture to Material";
+			}
+#endif
+
+			material.SetTextureBinding(pTexture, bindUnit);
+		}
+
+		void Renderer::SetMaterialTextureBinding(
+			RenderMaterial& material,
+			CompositingNode& compositingNode,
+			CompositingNode::CompositingAttachment attachment,
+			GLenum bindUnit
+		)
+		{
+#ifdef __PRE_DEBUG__
+			if (_materials.find(&material) == _materials.end())
+			{
+				throw "Cannot operate on unknown Material";
+			}
+			if (_compositingNodes.find(&compositingNode) == _compositingNodes.end())
+			{
+				throw "Cannot bind unknown CompositingNode to Material";
+			}
+#endif
+
+			switch (attachment)
+			{
+				case CompositingNode::CompositingAttachment::POSITION:
+					material.SetTextureBinding(
+						&compositingNode._compositingTarget.GetPosition(),
+						bindUnit
+					);
+				case CompositingNode::CompositingAttachment::NORMALS:
+					material.SetTextureBinding(
+						&compositingNode._compositingTarget.GetNormals(),
+						bindUnit
+					);
+				case CompositingNode::CompositingAttachment::ALBEDO_SPECULAR:
+					material.SetTextureBinding(
+						&compositingNode._compositingTarget.GetAlbedoSpecular(),
+						bindUnit
+					);
+			}
+		}
+
+		void Renderer::DeallocateMaterial(RenderMaterial& material)
+		{
+			auto pMaterial = &material;
+
+#ifdef __PRE_DEBUG__
+			if (_materials.find(pMaterial) == _materials.end())
+			{
+				throw "Cannot deallocate unknown Material";
+			}
+#endif
+
+			_materials.erase(pMaterial);
+			delete pMaterial;
+		}
+
+		RenderModel& Renderer::AllocateModel(unsigned int renderTag, RenderMesh& mesh, RenderMaterial& material)
+		{
+#ifdef __PRE_DEBUG__
+			if (_meshes.find(&mesh) == _meshes.end())
+			{
+				throw "Cannot allocate Model with unknown Mesh";
+			}
+			if (_materials.find(&material) == _materials.end())
+			{
+				throw "Cannot allocate Model with unknown Material";
+			}
+#endif
+
+			auto model = new RenderModel(renderTag, mesh, material);
+			auto itTag = _models.find(renderTag);
+
+			if (itTag == _models.end())
+			{
+				itTag = _models.insert(
+					std::make_pair(
+						renderTag,
+						unordered_set<RenderModel*>()
+					)
+				).first;
+			}
+
+			auto& tagSet = itTag->second;
+			tagSet.insert(model);
+			return *model;
+		}
+
+		void Renderer::SetModelMesh(RenderModel& model, RenderMesh& mesh)
+		{
+#ifdef __PRE_DEBUG__
+			auto itTag = _models.find(model._renderTag);
+			if (itTag == _models.end())
+			{
+				throw "Cannot operate on unknown Model";
+			}
+			auto& tagSet = itTag->second;
+			if (tagSet.find(&model) == tagSet.end())
+			{
+				throw "Cannot operate on unknown Model";
+			}
+			if (_meshes.find(&mesh) == _meshes.end())
+			{
+				throw "Cannot set unknown Mesh to Model";
+			}
+#endif
+
+			model.SetMesh(mesh);
+		}
+
+		void Renderer::SetModelMaterial(RenderModel& model, RenderMaterial& material)
+		{
+#ifdef __PRE_DEBUG__
+			auto itTag = _models.find(model._renderTag);
+			if (itTag == _models.end())
+			{
+				throw "Cannot operate on unknown Model";
+			}
+			auto& tagSet = itTag->second;
+			if (tagSet.find(&model) == tagSet.end())
+			{
+				throw "Cannot operate on unknown Model";
+			}
+			if (_materials.find(&material) == _materials.end())
+			{
+				throw "Cannot set unknown Material to Model";
+			}
+#endif
+
+			model.SetMaterial(material);
+		}
+
+		void Renderer::DeallocateModel(RenderModel& model)
+		{
+			auto pModel = &model;
+			auto itTag = _models.find(pModel->_renderTag);
+
+#ifdef __PRE_DEBUG__
+			if (itTag == _models.end())
+			{
+				throw "Cannot deallocate unknown Model";
+			}
+#endif
+
+			auto& tagModelSet = itTag->second;
+
+#ifdef __PRE_DEBUG__
+			if (tagModelSet.find(pModel) == tagModelSet.end())
+			{
+				throw "Cannot deallocate unknown Model";
+			}
+#endif
+
+			tagModelSet.erase(pModel);
+			delete pModel;
+		}
+
+		const glm::mat4 Renderer::MAT4_IDENTITY = glm::mat4();
 
 		Renderer::Renderer(SDL_Window& window, SDL_GLContext& glContext)
 			:
@@ -660,12 +743,21 @@ namespace PRE
 				return;
 			}
 
-			currentNode.BindTarget();
-			auto& tagModelList = itTag->second;
-			for (auto it = tagModelList.begin(); it != tagModelList.end(); ++it)
+			const glm::mat4* pViewMatrix = &MAT4_IDENTITY;
+
+			auto itCamera = _compositingNodeCameraPairs.find(pCurrentNode);
+			if (itCamera != _compositingNodeCameraPairs.end())
+			{
+				pViewMatrix = &itCamera->second->GetViewProjectionMatrix();
+			}
+			auto& viewMatrix = *pViewMatrix;
+
+			CompositingTarget::Bind(&currentNode._compositingTarget);
+			auto& tagModelSet = itTag->second;
+			for (auto it = tagModelSet.begin(); it != tagModelSet.end(); ++it)
 			{
 				auto& model = **it;
-				model.Render(currentNode._camera);
+				model.Render(viewMatrix);
 			}
 			CompositingTarget::Bind(nullptr);
 

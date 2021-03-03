@@ -1,9 +1,7 @@
 #include <modules/rendering/model/rendermodel.h>
 
-#include <modules/rendering/model/rendermaterial.h>
 #include <modules/rendering/model/rendermesh.h>
-
-#include <modules/rendering/camera/camera.h>
+#include <modules/rendering/model/rendermaterial.h>
 
 namespace PRE
 {
@@ -49,9 +47,9 @@ namespace PRE
 			_impl.material = &material;
 		}
 
-		void RenderModel::Render(const Camera& camera)
+		void RenderModel::Render(const glm::mat4& viewProjectionMatrix)
 		{
-			_impl.material->Bind(camera.GetViewProjectionMatrix() * modelMatrix);
+			_impl.material->Bind(viewProjectionMatrix * modelMatrix);
 			_impl.mesh->Render();
 		}
 	} // namespace RenderingModule

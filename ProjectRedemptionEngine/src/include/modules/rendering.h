@@ -4,9 +4,7 @@
 #include <modules/rendering/shader/renderfragmentshader.h>
 #include <modules/rendering/shader/rendershaderprogram.h>
 
-#include <modules/rendering/camera/camera.h>
-#include <modules/rendering/camera/orthographiccamera.h>
-#include <modules/rendering/camera/perspectivecamera.h>
+#include <modules/rendering/rendercamera.h>
 
 #include <modules/rendering/compositing/compositingnode.h>
 #include <modules/rendering/compositing/compositingtarget.h>

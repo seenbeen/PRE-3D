@@ -35,15 +35,13 @@
     <ClCompile Include="src\modules\gameobject\gameobjectworld.cpp" />
     <ClCompile Include="src\modules\input\input.cpp" />
     <ClCompile Include="src\modules\input\keycode.cpp" />
-    <ClCompile Include="src\modules\rendering\camera\camera.cpp" />
-    <ClCompile Include="src\modules\rendering\camera\orthographiccamera.cpp" />
-    <ClCompile Include="src\modules\rendering\camera\perspectivecamera.cpp" />
     <ClCompile Include="src\modules\rendering\compositing\compositingnode.cpp" />
     <ClCompile Include="src\modules\rendering\compositing\compositingtarget.cpp" />
     <ClCompile Include="src\modules\rendering\model\rendermaterial.cpp" />
     <ClCompile Include="src\modules\rendering\model\rendermesh.cpp" />
     <ClCompile Include="src\modules\rendering\model\rendermodel.cpp" />
     <ClCompile Include="src\modules\rendering\model\rendertexture.cpp" />
+    <ClCompile Include="src\modules\rendering\rendercamera.cpp" />
     <ClCompile Include="src\modules\rendering\renderer.cpp" />
     <ClCompile Include="src\modules\rendering\shader\renderfragmentshader.cpp" />
     <ClCompile Include="src\modules\rendering\shader\rendershaderprogram.cpp" />
@@ -52,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Deps\stb\stb_image.h" />
+    <ClInclude Include="src\core\components\precameracomponent.h" />
     <ClInclude Include="src\core\components\premodelrenderercomponent.h" />
     <ClInclude Include="src\core\preapplication.h" />
     <ClInclude Include="src\core\components\pretransformcomponent.h" />
@@ -84,15 +83,13 @@
     <ClInclude Include="src\modules\gameobject\gameobjectworld.h" />
     <ClInclude Include="src\modules\input\input.h" />
     <ClInclude Include="src\modules\input\keycode.h" />
-    <ClInclude Include="src\modules\rendering\camera\camera.h" />
-    <ClInclude Include="src\modules\rendering\camera\orthographiccamera.h" />
-    <ClInclude Include="src\modules\rendering\camera\perspectivecamera.h" />
     <ClInclude Include="src\modules\rendering\compositing\compositingnode.h" />
     <ClInclude Include="src\modules\rendering\compositing\compositingtarget.h" />
     <ClInclude Include="src\modules\rendering\model\rendermaterial.h" />
     <ClInclude Include="src\modules\rendering\model\rendermesh.h" />
     <ClInclude Include="src\modules\rendering\model\rendermodel.h" />
     <ClInclude Include="src\modules\rendering\model\rendertexture.h" />
+    <ClInclude Include="src\modules\rendering\rendercamera.h" />
     <ClInclude Include="src\modules\rendering\renderer.h" />
     <ClInclude Include="src\modules\rendering\shader\renderfragmentshader.h" />
     <ClInclude Include="src\modules\rendering\shader\rendershaderprogram.h" />

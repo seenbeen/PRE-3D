@@ -4,8 +4,6 @@
 
 #include <glm/glm.hpp>
 
-#include <modules/rendering/camera/camera.h>
-
 #include <modules/rendering/shader/rendershaderprogram.h>
 #include <modules/rendering/model/rendertexture.h>
 

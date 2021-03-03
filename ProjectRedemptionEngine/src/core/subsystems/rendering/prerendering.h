@@ -14,6 +14,7 @@ namespace PRE
 		class PREApplicationContext;
 		class PREModelRendererComponent;
 
+		class PRECompositingNode;
 		class PREShader;
 		class PRETexture;
 		class PREMaterial;
@@ -31,6 +32,8 @@ namespace PRE
 			friend class PREModelRendererComponent;
 
 		public:
+
+
 			PREShader& CreateShader(const string& vertex, const string& fragment);
 			void DestroyShader(PREShader& shader);
 

@@ -1,5 +1,4 @@
 #pragma once
-#include <string>
 #include <unordered_set>
 
 #include <glad/glad.h>
@@ -8,12 +7,10 @@ namespace PRE
 {
 	namespace RenderingModule
 	{
-		class Camera;
 		class CompositingTarget;
 		class RenderTexture;
 		class Renderer;
 
-		using std::string;
 		using std::unordered_set;
 
 		class CompositingNode
@@ -31,12 +28,11 @@ namespace PRE
 				friend class CompositingNode;
 
 			private:
-				CompositingTarget& target;
 				unordered_set<CompositingNode*> compositingNodeDependencies;
 
-				static Impl& MakeImpl(unsigned int width, unsigned int height);
+				static Impl& MakeImpl();
 
-				Impl(CompositingTarget& target);
+				Impl();
 				~Impl();
 			};
 
@@ -44,19 +40,16 @@ namespace PRE
 			enum class CompositingAttachment { POSITION, NORMALS, ALBEDO_SPECULAR };
 
 		private:
-			const Camera& _camera;
 			const unsigned int _renderTag;
+			CompositingTarget& _compositingTarget;
+
 			Impl& _impl;
 
-			CompositingNode(const Camera& camera, unsigned int renderTag, unsigned int width, unsigned int height);
+			CompositingNode(unsigned int renderTag, CompositingTarget& compositingTarget);
 			~CompositingNode();
-
-			void BindTarget();
 
 			void AddDependency(CompositingNode& compositingNode);
 			void RemoveDependency(CompositingNode& compositingNode);
-
-			RenderTexture& GetAttachment(CompositingAttachment attachment);
 
 			const unordered_set<CompositingNode*>& GetDependencies();
 		};
