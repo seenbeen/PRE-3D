@@ -26,6 +26,10 @@ namespace PRE
 				return newComponent;
 			}
 
+			void OnInstantiate() override;
+
+			virtual void Instantiate() = 0;
+
 		private:
 			PREApplicationContext* _preApplicationContext = nullptr;
 

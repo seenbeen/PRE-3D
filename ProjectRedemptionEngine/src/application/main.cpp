@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include <include/core.h>
-#include <include/modules/gameobject.h>
 
 using namespace PRE::Core;
 
@@ -72,9 +71,8 @@ void OnInitialize(PREApplicationContext& applicationContext)
     class : public PREGameObjectTemplate
     {
     protected:
-        void OnInstantiate() override
+        void Instantiate() override
         {
-            AddPREComponent<PRETransformComponent>();
             AddPREComponent<FooComponent>();
         }
     } fooTemplate;
@@ -82,7 +80,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
     class : public PREGameObjectTemplate
     {
     protected:
-        void OnInstantiate() override
+        void Instantiate() override
         {
             AddPREComponent<BarComponent>();
         }

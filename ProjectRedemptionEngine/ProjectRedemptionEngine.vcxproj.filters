@@ -135,6 +135,12 @@
     <Filter Include="Source Files\Core\Subsystems\Input">
       <UniqueIdentifier>{4ef87957-f99e-4892-af46-eaafdcd1e90e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Other Dependencies\glad">
+      <UniqueIdentifier>{fe9d1e7c-14f8-424a-9060-94cba3582fda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Other Dependencies\stb">
+      <UniqueIdentifier>{b0a264bd-4711-47c5-817f-6dd10449855f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\modules\gameobject\gameobject.h">
@@ -278,6 +284,9 @@
     <ClInclude Include="src\core\subsystems\world\preworldconfig.h">
       <Filter>Header Files\Core\Subsystems\World</Filter>
     </ClInclude>
+    <ClInclude Include="..\Deps\stb\stb_image.h">
+      <Filter>Header Files\Other Dependencies\stb</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\modules\gameobject\gameobject.cpp">
@@ -358,9 +367,6 @@
     <ClCompile Include="src\modules\rendering\compositing\compositingtarget.cpp">
       <Filter>Source Files\Modules\Rendering\Compositing</Filter>
     </ClCompile>
-    <ClCompile Include="..\Deps\glad\src\glad.c">
-      <Filter>Header Files\Other Dependencies</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\components\pretransformcomponent.cpp">
       <Filter>Source Files\Core\Components</Filter>
     </ClCompile>
@@ -389,6 +395,12 @@
       <Filter>Source Files\Core\Subsystems\Time</Filter>
     </ClCompile>
     <ClCompile Include="src\core\subsystems\world\preworldconfig.cpp">
+      <Filter>Source Files\Core\Subsystems\World</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Deps\glad\src\glad.c">
+      <Filter>Header Files\Other Dependencies\glad</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\world\pregameobjecttemplate.cpp">
       <Filter>Source Files\Core\Subsystems\World</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 
+#include <glad/glad.h>
+
 #include <include/modules/rendering.h>
 
 namespace PRE
@@ -33,7 +35,26 @@ namespace PRE
 			void DestroyShader(PREShader& shader);
 
 			PREMaterial& CreateMaterial(PREShader& shader);
-			PRETexture& CreateTexture(const unsigned char* data, unsigned int width, unsigned int height);
+			void DestroyMaterial(PREMaterial& material);
+
+			PRETexture& CreateTexture(
+				const unsigned char* data,
+				unsigned int width,
+				unsigned int height
+			);
+			void DestroyTexture(PRETexture& texture);
+
+			PREMesh& CreateMesh(
+				const glm::vec3* const vertices,
+				unsigned int nVertices,
+				const glm::vec3* const normals,
+				unsigned int nNormals,
+				const glm::vec2* const uvs,
+				unsigned int nUvs,
+				const unsigned int* const triangles,
+				unsigned int nTriangles
+			);
+			void DestroyMesh(PREMesh& mesh);
 
 		private:
 			static PRERendering& MakePRERendering(
