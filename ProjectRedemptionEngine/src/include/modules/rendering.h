@@ -6,7 +6,7 @@
 
 #include <modules/rendering/rendercamera.h>
 
-#include <modules/rendering/compositing/compositingnode.h>
+#include <modules/rendering/compositing/rendercompositingnode.h>
 #include <modules/rendering/compositing/compositingtarget.h>
 
 #include <modules/rendering/model/rendertexture.h>

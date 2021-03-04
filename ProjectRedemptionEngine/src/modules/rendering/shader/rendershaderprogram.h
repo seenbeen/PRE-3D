@@ -9,11 +9,10 @@ namespace PRE
 {
 	namespace RenderingModule
 	{
-		class RenderMaterial;
 		class Renderer;
-
 		class RenderVertexShader;
 		class RenderFragmentShader;
+		class RenderMaterial;
 
 		using std::string;
 
@@ -22,8 +21,8 @@ namespace PRE
 			RenderShaderProgram& operator=(const RenderShaderProgram&) = delete;
 			RenderShaderProgram(const RenderShaderProgram&) = delete;
 
-			friend class RenderMaterial;
 			friend class Renderer;
+			friend class RenderMaterial;
 
 			class Impl
 			{

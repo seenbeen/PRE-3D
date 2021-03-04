@@ -1,4 +1,4 @@
-#include <modules/rendering/compositing/compositingnode.h>
+#include <modules/rendering/compositing/rendercompositingnode.h>
 
 #include <unordered_set>
 
@@ -8,28 +8,28 @@ namespace PRE
 {
 	namespace RenderingModule
 	{
-		CompositingNode::Impl& CompositingNode::Impl::MakeImpl()
+		RenderCompositingNode::Impl& RenderCompositingNode::Impl::MakeImpl()
 		{
 			return *(new Impl());
 		}
 
-		CompositingNode::Impl::Impl() {}
+		RenderCompositingNode::Impl::Impl() {}
 
-		CompositingNode::Impl::~Impl() {}
+		RenderCompositingNode::Impl::~Impl() {}
 
-		CompositingNode::CompositingNode(unsigned int tagGroup, CompositingTarget* pCompositingTarget)
+		RenderCompositingNode::RenderCompositingNode(unsigned int tagGroup, CompositingTarget* pCompositingTarget)
 			:
 			_tagGroup(tagGroup),
 			_pCompositingTarget(pCompositingTarget),
 			_impl(Impl::MakeImpl()) {}
 
-		CompositingNode::~CompositingNode()
+		RenderCompositingNode::~RenderCompositingNode()
 		{
 			delete &_impl;
 		}
 
-		void CompositingNode::AddDependency(
-			CompositingNode& compositingNode
+		void RenderCompositingNode::AddDependency(
+			RenderCompositingNode& compositingNode
 		)
 		{
 			auto pCompositingNode = &compositingNode;
@@ -45,7 +45,7 @@ namespace PRE
 			_impl.compositingNodeDependencies.insert(pCompositingNode);
 		}
 
-		void CompositingNode::RemoveDependency(CompositingNode& compositingNode)
+		void RenderCompositingNode::RemoveDependency(RenderCompositingNode& compositingNode)
 		{
 			auto pCompositingNode = &compositingNode;
 			auto it = _impl.compositingNodeDependencies.find(pCompositingNode);
@@ -60,7 +60,7 @@ namespace PRE
 			_impl.compositingNodeDependencies.erase(it);
 		}
 
-		const unordered_set<CompositingNode*>& CompositingNode::GetDependencies()
+		const unordered_set<RenderCompositingNode*>& RenderCompositingNode::GetDependencies()
 		{
 			return _impl.compositingNodeDependencies;
 		}

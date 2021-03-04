@@ -191,9 +191,6 @@
     <ClInclude Include="src\modules\rendering\renderer.h">
       <Filter>Header Files\Modules\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="src\modules\rendering\compositing\compositingnode.h">
-      <Filter>Header Files\Modules\Rendering\Compositing</Filter>
-    </ClInclude>
     <ClInclude Include="src\modules\rendering\shader\rendervertexshader.h">
       <Filter>Header Files\Modules\Rendering\Shader</Filter>
     </ClInclude>
@@ -278,6 +275,9 @@
     <ClInclude Include="src\modules\rendering\rendercamera.h">
       <Filter>Header Files\Modules\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="src\modules\rendering\compositing\rendercompositingnode.h">
+      <Filter>Header Files\Modules\Rendering\Compositing</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\modules\gameobject\gameobject.cpp">
@@ -321,9 +321,6 @@
     </ClCompile>
     <ClCompile Include="src\modules\rendering\renderer.cpp">
       <Filter>Source Files\Modules\Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="src\modules\rendering\compositing\compositingnode.cpp">
-      <Filter>Source Files\Modules\Rendering\Compositing</Filter>
     </ClCompile>
     <ClCompile Include="src\modules\rendering\shader\rendervertexshader.cpp">
       <Filter>Source Files\Modules\Rendering\Shader</Filter>
@@ -387,6 +384,9 @@
     </ClCompile>
     <ClCompile Include="src\modules\rendering\rendercamera.cpp">
       <Filter>Source Files\Modules\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\rendering\compositing\rendercompositingnode.cpp">
+      <Filter>Source Files\Modules\Rendering\Compositing</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

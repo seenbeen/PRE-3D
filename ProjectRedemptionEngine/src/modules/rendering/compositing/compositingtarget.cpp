@@ -23,17 +23,17 @@ namespace PRE
 
 			auto position = new RenderTexture();
 			position->Bind();
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
 			position->BindTarget(GL_COLOR_ATTACHMENT0);
 			
 			auto normals = new RenderTexture();
 			normals->Bind();
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
 			normals->BindTarget(GL_COLOR_ATTACHMENT1);
 			
 			auto albedoSpecular = new RenderTexture();
 			albedoSpecular->Bind();
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 			albedoSpecular->BindTarget(GL_COLOR_ATTACHMENT2);
 
 			unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };

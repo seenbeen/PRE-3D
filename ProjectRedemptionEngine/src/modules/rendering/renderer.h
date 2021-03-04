@@ -15,7 +15,7 @@ namespace PRE
 {
 	namespace RenderingModule
 	{
-		class CompositingNode;
+		class RenderCompositingNode;
 		class RenderCamera;
 		class RenderVertexShader;
 		class RenderFragmentShader;
@@ -40,7 +40,7 @@ namespace PRE
 
 			static const unsigned int ROOT_TAG_GROUP;
 
-			CompositingNode& rootCompositingNode;
+			RenderCompositingNode& rootCompositingNode;
 
 			static Renderer& MakeRenderer(
 				const string& windowTitle,
@@ -52,20 +52,20 @@ namespace PRE
 
 			void Update();
 
-			CompositingNode& AllocateCompositingNode(
+			RenderCompositingNode& AllocateCompositingNode(
 				unsigned int tagGroup,
 				unsigned int width,
 				unsigned int height
 			);
 			void AttachCompositingNodeDependency(
-				CompositingNode& dependent,
-				CompositingNode& dependency
+				RenderCompositingNode& dependent,
+				RenderCompositingNode& dependency
 			);
 			void DetachCompositingNodeDependency(
-				CompositingNode& dependent,
-				CompositingNode& dependency
+				RenderCompositingNode& dependent,
+				RenderCompositingNode& dependency
 			);
-			void DeallocateCompositingNode(CompositingNode& compositingNode);
+			void DeallocateCompositingNode(RenderCompositingNode& compositingNode);
 
 			RenderCamera& AllocateCamera(
 				const CameraKind& kind,
@@ -78,12 +78,12 @@ namespace PRE
 
 			void BindCompositingPair(
 				RenderCamera& camera,
-				CompositingNode& compositingNode
+				RenderCompositingNode& compositingNode
 			);
 
 			void UnbindCompositingPair(
 				RenderCamera& camera,
-				CompositingNode& compositingNode
+				RenderCompositingNode& compositingNode
 			);
 
 			const RenderVertexShader& AllocateVertexShader(const string& shaderSource);
@@ -113,7 +113,7 @@ namespace PRE
 			);
 			void SetMaterialTextureBinding(
 				RenderMaterial& material,
-				CompositingNode& compositingNode,
+				RenderCompositingNode& compositingNode,
 				const CompositingAttachment& attachment,
 				GLenum bindUnit
 			);
@@ -136,16 +136,16 @@ namespace PRE
 			SDL_GLContext& _glContext;
 
 #ifdef __PRE_DEBUG__
-			unordered_set<CompositingNode*> _compositingNodes;
+			unordered_set<RenderCompositingNode*> _compositingNodes;
 
 			unordered_set<const RenderCamera*> _cameras;
 #endif
 
-			unordered_map<CompositingNode*, RenderCamera*> _compositingNodeCameraPairs;
+			unordered_map<RenderCompositingNode*, RenderCamera*> _compositingNodeCameraPairs;
 
 #ifdef __PRE_DEBUG__
 			// Note: this should be a 1:1 match to the above at all times, used for debugging
-			unordered_map<const RenderCamera*, const CompositingNode*> _cameraCompositingNodePairs;
+			unordered_map<const RenderCamera*, const RenderCompositingNode*> _cameraCompositingNodePairs;
 
 			unordered_set<const RenderVertexShader*> _vertexShaders;
 			unordered_set<const RenderFragmentShader*> _fragmentShaders;
@@ -169,9 +169,9 @@ namespace PRE
 			~Renderer();
 
 #ifdef __PRE_DEBUG__
-			void UpdateRecurse(CompositingNode& currentNode, unordered_set<CompositingNode*>& visited);
+			void UpdateRecurse(RenderCompositingNode& currentNode, unordered_set<RenderCompositingNode*>& visited);
 #else
-			void UpdateRecurse(CompositingNode& currentNode);
+			void UpdateRecurse(RenderCompositingNode& currentNode);
 #endif
 		};
 	} // namespace RenderingModule

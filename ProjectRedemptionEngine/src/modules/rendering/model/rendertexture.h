@@ -1,26 +1,23 @@
 #pragma once
-#include <string>
-
 #include <glad/glad.h>
 
 namespace PRE
 {
 	namespace RenderingModule
 	{
-		class CompositingTarget;
-		class RenderMaterial;
 		class Renderer;
 
-		using std::string;
+		class CompositingTarget;
+		class RenderMaterial;
 
 		class RenderTexture
 		{
 			RenderTexture& operator=(const RenderTexture&) = delete;
 			RenderTexture(const RenderTexture&) = delete;
 
+			friend class Renderer;
 			friend class CompositingTarget;
 			friend class RenderMaterial;
-			friend class Renderer;
 
 			class Impl
 			{

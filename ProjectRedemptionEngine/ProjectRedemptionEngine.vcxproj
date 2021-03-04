@@ -35,7 +35,7 @@
     <ClCompile Include="src\modules\gameobject\gameobjectworld.cpp" />
     <ClCompile Include="src\modules\input\input.cpp" />
     <ClCompile Include="src\modules\input\keycode.cpp" />
-    <ClCompile Include="src\modules\rendering\compositing\compositingnode.cpp" />
+    <ClCompile Include="src\modules\rendering\compositing\rendercompositingnode.cpp" />
     <ClCompile Include="src\modules\rendering\compositing\compositingtarget.cpp" />
     <ClCompile Include="src\modules\rendering\model\rendermaterial.cpp" />
     <ClCompile Include="src\modules\rendering\model\rendermesh.cpp" />
@@ -83,7 +83,7 @@
     <ClInclude Include="src\modules\gameobject\gameobjectworld.h" />
     <ClInclude Include="src\modules\input\input.h" />
     <ClInclude Include="src\modules\input\keycode.h" />
-    <ClInclude Include="src\modules\rendering\compositing\compositingnode.h" />
+    <ClInclude Include="src\modules\rendering\compositing\rendercompositingnode.h" />
     <ClInclude Include="src\modules\rendering\compositing\compositingtarget.h" />
     <ClInclude Include="src\modules\rendering\model\rendermaterial.h" />
     <ClInclude Include="src\modules\rendering\model\rendermesh.h" />

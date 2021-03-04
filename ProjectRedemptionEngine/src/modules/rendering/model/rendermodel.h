@@ -6,7 +6,6 @@ namespace PRE
 	namespace RenderingModule
 	{
 		class Renderer;
-
 		class RenderMesh;
 		class RenderMaterial;
 	

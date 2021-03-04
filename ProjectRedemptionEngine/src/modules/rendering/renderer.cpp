@@ -12,7 +12,7 @@
 #include <glm/glm.hpp>
 
 #include <modules/rendering/compositing/compositingtarget.h>
-#include <modules/rendering/compositing/compositingnode.h>
+#include <modules/rendering/compositing/rendercompositingnode.h>
 #include <modules/rendering/rendercamera.h>
 #include <modules/rendering/shader/rendervertexshader.h>
 #include <modules/rendering/shader/renderfragmentshader.h>
@@ -98,7 +98,7 @@ namespace PRE
 			glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			unordered_set<CompositingNode*> visited;
+			unordered_set<RenderCompositingNode*> visited;
 
 #if __PRE_DEBUG__
 			UpdateRecurse(rootCompositingNode, visited);
@@ -109,14 +109,14 @@ namespace PRE
 			SDL_GL_SwapWindow(&_window);
 		}
 
-		CompositingNode& Renderer::AllocateCompositingNode(
+		RenderCompositingNode& Renderer::AllocateCompositingNode(
 			unsigned int renderTag,
 			unsigned int width,
 			unsigned int height
 		)
 		{
 			auto pCompositingTarget = new CompositingTarget(width, height);
-			auto pCompositingNode = new CompositingNode(renderTag, pCompositingTarget);
+			auto pCompositingNode = new RenderCompositingNode(renderTag, pCompositingTarget);
 
 #ifdef __PRE_DEBUG__
 			_compositingNodes.insert(pCompositingNode);
@@ -126,8 +126,8 @@ namespace PRE
 		}
 
 		void Renderer::AttachCompositingNodeDependency(
-			CompositingNode& dependent,
-			CompositingNode& dependency
+			RenderCompositingNode& dependent,
+			RenderCompositingNode& dependency
 		)
 		{
 #ifdef __PRE_DEBUG__
@@ -149,8 +149,8 @@ namespace PRE
 		}
 
 		void Renderer::DetachCompositingNodeDependency(
-			CompositingNode& dependent,
-			CompositingNode& dependency
+			RenderCompositingNode& dependent,
+			RenderCompositingNode& dependency
 		)
 		{
 #ifdef __PRE_DEBUG__
@@ -167,7 +167,7 @@ namespace PRE
 			dependent.RemoveDependency(dependency);
 		}
 
-		void Renderer::DeallocateCompositingNode(CompositingNode& compositingNode)
+		void Renderer::DeallocateCompositingNode(RenderCompositingNode& compositingNode)
 		{
 			auto pCompositingNode = &compositingNode;
 #ifdef __PRE_DEBUG__
@@ -237,7 +237,7 @@ namespace PRE
 
 		void Renderer::BindCompositingPair(
 			RenderCamera& camera,
-			CompositingNode& compositingNode
+			RenderCompositingNode& compositingNode
 		)
 		{
 			auto pCamera = &camera;
@@ -270,7 +270,7 @@ namespace PRE
 
 		void Renderer::UnbindCompositingPair(
 			RenderCamera& camera,
-			CompositingNode& compositingNode
+			RenderCompositingNode& compositingNode
 		)
 		{
 #ifdef __PRE_DEBUG__
@@ -494,7 +494,7 @@ namespace PRE
 
 		void Renderer::SetMaterialTextureBinding(
 			RenderMaterial& material,
-			CompositingNode& compositingNode,
+			RenderCompositingNode& compositingNode,
 			const CompositingAttachment& attachment,
 			GLenum bindUnit
 		)
@@ -697,7 +697,7 @@ namespace PRE
 
 		Renderer::Renderer(SDL_Window& window, SDL_GLContext& glContext)
 			:
-			rootCompositingNode(*(new CompositingNode(ROOT_TAG_GROUP, nullptr))),
+			rootCompositingNode(*(new RenderCompositingNode(ROOT_TAG_GROUP, nullptr))),
 			_window(window),
 			_glContext(glContext)
 		{
@@ -749,10 +749,10 @@ namespace PRE
 
 		void Renderer::UpdateRecurse(
 #ifdef __PRE_DEBUG__
-			CompositingNode& currentNode,
-			unordered_set<CompositingNode*>& visited
+			RenderCompositingNode& currentNode,
+			unordered_set<RenderCompositingNode*>& visited
 #else
-			CompositingNode& currentNode
+			RenderCompositingNode& currentNode
 #endif
 		)
 		{
