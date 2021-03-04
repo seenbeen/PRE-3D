@@ -1,4 +1,4 @@
-#include <modules/rendering/compositing/compositingtarget.h>
+#include <modules/rendering/compositing/rendercompositingtarget.h>
 
 #include <glad/glad.h>
 
@@ -8,7 +8,7 @@ namespace PRE
 {
 	namespace RenderingModule
 	{
-		CompositingTarget::Impl& CompositingTarget::Impl::MakeImpl(
+		RenderCompositingTarget::Impl& RenderCompositingTarget::Impl::MakeImpl(
 			unsigned int width,
 			unsigned int height
 		)
@@ -57,7 +57,7 @@ namespace PRE
 			return *(new Impl(gBufferId, *position, *normals, *albedoSpecular));
 		}
 
-		CompositingTarget::Impl::Impl(
+		RenderCompositingTarget::Impl::Impl(
 			GLuint gBufferId,
 			RenderTexture& position,
 			RenderTexture& normals,
@@ -69,7 +69,7 @@ namespace PRE
 			normals(normals),
 			albedoSpecular(albedoSpecular) {}
 
-		CompositingTarget::Impl::~Impl()
+		RenderCompositingTarget::Impl::~Impl()
 		{
 			delete& albedoSpecular;
 			delete& normals;
@@ -77,30 +77,30 @@ namespace PRE
 			glDeleteFramebuffers(1, &gBufferId);
 		}
 
-		CompositingTarget::CompositingTarget(unsigned int width, unsigned int height)
+		RenderCompositingTarget::RenderCompositingTarget(unsigned int width, unsigned int height)
 			: _impl(Impl::MakeImpl(width, height)) {}
 
-		CompositingTarget::~CompositingTarget()
+		RenderCompositingTarget::~RenderCompositingTarget()
 		{
 			delete &_impl;
 		}
 
-		RenderTexture& CompositingTarget::GetPosition()
+		RenderTexture& RenderCompositingTarget::GetPosition()
 		{
 			return _impl.position;
 		}
 
-		RenderTexture& CompositingTarget::GetNormals()
+		RenderTexture& RenderCompositingTarget::GetNormals()
 		{
 			return _impl.normals;
 		}
 
-		RenderTexture& CompositingTarget::GetAlbedoSpecular()
+		RenderTexture& RenderCompositingTarget::GetAlbedoSpecular()
 		{
 			return _impl.albedoSpecular;
 		}
 
-		void CompositingTarget::Bind(CompositingTarget* pCompositingTarget)
+		void RenderCompositingTarget::Bind(RenderCompositingTarget* pCompositingTarget)
 		{
 			if (pCompositingTarget == nullptr)
 			{

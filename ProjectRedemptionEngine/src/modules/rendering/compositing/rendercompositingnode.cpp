@@ -2,7 +2,7 @@
 
 #include <unordered_set>
 
-#include <modules/rendering/compositing/compositingtarget.h>
+#include <modules/rendering/compositing/rendercompositingtarget.h>
 
 namespace PRE
 {
@@ -17,7 +17,7 @@ namespace PRE
 
 		RenderCompositingNode::Impl::~Impl() {}
 
-		RenderCompositingNode::RenderCompositingNode(unsigned int tagGroup, CompositingTarget* pCompositingTarget)
+		RenderCompositingNode::RenderCompositingNode(unsigned int tagGroup, RenderCompositingTarget* pCompositingTarget)
 			:
 			_tagGroup(tagGroup),
 			_pCompositingTarget(pCompositingTarget),

@@ -212,9 +212,6 @@
     <ClInclude Include="src\modules\rendering\model\rendertexture.h">
       <Filter>Header Files\Modules\Rendering\Model</Filter>
     </ClInclude>
-    <ClInclude Include="src\modules\rendering\compositing\compositingtarget.h">
-      <Filter>Header Files\Modules\Rendering\Compositing</Filter>
-    </ClInclude>
     <ClInclude Include="src\include\modules\rendering.h">
       <Filter>Header Files\Include\Modules</Filter>
     </ClInclude>
@@ -276,6 +273,9 @@
       <Filter>Header Files\Modules\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="src\modules\rendering\compositing\rendercompositingnode.h">
+      <Filter>Header Files\Modules\Rendering\Compositing</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\rendering\compositing\rendercompositingtarget.h">
       <Filter>Header Files\Modules\Rendering\Compositing</Filter>
     </ClInclude>
   </ItemGroup>
@@ -343,9 +343,6 @@
     <ClCompile Include="src\modules\rendering\model\rendermaterial.cpp">
       <Filter>Source Files\Modules\Rendering\Model</Filter>
     </ClCompile>
-    <ClCompile Include="src\modules\rendering\compositing\compositingtarget.cpp">
-      <Filter>Source Files\Modules\Rendering\Compositing</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\components\pretransformcomponent.cpp">
       <Filter>Source Files\Core\Components</Filter>
     </ClCompile>
@@ -386,6 +383,9 @@
       <Filter>Source Files\Modules\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="src\modules\rendering\compositing\rendercompositingnode.cpp">
+      <Filter>Source Files\Modules\Rendering\Compositing</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\rendering\compositing\rendercompositingtarget.cpp">
       <Filter>Source Files\Modules\Rendering\Compositing</Filter>
     </ClCompile>
   </ItemGroup>

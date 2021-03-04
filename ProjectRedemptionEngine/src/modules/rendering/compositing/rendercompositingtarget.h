@@ -8,10 +8,10 @@ namespace PRE
 		class Renderer;
 		class RenderTexture;
 
-		class CompositingTarget
+		class RenderCompositingTarget
 		{
-			CompositingTarget& operator=(const CompositingTarget&) = delete;
-			CompositingTarget(const CompositingTarget&) = delete;
+			RenderCompositingTarget& operator=(const RenderCompositingTarget&) = delete;
+			RenderCompositingTarget(const RenderCompositingTarget&) = delete;
 
 			friend class Renderer;
 
@@ -20,7 +20,7 @@ namespace PRE
 				Impl& operator=(const Impl&) = delete;
 				Impl(const Impl&) = delete;
 
-				friend class CompositingTarget;
+				friend class RenderCompositingTarget;
 
 			private:
 				const GLuint gBufferId;
@@ -43,14 +43,14 @@ namespace PRE
 		private:
 			Impl& _impl;
 			
-			CompositingTarget(unsigned int width, unsigned int height);
-			~CompositingTarget();
+			RenderCompositingTarget(unsigned int width, unsigned int height);
+			~RenderCompositingTarget();
 
 			RenderTexture& GetPosition();
 			RenderTexture& GetNormals();
 			RenderTexture& GetAlbedoSpecular();
 
-			static void Bind(CompositingTarget* pCompositingTarget);
+			static void Bind(RenderCompositingTarget* pCompositingTarget);
 		};
 	} // namespace RenderingModule
 } // namespace PRE

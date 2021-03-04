@@ -7,7 +7,7 @@ namespace PRE
 	{
 		class Renderer;
 
-		class CompositingTarget;
+		class RenderCompositingTarget;
 		class RenderMaterial;
 
 		class RenderTexture
@@ -16,7 +16,7 @@ namespace PRE
 			RenderTexture(const RenderTexture&) = delete;
 
 			friend class Renderer;
-			friend class CompositingTarget;
+			friend class RenderCompositingTarget;
 			friend class RenderMaterial;
 
 			class Impl

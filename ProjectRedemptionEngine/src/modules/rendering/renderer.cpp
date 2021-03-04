@@ -11,7 +11,7 @@
 
 #include <glm/glm.hpp>
 
-#include <modules/rendering/compositing/compositingtarget.h>
+#include <modules/rendering/compositing/rendercompositingtarget.h>
 #include <modules/rendering/compositing/rendercompositingnode.h>
 #include <modules/rendering/rendercamera.h>
 #include <modules/rendering/shader/rendervertexshader.h>
@@ -115,7 +115,7 @@ namespace PRE
 			unsigned int height
 		)
 		{
-			auto pCompositingTarget = new CompositingTarget(width, height);
+			auto pCompositingTarget = new RenderCompositingTarget(width, height);
 			auto pCompositingNode = new RenderCompositingNode(renderTag, pCompositingTarget);
 
 #ifdef __PRE_DEBUG__
@@ -795,14 +795,14 @@ namespace PRE
 			}
 			auto& viewMatrix = *pViewMatrix;
 
-			CompositingTarget::Bind(currentNode._pCompositingTarget);
+			RenderCompositingTarget::Bind(currentNode._pCompositingTarget);
 			auto& tagModelSet = _tagGroups[currentNode._tagGroup];
 			for (auto it = tagModelSet.begin(); it != tagModelSet.end(); ++it)
 			{
 				auto& model = **it;
 				model.Render(viewMatrix);
 			}
-			CompositingTarget::Bind(nullptr);
+			RenderCompositingTarget::Bind(nullptr);
 
 #ifdef __PRE_DEBUG__
 			visited.erase(pCurrentNode);

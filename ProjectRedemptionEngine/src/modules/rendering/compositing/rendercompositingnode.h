@@ -6,7 +6,7 @@ namespace PRE
 	namespace RenderingModule
 	{
 		class Renderer;
-		class CompositingTarget;
+		class RenderCompositingTarget;
 
 		using std::unordered_set;
 
@@ -35,11 +35,11 @@ namespace PRE
 
 		private:
 			const unsigned int _tagGroup;
-			CompositingTarget* const _pCompositingTarget;
+			RenderCompositingTarget* const _pCompositingTarget;
 
 			Impl& _impl;
 
-			RenderCompositingNode(unsigned int tagGroup, CompositingTarget* pCompositingTarget);
+			RenderCompositingNode(unsigned int tagGroup, RenderCompositingTarget* pCompositingTarget);
 			~RenderCompositingNode();
 
 			void AddDependency(RenderCompositingNode& compositingNode);
