@@ -42,6 +42,19 @@ namespace PRE
 				~Impl();
 			};
 
+		public:
+			void SetBool(const string& name, bool value);
+			void SetInt(const string& name, int value);
+			void SetFloat(const string& name, float value);
+
+			void SetVec2(const string& name, const glm::vec2& value);
+			void SetVec3(const string& name, const glm::vec3& value);
+			void SetVec4(const string& name, const glm::vec4& value);
+
+			void SetMat2(const string& name, const glm::mat2& value);
+			void SetMat3(const string& name, const glm::mat3& value);
+			void SetMat4(const string& name, const glm::mat4& value);
+
 		private:
 			Impl& _impl;
 
@@ -51,19 +64,7 @@ namespace PRE
 			);
 			~RenderShaderProgram();
 
-			void SetBool(const string& name, bool value) const;
-			void SetInt(const string& name, int value) const;
-			void SetFloat(const string& name, float value) const;
-
-			void SetVec2(const string& name, const glm::vec2& value) const;
-			void SetVec3(const string& name, const glm::vec3& value) const;
-			void SetVec4(const string& name, const glm::vec4& value) const;
-
-			void SetMat2(const string& name, const glm::mat2& value) const;
-			void SetMat3(const string& name, const glm::mat3& value) const;
-			void SetMat4(const string& name, const glm::mat4& value) const;
-
-			void Bind() const;
+			void Bind();
 		};
 	} // namespace RenderingModule
 } // namespace PRE

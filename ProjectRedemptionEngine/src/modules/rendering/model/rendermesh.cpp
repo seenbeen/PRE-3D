@@ -212,6 +212,15 @@ namespace PRE
 
 		void RenderMesh::Render()
 		{
+			if (
+				_impl.nVertices == 0 ||
+				_impl.nNormals == 0 ||
+				_impl.nUvs == 0 ||
+				_impl.nTriangleIndices == 0
+			)
+			{
+				return;
+			}
 			glBindVertexArray(_impl.vertexArrayObject);
 			if (_impl.verticesHaveChanged)
 			{

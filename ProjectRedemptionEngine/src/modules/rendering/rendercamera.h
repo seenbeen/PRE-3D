@@ -26,6 +26,14 @@ namespace PRE
 				friend class RenderCamera;
 
 			private:
+				static Impl& MakeImpl(
+					const Kind& kind,
+					float size,
+					float aspectRatio,
+					float nearClippingPlane,
+					float farClippingPlane
+				);
+
 				bool projectionMatrixChanged;
 				bool viewMatrixChanged;
 
@@ -40,14 +48,6 @@ namespace PRE
 				glm::mat4 projectionMatrix;
 				glm::mat4 viewProjectionMatrix;
 
-				static Impl& MakeImpl(
-					const Kind& kind,
-					float size,
-					float aspectRatio,
-					float nearClippingPlane,
-					float farClippingPlane
-				);
-
 				Impl(
 					const Kind& kind,
 					float size,
@@ -59,21 +59,11 @@ namespace PRE
 			};
 
 		public:
-			const Kind& GetKind() const;
 			void SetKind(const Kind& kind);
-
-			float GetSize() const;
 			void SetSize(float size);
-
-			float GetAspectRatio() const;
 			void SetAspectRatio(float aspectRatio);
-
-			float GetNearClippingPlane() const;
 			void SetNearClippingPlane(float nearClippingPlane);
-
-			float GetFarClippingPlane() const;
 			void SetFarClippingPlane(float farClippingPlane);
-
 			void SetViewMatrix(const glm::mat4& viewMatrix);
 
 			const glm::mat4& GetViewProjectionMatrix();

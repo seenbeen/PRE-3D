@@ -7,6 +7,8 @@ namespace PRE
 	{
 		class Renderer;
 		class RenderCompositingTarget;
+		class RenderTexture;
+		class RenderMaterial;
 
 		using std::unordered_set;
 
@@ -16,6 +18,7 @@ namespace PRE
 			RenderCompositingNode(const RenderCompositingNode&) = delete;
 
 			friend class Renderer;
+			friend class RenderMaterial;
 
 			class Impl
 			{
@@ -35,12 +38,16 @@ namespace PRE
 
 		private:
 			const unsigned int _tagGroup;
-			RenderCompositingTarget* const _pCompositingTarget;
+			RenderCompositingTarget* _pCompositingTarget;
 
 			Impl& _impl;
 
 			RenderCompositingNode(unsigned int tagGroup, RenderCompositingTarget* pCompositingTarget);
 			~RenderCompositingNode();
+
+			RenderTexture& GetPosition();
+			RenderTexture& GetNormals();
+			RenderTexture& GetAlbedoSpecular();
 
 			void AddDependency(RenderCompositingNode& compositingNode);
 			void RemoveDependency(RenderCompositingNode& compositingNode);

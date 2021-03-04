@@ -4,6 +4,8 @@
 
 #include <glm/glm.hpp>
 
+#include <modules/rendering/compositing/rendercompositingtarget.h>
+#include <modules/rendering/compositing/rendercompositingnode.h>
 #include <modules/rendering/shader/rendershaderprogram.h>
 #include <modules/rendering/model/rendertexture.h>
 
@@ -11,29 +13,20 @@ namespace PRE
 {
 	namespace RenderingModule
 	{
-		RenderMaterial::Impl& RenderMaterial::Impl::MakeImpl(RenderShaderProgram& shaderProgram)
+		RenderMaterial::Impl& RenderMaterial::Impl::MakeImpl()
 		{
-			return *(new Impl(shaderProgram));
+			return *(new Impl());
 		}
 
-		RenderMaterial::Impl::Impl(RenderShaderProgram& shaderProgram)
+		RenderMaterial::Impl::Impl()
 			:
-			shaderProgram(&shaderProgram) {}
+			pShaderProgram(nullptr) {}
 
 		RenderMaterial::Impl::~Impl() {}
 
-		RenderMaterial::RenderMaterial(RenderShaderProgram& shaderProgram)
-			:
-			_impl(Impl::MakeImpl(shaderProgram)) {}
-
-		RenderMaterial::~RenderMaterial()
+		void RenderMaterial::SetShaderProgram(RenderShaderProgram* pShaderProgram)
 		{
-			delete &_impl;
-		}
-
-		void RenderMaterial::SetShaderProgram(RenderShaderProgram& shaderProgram)
-		{
-			_impl.shaderProgram = &shaderProgram;
+			_impl.pShaderProgram = pShaderProgram;
 		}
 
 		void RenderMaterial::SetTextureBinding(RenderTexture* pRenderTexture, GLenum bindUnit)
@@ -52,15 +45,54 @@ namespace PRE
 			}
 		}
 
+		void RenderMaterial::SetTextureBinding(
+			RenderCompositingNode& compositingNode,
+			const CompositingAttachment& attachment,
+			GLenum bindUnit
+		)
+		{
+			switch (attachment)
+			{
+			case CompositingAttachment::POSITIONS:
+				SetTextureBinding(
+					&compositingNode.GetPosition(),
+					bindUnit
+				);
+			case CompositingAttachment::NORMALS:
+				SetTextureBinding(
+					&compositingNode.GetNormals(),
+					bindUnit
+				);
+			case CompositingAttachment::ALBEDO_SPECULAR:
+				SetTextureBinding(
+					&compositingNode.GetAlbedoSpecular(),
+					bindUnit
+				);
+			}
+		}
+
+		RenderMaterial::RenderMaterial()
+			:
+			_impl(Impl::MakeImpl()) {}
+
+		RenderMaterial::~RenderMaterial()
+		{
+			delete &_impl;
+		}
+
 		void RenderMaterial::Bind(const glm::mat4& mvp)
 		{
+			if (_impl.pShaderProgram == nullptr)
+			{
+				return;
+			}
 			for (auto it = _impl.textureBindings.begin(); it != _impl.textureBindings.end(); ++it)
 			{
 				RenderTexture::SetActive(it->first);
 				it->second->Bind();
 			}
-			_impl.shaderProgram->Bind();
-			_impl.shaderProgram->SetMat4("PRE_MVP", mvp);
+			_impl.pShaderProgram->Bind();
+			_impl.pShaderProgram->SetMat4("PRE_MVP", mvp);
 		}
 	} // namespace RenderingModule
 } // namespace PRE

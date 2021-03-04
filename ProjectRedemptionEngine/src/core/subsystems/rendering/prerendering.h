@@ -13,15 +13,18 @@ namespace PRE
 
 		class PREApplicationContext;
 		class PREModelRendererComponent;
+		class PRECameraComponent;
 
-		class PRECompositingNode;
+		class PRERenderTexture;
 		class PREShader;
+		class PREMesh;
 		class PRETexture;
 		class PREMaterial;
-		class PREMesh;
 
 		using std::string;
 		using PRE::RenderingModule::Renderer;
+		using PRE::RenderingModule::RenderCamera;
+		using PRE::RenderingModule::RenderModel;
 
 		class PRERendering
 		{
@@ -30,46 +33,51 @@ namespace PRE
 
 			friend class PREApplicationContext;
 			friend class PREModelRendererComponent;
+			friend class PRECameraComponent;
+
+			class Impl
+			{
+				Impl& operator=(const Impl&) = delete;
+				Impl(const Impl&) = delete;
+
+				friend class PRERendering;
+
+			private:
+				static Impl& MakeImpl(PREApplicationContext& applicationContext, Renderer& renderer);
+
+				PREApplicationContext& applicationContext;
+				Renderer& renderer;
+
+				Impl(PREApplicationContext& applicationContext, Renderer& renderer);
+				~Impl();
+			};
 
 		public:
-
-
+			PRERenderTexture& CreateRenderTexture();
+			void DestroyRenderTexture(PRERenderTexture& renderTexture);
+			
 			PREShader& CreateShader(const string& vertex, const string& fragment);
 			void DestroyShader(PREShader& shader);
 
-			PREMaterial& CreateMaterial(PREShader& shader);
-			void DestroyMaterial(PREMaterial& material);
-
-			PRETexture& CreateTexture(
-				const unsigned char* data,
-				unsigned int width,
-				unsigned int height
-			);
+			PRETexture& CreateTexture();
 			void DestroyTexture(PRETexture& texture);
 
-			PREMesh& CreateMesh(
-				const glm::vec3* const vertices,
-				unsigned int nVertices,
-				const glm::vec3* const normals,
-				unsigned int nNormals,
-				const glm::vec2* const uvs,
-				unsigned int nUvs,
-				const unsigned int* const triangles,
-				unsigned int nTriangles
-			);
+			PREMaterial& CreateMaterial();
+			void DestroyMaterial(PREMaterial& material);
+
+			PREMesh& CreateMesh();
 			void DestroyMesh(PREMesh& mesh);
 
 		private:
 			static PRERendering& MakePRERendering(
 				const PRERenderingConfig& renderingConfig,
-				PREApplicationContext& preApplicationContext
+				PREApplicationContext& applicationContext
 			);
 
-			PREApplicationContext& _preApplicationContext;
-			Renderer& _renderer;
+			Impl& _impl;
 
 			PRERendering(
-				PREApplicationContext& preApplicationContext,
+				PREApplicationContext& applicationContext,
 				Renderer& renderer
 			);
 			~PRERendering();
@@ -77,6 +85,14 @@ namespace PRE
 			void Initialize();
 			void Update();
 			void Shutdown();
+
+			void AllocateCamera(PRECameraComponent& cameraComponent);
+			void UpdateCamera(PRECameraComponent& cameraComponent);
+			void DeallocateCamera(PRECameraComponent& cameraComponent);
+
+			void AllocateModel(PREModelRendererComponent& modelRendererComponent);
+			void UpdateModel(PREModelRendererComponent& modelRendererComponent);
+			void DeallocateModel(PREModelRendererComponent& modelRendererComponent);
 		};
 	} // namespace Core
 } // namespace PRE

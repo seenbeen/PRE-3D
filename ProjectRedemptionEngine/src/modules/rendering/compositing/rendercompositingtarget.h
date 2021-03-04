@@ -6,6 +6,7 @@ namespace PRE
 	namespace RenderingModule
 	{
 		class Renderer;
+		class RenderCompositingNode;
 		class RenderTexture;
 
 		class RenderCompositingTarget
@@ -14,6 +15,7 @@ namespace PRE
 			RenderCompositingTarget(const RenderCompositingTarget&) = delete;
 
 			friend class Renderer;
+			friend class RenderCompositingNode;
 
 			class Impl
 			{

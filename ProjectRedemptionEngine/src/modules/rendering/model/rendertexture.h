@@ -30,7 +30,7 @@ namespace PRE
 				const GLuint textureId;
 				unsigned int width;
 				unsigned int height;
-				unsigned int* data;
+				unsigned char* data;
 				bool hasChanged;
 
 				static Impl& MakeImpl();
@@ -43,7 +43,7 @@ namespace PRE
 			void SetData(
 				unsigned int width,
 				unsigned int height,
-				const unsigned int* const data
+				const unsigned char* const data
 			);
 
 		private:

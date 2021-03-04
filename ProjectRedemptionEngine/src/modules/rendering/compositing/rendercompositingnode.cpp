@@ -3,6 +3,7 @@
 #include <unordered_set>
 
 #include <modules/rendering/compositing/rendercompositingtarget.h>
+#include <modules/rendering/model/rendertexture.h>
 
 namespace PRE
 {
@@ -26,6 +27,21 @@ namespace PRE
 		RenderCompositingNode::~RenderCompositingNode()
 		{
 			delete &_impl;
+		}
+
+		RenderTexture& RenderCompositingNode::GetPosition()
+		{
+			return _pCompositingTarget->GetPosition();
+		}
+
+		RenderTexture& RenderCompositingNode::GetNormals()
+		{
+			return _pCompositingTarget->GetNormals();
+		}
+
+		RenderTexture& RenderCompositingNode::GetAlbedoSpecular()
+		{
+			return _pCompositingTarget->GetAlbedoSpecular();
 		}
 
 		void RenderCompositingNode::AddDependency(

@@ -37,10 +37,10 @@ namespace PRE
 		void RenderTexture::SetData(
 			unsigned int width,
 			unsigned int height,
-			const unsigned int* const data
+			const unsigned char* const data
 		)
 		{
-			auto total = (int)(width * height);
+			auto total = (int)(width * height) * 4; // 4-channels
 
 #ifdef __PRE_DEBUG__
 			if (total < 0) {
@@ -49,8 +49,8 @@ namespace PRE
 #endif
 
 			delete[] _impl.data;
-			_impl.data = new unsigned int[total];
-			std::memcpy(_impl.data, data, total * sizeof(unsigned int));
+			_impl.data = new unsigned char[total];
+			std::memcpy(_impl.data, data, total * sizeof(unsigned char));
 			_impl.width = width;
 			_impl.height = height;
 			_impl.hasChanged = true;

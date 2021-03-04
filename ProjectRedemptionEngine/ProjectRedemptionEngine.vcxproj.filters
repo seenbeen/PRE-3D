@@ -278,6 +278,12 @@
     <ClInclude Include="src\modules\rendering\compositing\rendercompositingtarget.h">
       <Filter>Header Files\Modules\Rendering\Compositing</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\subsystems\rendering\prerendertexture.h">
+      <Filter>Header Files\Core\Subsystems\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\subsystems\rendering\pretexture.h">
+      <Filter>Header Files\Core\Subsystems\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\modules\gameobject\gameobject.cpp">
@@ -387,6 +393,24 @@
     </ClCompile>
     <ClCompile Include="src\modules\rendering\compositing\rendercompositingtarget.cpp">
       <Filter>Source Files\Modules\Rendering\Compositing</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\components\precameracomponent.cpp">
+      <Filter>Source Files\Core\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\rendering\prerendertexture.cpp">
+      <Filter>Source Files\Core\Subsystems\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\rendering\pretexture.cpp">
+      <Filter>Source Files\Core\Subsystems\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\rendering\preshader.cpp">
+      <Filter>Source Files\Core\Subsystems\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\rendering\premesh.cpp">
+      <Filter>Source Files\Core\Subsystems\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\rendering\prematerial.cpp">
+      <Filter>Source Files\Core\Subsystems\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

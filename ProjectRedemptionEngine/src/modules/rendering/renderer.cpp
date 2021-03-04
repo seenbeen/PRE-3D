@@ -99,11 +99,12 @@ namespace PRE
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			unordered_set<RenderCompositingNode*> visited;
+			unordered_set<RenderCompositingNode*> rendered;
 
 #if __PRE_DEBUG__
-			UpdateRecurse(rootCompositingNode, visited);
+			UpdateRecurse(rootCompositingNode, rendered, visited);
 #else
-			UpdateRecurse(rootCompositingNode);
+			UpdateRecurse(rootCompositingNode, rendered);
 #endif
 
 			SDL_GL_SwapWindow(&_window);
@@ -305,7 +306,7 @@ namespace PRE
 			_compositingNodeCameraPairs.erase(itCompositingNodePair);
 		}
 
-		const RenderVertexShader& Renderer::AllocateVertexShader(const string& shaderSource)
+		RenderVertexShader& Renderer::AllocateVertexShader(const string& shaderSource)
 		{
 			auto vertexShader = new RenderVertexShader(shaderSource);
 
@@ -332,7 +333,7 @@ namespace PRE
 			delete pVertexShader;
 		}
 
-		const RenderFragmentShader& Renderer::AllocateFragmentShader(const string& shaderSource)
+		RenderFragmentShader& Renderer::AllocateFragmentShader(const string& shaderSource)
 		{
 			auto fragmentShader = new RenderFragmentShader(shaderSource);
 
@@ -359,7 +360,7 @@ namespace PRE
 			delete pFragmentShader;
 		}
 
-		const RenderShaderProgram& Renderer::AllocateShaderProgram(
+		RenderShaderProgram& Renderer::AllocateShaderProgram(
 			const RenderVertexShader& vertexShader,
 			const RenderFragmentShader& fragmentShader
 		)
@@ -443,95 +444,15 @@ namespace PRE
 			delete pTexture;
 		}
 
-		RenderMaterial& Renderer::AllocateMaterial(RenderShaderProgram& shaderProgram)
+		RenderMaterial& Renderer::AllocateMaterial()
 		{
-			auto material = new RenderMaterial(shaderProgram);
+			auto material = new RenderMaterial();
 
 #ifdef __PRE_DEBUG__
 			_materials.insert(material);
 #endif
 
 			return *material;
-		}
-
-		void Renderer::SetMaterialShader(RenderMaterial& material, RenderShaderProgram& shaderProgram)
-		{
-			auto pShaderProgram = &shaderProgram;
-
-#ifdef __PRE_DEBUG__
-			if (_materials.find(&material) == _materials.end())
-			{
-				throw "Cannot operate on unknown Material";
-			}
-			if (_shaderPrograms.find(pShaderProgram) == _shaderPrograms.end())
-			{
-				throw "Cannot set unknown ShaderProgram to Material";
-			}
-#endif
-
-			material.SetShaderProgram(shaderProgram);
-		}
-
-		void Renderer::SetMaterialTextureBinding(
-			RenderMaterial& material,
-			RenderTexture* pTexture,
-			GLenum bindUnit
-		)
-		{
-#ifdef __PRE_DEBUG__
-			if (_materials.find(&material) == _materials.end())
-			{
-				throw "Cannot operate on unknown Material";
-			}
-			if (pTexture != nullptr && _textures.find(pTexture) == _textures.end())
-			{
-				throw "Cannot bind unknown Texture to Material";
-			}
-#endif
-
-			material.SetTextureBinding(pTexture, bindUnit);
-		}
-
-		void Renderer::SetMaterialTextureBinding(
-			RenderMaterial& material,
-			RenderCompositingNode& compositingNode,
-			const CompositingAttachment& attachment,
-			GLenum bindUnit
-		)
-		{
-#ifdef __PRE_DEBUG__
-			if (&compositingNode == &rootCompositingNode)
-			{
-				throw "Cannot set material texture binding of root CompositingNode";
-			}
-			if (_materials.find(&material) == _materials.end())
-			{
-				throw "Cannot operate on unknown Material";
-			}
-			if (_compositingNodes.find(&compositingNode) == _compositingNodes.end())
-			{
-				throw "Cannot bind unknown CompositingNode to Material";
-			}
-#endif
-
-			switch (attachment)
-			{
-			case CompositingAttachment::POSITIONS:
-				material.SetTextureBinding(
-					&compositingNode._pCompositingTarget->GetPosition(),
-					bindUnit
-				);
-			case CompositingAttachment::NORMALS:
-				material.SetTextureBinding(
-					&compositingNode._pCompositingTarget->GetNormals(),
-					bindUnit
-				);
-			case CompositingAttachment::ALBEDO_SPECULAR:
-				material.SetTextureBinding(
-					&compositingNode._pCompositingTarget->GetAlbedoSpecular(),
-					bindUnit
-				);
-			}
 		}
 
 		void Renderer::DeallocateMaterial(RenderMaterial& material)
@@ -550,20 +471,9 @@ namespace PRE
 			delete pMaterial;
 		}
 
-		RenderModel& Renderer::AllocateModel(RenderMesh& mesh, RenderMaterial& material)
+		RenderModel& Renderer::AllocateModel()
 		{
-#ifdef __PRE_DEBUG__
-			if (_meshes.find(&mesh) == _meshes.end())
-			{
-				throw "Cannot allocate Model with unknown Mesh";
-			}
-			if (_materials.find(&material) == _materials.end())
-			{
-				throw "Cannot allocate Model with unknown Material";
-			}
-#endif
-
-			auto pModel = new RenderModel(mesh, material);
+			auto pModel = new RenderModel();
 
 #ifdef __PRE_DEBUG__
 			_models.insert(pModel);
@@ -573,36 +483,36 @@ namespace PRE
 			return *pModel;
 		}
 
-		void Renderer::SetModelMesh(RenderModel& model, RenderMesh& mesh)
+		void Renderer::SetModelMesh(RenderModel& model, RenderMesh* pMesh)
 		{
 #ifdef __PRE_DEBUG__
 			if (_models.find(&model) == _models.end())
 			{
 				throw "Cannot operate on unknown Model";
 			}
-			if (_meshes.find(&mesh) == _meshes.end())
+			if (_meshes.find(pMesh) == _meshes.end())
 			{
 				throw "Cannot set unknown Mesh to Model";
 			}
 #endif
 
-			model.SetMesh(mesh);
+			model.SetMesh(pMesh);
 		}
 
-		void Renderer::SetModelMaterial(RenderModel& model, RenderMaterial& material)
+		void Renderer::SetModelMaterial(RenderModel& model, RenderMaterial* pMaterial)
 		{
 #ifdef __PRE_DEBUG__
 			if (_models.find(&model) == _models.end())
 			{
 				throw "Cannot operate on unknown Model";
 			}
-			if (_materials.find(&material) == _materials.end())
+			if (_materials.find(pMaterial) == _materials.end())
 			{
 				throw "Cannot set unknown Material to Model";
 			}
 #endif
 
-			model.SetMaterial(material);
+			model.SetMaterial(pMaterial);
 		}
 
 		void Renderer::DeallocateModel(RenderModel& model)
@@ -750,13 +660,19 @@ namespace PRE
 		void Renderer::UpdateRecurse(
 #ifdef __PRE_DEBUG__
 			RenderCompositingNode& currentNode,
+			unordered_set<RenderCompositingNode*>& rendered,
 			unordered_set<RenderCompositingNode*>& visited
 #else
-			RenderCompositingNode& currentNode
+			RenderCompositingNode& currentNode,
+			unordered_set<RenderCompositingNode*>& rendered
 #endif
 		)
 		{
 			auto pCurrentNode = &currentNode;
+			if (rendered.find(pCurrentNode) != rendered.end())
+			{
+				return;
+			}
 
 #ifdef __PRE_DEBUG__
 			if (visited.find(pCurrentNode) != visited.end()) {
@@ -772,9 +688,9 @@ namespace PRE
 			{
 
 #ifdef __PRE_DEBUG__
-				UpdateRecurse(**it, visited);
+				UpdateRecurse(**it, rendered, visited);
 #else
-				UpdateRecurse(**it);
+				UpdateRecurse(**it, rendered);
 #endif
 
 			}
@@ -807,6 +723,7 @@ namespace PRE
 #ifdef __PRE_DEBUG__
 			visited.erase(pCurrentNode);
 #endif
+			rendered.insert(pCurrentNode);
 		}
 	} // namespace RenderingModule
 } // namespace PRE

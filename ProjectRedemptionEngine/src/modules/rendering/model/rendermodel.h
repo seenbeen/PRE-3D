@@ -24,12 +24,12 @@ namespace PRE
 				friend class RenderModel;
 
 			private:
-				RenderMaterial* material;
-				RenderMesh* mesh;
+				RenderMaterial* pMaterial;
+				RenderMesh* pMesh;
 
-				static Impl& MakeImpl(RenderMesh& mesh, RenderMaterial& material);
+				static Impl& MakeImpl();
 
-				Impl(RenderMesh& mesh, RenderMaterial& material);
+				Impl();
 				~Impl();
 			};
 
@@ -39,11 +39,11 @@ namespace PRE
 		private:
 			Impl& _impl;
 
-			RenderModel(RenderMesh& mesh, RenderMaterial& material);
+			RenderModel();
 			~RenderModel();
 
-			void SetMesh(RenderMesh& mesh);
-			void SetMaterial(RenderMaterial& material);
+			void SetMesh(RenderMesh* pMesh);
+			void SetMaterial(RenderMaterial* pMaterial);
 
 			void Render(const glm::mat4& viewProjectionMatrix);
 		};

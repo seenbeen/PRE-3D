@@ -10,6 +10,7 @@ namespace PRE
 	namespace RenderingModule
 	{
 		class Renderer;
+		class RenderCompositingNode;
 		class RenderShaderProgram;
 		class RenderTexture;
 		class RenderModel;
@@ -32,23 +33,31 @@ namespace PRE
 				friend class RenderMaterial;
 
 			private:
-				RenderShaderProgram* shaderProgram;
+				RenderShaderProgram* pShaderProgram;
 				unordered_map<unsigned int, RenderTexture*> textureBindings;
 
-				static Impl& MakeImpl(RenderShaderProgram& shaderProgram);
+				static Impl& MakeImpl();
 
-				Impl(RenderShaderProgram& shaderProgram);
+				Impl();
 				~Impl();
 			};
+
+		public:
+			enum class CompositingAttachment { POSITIONS, NORMALS, ALBEDO_SPECULAR };
+
+			void SetShaderProgram(RenderShaderProgram* pShaderProgram);
+			void SetTextureBinding(RenderTexture* pRenderTexture, GLenum bindUnit);
+			void SetTextureBinding(
+				RenderCompositingNode& compositingNode,
+				const CompositingAttachment& attachment,
+				GLenum bindUnit
+			);
 
 		private:
 			Impl& _impl;
 
-			RenderMaterial(RenderShaderProgram& shaderProgram);
+			RenderMaterial();
 			~RenderMaterial();
-
-			void SetShaderProgram(RenderShaderProgram& shaderProgram);
-			void SetTextureBinding(RenderTexture* renderTexture, GLenum bindUnit);
 
 			void Bind(const glm::mat4& mvp);
 		};

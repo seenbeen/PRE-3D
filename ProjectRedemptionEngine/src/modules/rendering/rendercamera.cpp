@@ -39,19 +39,10 @@ namespace PRE
 
 		RenderCamera::Impl::~Impl() {}
 
-		const RenderCamera::Kind& RenderCamera::GetKind() const {
-			return _impl.kind;
-		}
-
 		void RenderCamera::SetKind(const RenderCamera::Kind& kind)
 		{
 			_impl.kind = kind;
 			_impl.projectionMatrixChanged = true;
-		}
-
-		float RenderCamera::GetSize() const
-		{
-			return _impl.size;
 		}
 
 		void RenderCamera::SetSize(float size)
@@ -60,31 +51,16 @@ namespace PRE
 			_impl.projectionMatrixChanged = true;
 		}
 
-		float RenderCamera::GetAspectRatio() const
-		{
-			return _impl.aspectRatio;
-		}
-
 		void RenderCamera::SetAspectRatio(float aspectRatio)
 		{
 			_impl.aspectRatio = aspectRatio;
 			_impl.projectionMatrixChanged = true;
 		}
 
-		float RenderCamera::GetNearClippingPlane() const
-		{
-			return _impl.nearClippingPlane;
-		}
-
 		void RenderCamera::SetNearClippingPlane(float nearClippingPlane)
 		{
 			_impl.nearClippingPlane = nearClippingPlane;
 			_impl.projectionMatrixChanged = true;
-		}
-
-		float RenderCamera::GetFarClippingPlane() const
-		{
-			return _impl.farClippingPlane;
 		}
 
 		void RenderCamera::SetFarClippingPlane(float farClippingPlane)

@@ -36,19 +36,19 @@ namespace PRE
 
 		public:
 			enum class CameraKind { ORTHOGRAPHIC, PERSPECTIVE };
-			enum class CompositingAttachment { POSITIONS, NORMALS, ALBEDO_SPECULAR };
 
 			static const unsigned int ROOT_TAG_GROUP;
-
-			RenderCompositingNode& rootCompositingNode;
 
 			static Renderer& MakeRenderer(
 				const string& windowTitle,
 				unsigned int windowWidth,
 				unsigned int windowHeight
 			);
+
 			static void SetActiveRenderer(Renderer& renderer);
 			static void ShutdownRenderer(Renderer& renderer);
+
+			RenderCompositingNode& rootCompositingNode;
 
 			void Update();
 
@@ -86,13 +86,13 @@ namespace PRE
 				RenderCompositingNode& compositingNode
 			);
 
-			const RenderVertexShader& AllocateVertexShader(const string& shaderSource);
+			RenderVertexShader& AllocateVertexShader(const string& shaderSource);
 			void DeallocateVertexShader(const RenderVertexShader& vertexShader);
 
-			const RenderFragmentShader& AllocateFragmentShader(const string& shaderSource);
+			RenderFragmentShader& AllocateFragmentShader(const string& shaderSource);
 			void DeallocateFragmentShader(const RenderFragmentShader& fragmentShader);
 
-			const RenderShaderProgram& AllocateShaderProgram(
+			RenderShaderProgram& AllocateShaderProgram(
 				const RenderVertexShader& vertexShader,
 				const RenderFragmentShader& fragmentShader
 			);
@@ -104,24 +104,12 @@ namespace PRE
 			RenderTexture& AllocateTexture();
 			void DeallocateTexture(RenderTexture& texture);
 
-			RenderMaterial& AllocateMaterial(RenderShaderProgram& shaderProgram);
-			void SetMaterialShader(RenderMaterial& material, RenderShaderProgram& shaderProgram);
-			void SetMaterialTextureBinding(
-				RenderMaterial& material,
-				RenderTexture* pTexture,
-				GLenum bindUnit
-			);
-			void SetMaterialTextureBinding(
-				RenderMaterial& material,
-				RenderCompositingNode& compositingNode,
-				const CompositingAttachment& attachment,
-				GLenum bindUnit
-			);
+			RenderMaterial& AllocateMaterial();
 			void DeallocateMaterial(RenderMaterial& material);
 
-			RenderModel& AllocateModel(RenderMesh& mesh, RenderMaterial& material);
-			void SetModelMesh(RenderModel& model, RenderMesh& mesh);
-			void SetModelMaterial(RenderModel& model, RenderMaterial& material);
+			RenderModel& AllocateModel();
+			void SetModelMesh(RenderModel& model, RenderMesh* pMesh);
+			void SetModelMaterial(RenderModel& model, RenderMaterial* pMaterial);
 			void DeallocateModel(RenderModel& model);
 
 			void DeclareTagGroup(unsigned int tagGroup);
@@ -169,9 +157,15 @@ namespace PRE
 			~Renderer();
 
 #ifdef __PRE_DEBUG__
-			void UpdateRecurse(RenderCompositingNode& currentNode, unordered_set<RenderCompositingNode*>& visited);
+			void UpdateRecurse(
+				RenderCompositingNode& currentNode,
+				unordered_set<RenderCompositingNode*>& rendered,
+				unordered_set<RenderCompositingNode*>& visited);
 #else
-			void UpdateRecurse(RenderCompositingNode& currentNode);
+			void UpdateRecurse(
+				RenderCompositingNode& currentNode,
+				unordered_set<RenderCompositingNode*>& rendered
+			);
 #endif
 		};
 	} // namespace RenderingModule

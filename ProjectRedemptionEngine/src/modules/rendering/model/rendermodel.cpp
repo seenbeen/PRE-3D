@@ -7,27 +7,21 @@ namespace PRE
 {
 	namespace RenderingModule
 	{
-		RenderModel::Impl& RenderModel::Impl::MakeImpl(
-			RenderMesh& mesh,
-			RenderMaterial& material
-		)
+		RenderModel::Impl& RenderModel::Impl::MakeImpl()
 		{
-			return *(new Impl(mesh, material));
+			return *(new Impl());
 		}
 
-		RenderModel::Impl::Impl(RenderMesh& mesh, RenderMaterial& material)
+		RenderModel::Impl::Impl()
 			:
-			material(&material),
-			mesh(&mesh) {}
+			pMesh(nullptr),
+			pMaterial(nullptr) {}
 
 		RenderModel::Impl::~Impl() {}
 
-		RenderModel::RenderModel(
-			RenderMesh& mesh,
-			RenderMaterial& material
-		)
+		RenderModel::RenderModel()
 			:
-			_impl(Impl::MakeImpl(mesh, material)),
+			_impl(Impl::MakeImpl()),
 			modelMatrix() {}
 
 		RenderModel::~RenderModel()
@@ -35,20 +29,23 @@ namespace PRE
 			delete &_impl;
 		}
 
-		void RenderModel::SetMesh(RenderMesh& mesh)
+		void RenderModel::SetMesh(RenderMesh* pMesh)
 		{
-			_impl.mesh = &mesh;
+			_impl.pMesh = pMesh;
 		}
 
-		void RenderModel::SetMaterial(RenderMaterial& material)
+		void RenderModel::SetMaterial(RenderMaterial* pMaterial)
 		{
-			_impl.material = &material;
+			_impl.pMaterial = pMaterial;
 		}
 
 		void RenderModel::Render(const glm::mat4& viewProjectionMatrix)
 		{
-			_impl.material->Bind(viewProjectionMatrix * modelMatrix);
-			_impl.mesh->Render();
+			if (_impl.pMesh != nullptr && _impl.pMaterial != nullptr)
+			{
+				_impl.pMaterial->Bind(viewProjectionMatrix * modelMatrix);
+				_impl.pMesh->Render();
+			}
 		}
 	} // namespace RenderingModule
 } // namespace PRE
