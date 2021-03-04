@@ -5,9 +5,8 @@ namespace PRE
 {
 	namespace RenderingModule
 	{
-		class RenderTexture;
-
 		class Renderer;
+		class RenderTexture;
 
 		class CompositingTarget
 		{

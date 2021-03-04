@@ -2,11 +2,7 @@
 
 #include <unordered_set>
 
-#include <glad/glad.h>
-
 #include <modules/rendering/compositing/compositingtarget.h>
-#include <modules/rendering/shader/rendershaderprogram.h>
-#include <modules/rendering/model/rendertexture.h>
 
 namespace PRE
 {
@@ -21,10 +17,10 @@ namespace PRE
 
 		CompositingNode::Impl::~Impl() {}
 
-		CompositingNode::CompositingNode(unsigned int renderTag, CompositingTarget& compositingTarget)
+		CompositingNode::CompositingNode(unsigned int tagGroup, CompositingTarget* pCompositingTarget)
 			:
-			_renderTag(renderTag),
-			_compositingTarget(compositingTarget),
+			_tagGroup(tagGroup),
+			_pCompositingTarget(pCompositingTarget),
 			_impl(Impl::MakeImpl()) {}
 
 		CompositingNode::~CompositingNode()

@@ -23,13 +23,11 @@ namespace PRE
 		RenderModel::Impl::~Impl() {}
 
 		RenderModel::RenderModel(
-			const unsigned int renderTag,
 			RenderMesh& mesh,
 			RenderMaterial& material
 		)
 			:
 			_impl(Impl::MakeImpl(mesh, material)),
-			_renderTag(renderTag),
 			modelMatrix() {}
 
 		RenderModel::~RenderModel()

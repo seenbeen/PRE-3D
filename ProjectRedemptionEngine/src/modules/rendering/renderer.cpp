@@ -7,23 +7,19 @@
 
 #include <SDL.h>
 
-#include <glm/glm.hpp>
-
 #include <glad/glad.h>
+
+#include <glm/glm.hpp>
 
 #include <modules/rendering/compositing/compositingtarget.h>
 #include <modules/rendering/compositing/compositingnode.h>
-
 #include <modules/rendering/rendercamera.h>
-
 #include <modules/rendering/shader/rendervertexshader.h>
 #include <modules/rendering/shader/renderfragmentshader.h>
 #include <modules/rendering/shader/rendershaderprogram.h>
-
 #include <modules/rendering/model/rendermesh.h>
 #include <modules/rendering/model/rendertexture.h>
 #include <modules/rendering/model/rendermaterial.h>
-
 #include <modules/rendering/model/rendermodel.h>
 
 namespace PRE
@@ -33,6 +29,8 @@ namespace PRE
 		using std::string;
 		using std::unordered_map;
 		using std::unordered_set;
+
+		const unsigned int Renderer::ROOT_TAG_GROUP = 0;
 
 		Renderer& Renderer::MakeRenderer(
 			const string& windowTitle,
@@ -91,7 +89,7 @@ namespace PRE
 		{
 			SDL_GL_DeleteContext(renderer._glContext);
 			SDL_DestroyWindow(&renderer._window);
-			delete &renderer;
+			delete& renderer;
 		}
 
 		// TODO: spatial query optimization
@@ -101,40 +99,12 @@ namespace PRE
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			unordered_set<CompositingNode*> visited;
-			for (auto it = _rootCompositingNodes.begin(); it != _rootCompositingNodes.end(); ++it)
-			{
-				auto pCurrentNode = *it;
 
-#ifdef __PRE_DEBUG__
-				UpdateRecurse(*pCurrentNode, visited);
+#if __PRE_DEBUG__
+			UpdateRecurse(rootCompositingNode, visited);
 #else
-				UpdateRecurse(*pCurrentNode);
+			UpdateRecurse(rootCompositingNode);
 #endif
-
-				auto itTag = _models.find(pCurrentNode->_renderTag);
-				if (itTag == _models.end())
-				{
-					continue;
-				}
-
-				const glm::mat4* pViewMatrix = &MAT4_IDENTITY;
-
-				auto itCamera = _compositingNodeCameraPairs.find(pCurrentNode);
-				if (itCamera != _compositingNodeCameraPairs.end())
-				{
-					pViewMatrix = &itCamera->second->GetViewProjectionMatrix();
-				}
-				auto& viewMatrix = *pViewMatrix;
-
-				CompositingTarget::Bind(nullptr);
-				auto& tagModelSet = itTag->second;
-				for (auto it = tagModelSet.begin(); it != tagModelSet.end(); ++it)
-				{
-					auto& model = **it;
-					model.Render(viewMatrix);
-				}
-				CompositingTarget::Bind(nullptr);
-			}
 
 			SDL_GL_SwapWindow(&_window);
 		}
@@ -146,45 +116,13 @@ namespace PRE
 		)
 		{
 			auto pCompositingTarget = new CompositingTarget(width, height);
-			auto pCompositingNode = new CompositingNode(renderTag, *pCompositingTarget);
+			auto pCompositingNode = new CompositingNode(renderTag, pCompositingTarget);
+
+#ifdef __PRE_DEBUG__
 			_compositingNodes.insert(pCompositingNode);
+#endif
+
 			return *pCompositingNode;
-		}
-
-		void Renderer::AttachRootCompositingNodeDependency(CompositingNode& dependency)
-		{
-			auto pDependency = &dependency;
-
-#ifdef __PRE_DEBUG__
-			if (_compositingNodes.find(pDependency) == _compositingNodes.end())
-			{
-				throw "Cannot attach unknown dependency CompositingNode";
-			}
-			if (_rootCompositingNodes.find(pDependency) != _rootCompositingNodes.end())
-			{
-				throw "duplicate CompositingNode dependency on root detected";
-			}
-#endif
-
-			_rootCompositingNodes.insert(pDependency);
-		}
-
-		void Renderer::DetachRootCompositingNodeDependency(CompositingNode& dependency)
-		{
-			auto pDependency = &dependency;
-
-#ifdef __PRE_DEBUG__
-			if (_compositingNodes.find(pDependency) == _compositingNodes.end())
-			{
-				throw "Cannot detach unknown dependency CompositingNode";
-			}
-			if (_rootCompositingNodes.find(pDependency) == _rootCompositingNodes.end())
-			{
-				throw "cannot remove unknown CompositingNode dependency from root";
-			}
-#endif
-
-			_rootCompositingNodes.erase(pDependency);
 		}
 
 		void Renderer::AttachCompositingNodeDependency(
@@ -193,6 +131,10 @@ namespace PRE
 		)
 		{
 #ifdef __PRE_DEBUG__
+			if (&dependency == &rootCompositingNode)
+			{
+				throw "Cannot attach root CompositingNode as a dependency";
+			}
 			if (_compositingNodes.find(&dependent) == _compositingNodes.end())
 			{
 				throw "Cannot attach unknown dependent CompositingNode";
@@ -229,6 +171,10 @@ namespace PRE
 		{
 			auto pCompositingNode = &compositingNode;
 #ifdef __PRE_DEBUG__
+			if (pCompositingNode == &rootCompositingNode)
+			{
+				throw "Cannot deallocate root CompositingNode";
+			}
 			if (_compositingNodes.find(pCompositingNode) == _compositingNodes.end())
 			{
 				throw "Cannot deallocate unknown CompositingNode";
@@ -237,15 +183,15 @@ namespace PRE
 			{
 				throw "Cannot deallocate paired CompositingNode";
 			}
-#endif
 
 			_compositingNodes.erase(pCompositingNode);
-			delete &pCompositingNode->_compositingTarget;
+#endif
+			delete pCompositingNode->_pCompositingTarget;
 			delete pCompositingNode;
 		}
 
 		RenderCamera& Renderer::AllocateCamera(
-			const RenderCamera::Kind& kind,
+			const CameraKind& kind,
 			float size,
 			float aspectRatio,
 			float nearClippingPlane,
@@ -253,13 +199,19 @@ namespace PRE
 		)
 		{
 			auto camera = new RenderCamera(
-				kind,
+				kind == CameraKind::ORTHOGRAPHIC ?
+				RenderCamera::Kind::ORTHOGRAPHIC :
+				RenderCamera::Kind::PERSPECTIVE,
 				size,
 				aspectRatio,
 				nearClippingPlane,
 				farClippingPlane
 			);
+
+#ifdef __PRE_DEBUG__
 			_cameras.insert(camera);
+#endif
+
 			return *camera;
 		}
 
@@ -276,9 +228,10 @@ namespace PRE
 			{
 				throw "Cannot deallocate paired Camera";
 			}
-#endif
 
 			_cameras.erase(pCamera);
+#endif
+
 			delete pCamera;
 		}
 
@@ -307,8 +260,12 @@ namespace PRE
 				throw "CompositingNode is already bound to a Camera";
 			}
 #endif
+
 			_compositingNodeCameraPairs[pCompositingNode] = pCamera;
+
+#ifdef __PRE_DEBUG__
 			_cameraCompositingNodePairs[pCamera] = pCompositingNode;
+#endif
 		}
 
 		void Renderer::UnbindCompositingPair(
@@ -316,7 +273,10 @@ namespace PRE
 			CompositingNode& compositingNode
 		)
 		{
+#ifdef __PRE_DEBUG__
 			auto itCameraPair = _cameraCompositingNodePairs.find(&camera);
+#endif
+
 			auto itCompositingNodePair = _compositingNodeCameraPairs.find(&compositingNode);
 
 #ifdef __PRE_DEBUG__
@@ -328,26 +288,31 @@ namespace PRE
 			{
 				throw "Cannot unbind unknown CompositingNode";
 			}
-			
+
 			if (!(
 				itCameraPair != _cameraCompositingNodePairs.end() &&
 				itCameraPair->first == &camera &&
 				itCompositingNodePair != _compositingNodeCameraPairs.end() &&
 				itCompositingNodePair->first == &compositingNode
-			))
+				))
 			{
 				throw "Cannot unbind unknown compositing pair";
 			}
-#endif
 
 			_cameraCompositingNodePairs.erase(itCameraPair);
+#endif
+
 			_compositingNodeCameraPairs.erase(itCompositingNodePair);
 		}
 
 		const RenderVertexShader& Renderer::AllocateVertexShader(const string& shaderSource)
 		{
 			auto vertexShader = new RenderVertexShader(shaderSource);
+
+#ifdef __PRE_DEBUG__
 			_vertexShaders.insert(vertexShader);
+#endif
+
 			return *vertexShader;
 		}
 
@@ -360,16 +325,21 @@ namespace PRE
 			{
 				throw "Cannot deallocate unknown VertexShader";
 			}
-#endif
 
 			_vertexShaders.erase(pVertexShader);
+#endif
+
 			delete pVertexShader;
 		}
 
 		const RenderFragmentShader& Renderer::AllocateFragmentShader(const string& shaderSource)
 		{
 			auto fragmentShader = new RenderFragmentShader(shaderSource);
+
+#ifdef __PRE_DEBUG__
 			_fragmentShaders.insert(fragmentShader);
+#endif
+
 			return *fragmentShader;
 		}
 
@@ -382,9 +352,10 @@ namespace PRE
 			{
 				throw "Cannot deallocate unknown FragmentShader";
 			}
-#endif
 
 			_fragmentShaders.erase(pFragmentShader);
+#endif
+
 			delete pFragmentShader;
 		}
 
@@ -394,7 +365,11 @@ namespace PRE
 		)
 		{
 			auto shaderProgram = new RenderShaderProgram(vertexShader, fragmentShader);
+
+#ifdef __PRE_DEBUG__
 			_shaderPrograms.insert(shaderProgram);
+#endif
+
 			return *shaderProgram;
 		}
 
@@ -407,16 +382,21 @@ namespace PRE
 			{
 				throw "Cannot deallocate unknown ShaderProgram";
 			}
-#endif
 
 			_shaderPrograms.erase(pShaderProgram);
+#endif
+
 			delete pShaderProgram;
 		}
 
 		RenderMesh& Renderer::AllocateMesh()
 		{
 			auto mesh = new RenderMesh();
+
+#ifdef __PRE_DEBUG__
 			_meshes.insert(mesh);
+#endif
+
 			return *mesh;
 		}
 
@@ -429,16 +409,21 @@ namespace PRE
 			{
 				throw "Cannot deallocate unknown Mesh";
 			}
-#endif
 
 			_meshes.erase(_meshes.find(pMesh));
+#endif
+
 			delete pMesh;
 		}
 
 		RenderTexture& Renderer::AllocateTexture()
 		{
 			auto texture = new RenderTexture();
+
+#ifdef __PRE_DEBUG__
 			_textures.insert(texture);
+#endif
+
 			return *texture;
 		}
 
@@ -451,16 +436,21 @@ namespace PRE
 			{
 				throw "Cannot deallocate unknown Texture";
 			}
-#endif
 
 			_textures.erase(pTexture);
+#endif
+
 			delete pTexture;
 		}
 
 		RenderMaterial& Renderer::AllocateMaterial(RenderShaderProgram& shaderProgram)
 		{
 			auto material = new RenderMaterial(shaderProgram);
+
+#ifdef __PRE_DEBUG__
 			_materials.insert(material);
+#endif
+
 			return *material;
 		}
 
@@ -505,11 +495,15 @@ namespace PRE
 		void Renderer::SetMaterialTextureBinding(
 			RenderMaterial& material,
 			CompositingNode& compositingNode,
-			CompositingNode::CompositingAttachment attachment,
+			const CompositingAttachment& attachment,
 			GLenum bindUnit
 		)
 		{
 #ifdef __PRE_DEBUG__
+			if (&compositingNode == &rootCompositingNode)
+			{
+				throw "Cannot set material texture binding of root CompositingNode";
+			}
 			if (_materials.find(&material) == _materials.end())
 			{
 				throw "Cannot operate on unknown Material";
@@ -522,21 +516,21 @@ namespace PRE
 
 			switch (attachment)
 			{
-				case CompositingNode::CompositingAttachment::POSITION:
-					material.SetTextureBinding(
-						&compositingNode._compositingTarget.GetPosition(),
-						bindUnit
-					);
-				case CompositingNode::CompositingAttachment::NORMALS:
-					material.SetTextureBinding(
-						&compositingNode._compositingTarget.GetNormals(),
-						bindUnit
-					);
-				case CompositingNode::CompositingAttachment::ALBEDO_SPECULAR:
-					material.SetTextureBinding(
-						&compositingNode._compositingTarget.GetAlbedoSpecular(),
-						bindUnit
-					);
+			case CompositingAttachment::POSITIONS:
+				material.SetTextureBinding(
+					&compositingNode._pCompositingTarget->GetPosition(),
+					bindUnit
+				);
+			case CompositingAttachment::NORMALS:
+				material.SetTextureBinding(
+					&compositingNode._pCompositingTarget->GetNormals(),
+					bindUnit
+				);
+			case CompositingAttachment::ALBEDO_SPECULAR:
+				material.SetTextureBinding(
+					&compositingNode._pCompositingTarget->GetAlbedoSpecular(),
+					bindUnit
+				);
 			}
 		}
 
@@ -549,13 +543,14 @@ namespace PRE
 			{
 				throw "Cannot deallocate unknown Material";
 			}
-#endif
 
 			_materials.erase(pMaterial);
+#endif
+
 			delete pMaterial;
 		}
 
-		RenderModel& Renderer::AllocateModel(unsigned int renderTag, RenderMesh& mesh, RenderMaterial& material)
+		RenderModel& Renderer::AllocateModel(RenderMesh& mesh, RenderMaterial& material)
 		{
 #ifdef __PRE_DEBUG__
 			if (_meshes.find(&mesh) == _meshes.end())
@@ -568,34 +563,20 @@ namespace PRE
 			}
 #endif
 
-			auto model = new RenderModel(renderTag, mesh, material);
-			auto itTag = _models.find(renderTag);
+			auto pModel = new RenderModel(mesh, material);
 
-			if (itTag == _models.end())
-			{
-				itTag = _models.insert(
-					std::make_pair(
-						renderTag,
-						unordered_set<RenderModel*>()
-					)
-				).first;
-			}
+#ifdef __PRE_DEBUG__
+			_models.insert(pModel);
+			_modelTagGroups[pModel] = std::move(unordered_set<unsigned int>());
+#endif
 
-			auto& tagSet = itTag->second;
-			tagSet.insert(model);
-			return *model;
+			return *pModel;
 		}
 
 		void Renderer::SetModelMesh(RenderModel& model, RenderMesh& mesh)
 		{
 #ifdef __PRE_DEBUG__
-			auto itTag = _models.find(model._renderTag);
-			if (itTag == _models.end())
-			{
-				throw "Cannot operate on unknown Model";
-			}
-			auto& tagSet = itTag->second;
-			if (tagSet.find(&model) == tagSet.end())
+			if (_models.find(&model) == _models.end())
 			{
 				throw "Cannot operate on unknown Model";
 			}
@@ -611,13 +592,7 @@ namespace PRE
 		void Renderer::SetModelMaterial(RenderModel& model, RenderMaterial& material)
 		{
 #ifdef __PRE_DEBUG__
-			auto itTag = _models.find(model._renderTag);
-			if (itTag == _models.end())
-			{
-				throw "Cannot operate on unknown Model";
-			}
-			auto& tagSet = itTag->second;
-			if (tagSet.find(&model) == tagSet.end())
+			if (_models.find(&model) == _models.end())
 			{
 				throw "Cannot operate on unknown Model";
 			}
@@ -633,76 +608,143 @@ namespace PRE
 		void Renderer::DeallocateModel(RenderModel& model)
 		{
 			auto pModel = &model;
-			auto itTag = _models.find(pModel->_renderTag);
 
 #ifdef __PRE_DEBUG__
-			if (itTag == _models.end())
+			if (_models.find(pModel) == _models.end())
 			{
 				throw "Cannot deallocate unknown Model";
 			}
-#endif
-
-			auto& tagModelSet = itTag->second;
-
-#ifdef __PRE_DEBUG__
-			if (tagModelSet.find(pModel) == tagModelSet.end())
+			if (!_modelTagGroups.find(pModel)->second.empty())
 			{
-				throw "Cannot deallocate unknown Model";
+				throw "Cannot deallocate Model still in tag group(s)";
 			}
+
+			_models.erase(pModel);
 #endif
 
-			tagModelSet.erase(pModel);
 			delete pModel;
+		}
+
+		void Renderer::DeclareTagGroup(unsigned int tagGroup)
+		{
+#ifdef __PRE_DEBUG__
+			if (_tagGroups.find(tagGroup) != _tagGroups.end())
+			{
+				throw "Tag group already exists";
+			}
+#endif
+			_tagGroups[tagGroup] = std::move(unordered_set<RenderModel*>());
+		}
+
+		void Renderer::AddModelToTagGroup(RenderModel& model, unsigned int tagGroup)
+		{
+#ifdef __PRE_DEBUG__
+			if (_models.find(&model) == _models.end())
+			{
+				throw "Cannot add unknown Model to tag group";
+			}
+			if (_tagGroups.find(tagGroup) == _tagGroups.end())
+			{
+				throw "Cannot add Model to undeclared tag group";
+			}
+			auto& modelTagGroup = _modelTagGroups.find(&model)->second;
+			if (modelTagGroup.find(tagGroup) != modelTagGroup.end())
+			{
+				throw "Model already belongs to tag group";
+			}
+			modelTagGroup.insert(tagGroup);
+#endif
+			_tagGroups[tagGroup].insert(&model);
+		}
+
+		void Renderer::RemoveModelFromTagGroup(RenderModel& model, unsigned int tagGroup)
+		{
+#ifdef __PRE_DEBUG__
+			if (_models.find(&model) == _models.end())
+			{
+				throw "Cannot remove unknown Model from tag group";
+			}
+			if (_tagGroups.find(tagGroup) == _tagGroups.end())
+			{
+				throw "Cannot remove Model from undeclared tag group";
+			}
+			auto& modelTagGroup = _modelTagGroups.find(&model)->second;
+			if (modelTagGroup.find(tagGroup) == modelTagGroup.end())
+			{
+				throw "Model does not belong to tag group";
+			}
+			modelTagGroup.erase(tagGroup);
+#endif
+			_tagGroups[tagGroup].erase(&model);
+		}
+
+		void Renderer::RevokeTagGroup(unsigned int tagGroup)
+		{
+#ifdef __PRE_DEBUG__
+			if (tagGroup == ROOT_TAG_GROUP)
+			{
+				throw "Cannot revoke root tag group";
+			}
+			if (_tagGroups.find(tagGroup) == _tagGroups.end())
+			{
+				throw "Cannot revoke unknown tag group";
+			}
+#endif
+			_tagGroups.erase(tagGroup);
 		}
 
 		const glm::mat4 Renderer::MAT4_IDENTITY = glm::mat4();
 
 		Renderer::Renderer(SDL_Window& window, SDL_GLContext& glContext)
 			:
+			rootCompositingNode(*(new CompositingNode(ROOT_TAG_GROUP, nullptr))),
 			_window(window),
-			_glContext(glContext) {}
+			_glContext(glContext)
+		{
+			_tagGroups[ROOT_TAG_GROUP] = std::move(unordered_set<RenderModel*>());
+		}
 
 		Renderer::~Renderer()
 		{
-			for (auto it = _vertexShaders.begin(); it != _vertexShaders.end(); ++it)
+#ifdef __PRE_DEBUG__
+			delete& rootCompositingNode;
+			for (auto it = _compositingNodes.begin(); it != _compositingNodes.end(); ++it)
 			{
-				delete* it;
-			}
-			for (auto it = _fragmentShaders.begin(); it != _fragmentShaders.end(); ++it)
-			{
-				delete* it;
-			}
-			for (auto it = _shaderPrograms.begin(); it != _shaderPrograms.end(); ++it)
-			{
-				delete* it;
-			}
-			for (auto it = _meshes.begin(); it != _meshes.end(); ++it)
-			{
-				delete* it;
-			}
-			for (auto it = _textures.begin(); it != _textures.end(); ++it)
-			{
-				delete* it;
-			}
-			for (auto it = _materials.begin(); it != _materials.end(); ++it)
-			{
-				delete* it;
-			}
-			for (auto it = _models.begin(); it != _models.end(); ++it)
-			{
-				for (auto _it = it->second.begin(); _it != it->second.end(); ++_it)
-				{
-					delete* _it;
-				}
+				delete *it;
 			}
 			for (auto it = _cameras.begin(); it != _cameras.end(); ++it)
 			{
-				delete* it;
+				delete *it;
 			}
-			for (auto it = _compositingNodes.begin(); it != _compositingNodes.end(); ++it)
+			for (auto it = _vertexShaders.begin(); it != _vertexShaders.end(); ++it)
 			{
-				delete* it;
+				delete *it;
 			}
+			for (auto it = _fragmentShaders.begin(); it != _fragmentShaders.end(); ++it)
+			{
+				delete *it;
+			}
+			for (auto it = _shaderPrograms.begin(); it != _shaderPrograms.end(); ++it)
+			{
+				delete *it;
+			}
+			for (auto it = _meshes.begin(); it != _meshes.end(); ++it)
+			{
+				delete *it;
+			}
+			for (auto it = _textures.begin(); it != _textures.end(); ++it)
+			{
+				delete *it;
+			}
+			for (auto it = _materials.begin(); it != _materials.end(); ++it)
+			{
+				delete *it;
+			}
+			for (auto it = _models.begin(); it != _models.end(); ++it)
+			{
+				delete *it;
+			}
+#endif
 		}
 
 		void Renderer::UpdateRecurse(
@@ -714,9 +756,9 @@ namespace PRE
 #endif
 		)
 		{
-#ifdef __PRE_DEBUG__
 			auto pCurrentNode = &currentNode;
 
+#ifdef __PRE_DEBUG__
 			if (visited.find(pCurrentNode) != visited.end()) {
 
 				throw "Cyclic compositing dependency detected";
@@ -737,11 +779,12 @@ namespace PRE
 
 			}
 
-			auto itTag = _models.find(currentNode._renderTag);
-			if (itTag == _models.end())
+#ifdef __PRE_DEBUG__
+			if (_tagGroups.find(currentNode._tagGroup) == _tagGroups.end())
 			{
-				return;
+				throw "Cannot composite using undeclared tag group";
 			}
+#endif
 
 			const glm::mat4* pViewMatrix = &MAT4_IDENTITY;
 
@@ -752,8 +795,8 @@ namespace PRE
 			}
 			auto& viewMatrix = *pViewMatrix;
 
-			CompositingTarget::Bind(&currentNode._compositingTarget);
-			auto& tagModelSet = itTag->second;
+			CompositingTarget::Bind(currentNode._pCompositingTarget);
+			auto& tagModelSet = _tagGroups[currentNode._tagGroup];
 			for (auto it = tagModelSet.begin(); it != tagModelSet.end(); ++it)
 			{
 				auto& model = **it;

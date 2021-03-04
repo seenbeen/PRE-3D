@@ -1,35 +1,30 @@
 #pragma once
-#include <list>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
-
-#include <glm/glm.hpp>
-
-#include <glad/glad.h>
-
-#include <modules/rendering/compositing/compositingnode.h>
-#include <modules/rendering/rendercamera.h>
 
 // TODO: migrate SDL to its own namespace to reduce global clutter
 struct SDL_Window;
 typedef void* SDL_GLContext;
 
+#include <glad/glad.h>
+
+#include <glm/glm.hpp>
+
 namespace PRE
 {
 	namespace RenderingModule
 	{
+		class CompositingNode;
+		class RenderCamera;
 		class RenderVertexShader;
 		class RenderFragmentShader;
 		class RenderShaderProgram;
-
 		class RenderMesh;
 		class RenderTexture;
 		class RenderMaterial;
-
 		class RenderModel;
 
-		using std::list;
 		using std::string;
 		using std::unordered_map;
 		using std::unordered_set;
@@ -40,6 +35,13 @@ namespace PRE
 			Renderer(const Renderer&) = delete;
 
 		public:
+			enum class CameraKind { ORTHOGRAPHIC, PERSPECTIVE };
+			enum class CompositingAttachment { POSITIONS, NORMALS, ALBEDO_SPECULAR };
+
+			static const unsigned int ROOT_TAG_GROUP;
+
+			CompositingNode& rootCompositingNode;
+
 			static Renderer& MakeRenderer(
 				const string& windowTitle,
 				unsigned int windowWidth,
@@ -51,12 +53,10 @@ namespace PRE
 			void Update();
 
 			CompositingNode& AllocateCompositingNode(
-				unsigned int renderTag,
+				unsigned int tagGroup,
 				unsigned int width,
 				unsigned int height
 			);
-			void AttachRootCompositingNodeDependency(CompositingNode& dependency);
-			void DetachRootCompositingNodeDependency(CompositingNode& dependency);
 			void AttachCompositingNodeDependency(
 				CompositingNode& dependent,
 				CompositingNode& dependency
@@ -68,7 +68,7 @@ namespace PRE
 			void DeallocateCompositingNode(CompositingNode& compositingNode);
 
 			RenderCamera& AllocateCamera(
-				const RenderCamera::Kind& kind,
+				const CameraKind& kind,
 				float size,
 				float aspectRatio,
 				float nearClippingPlane,
@@ -114,15 +114,20 @@ namespace PRE
 			void SetMaterialTextureBinding(
 				RenderMaterial& material,
 				CompositingNode& compositingNode,
-				CompositingNode::CompositingAttachment attachment,
+				const CompositingAttachment& attachment,
 				GLenum bindUnit
 			);
 			void DeallocateMaterial(RenderMaterial& material);
 
-			RenderModel& AllocateModel(unsigned int renderTag, RenderMesh& mesh, RenderMaterial& material);
+			RenderModel& AllocateModel(RenderMesh& mesh, RenderMaterial& material);
 			void SetModelMesh(RenderModel& model, RenderMesh& mesh);
 			void SetModelMaterial(RenderModel& model, RenderMaterial& material);
 			void DeallocateModel(RenderModel& model);
+
+			void DeclareTagGroup(unsigned int tagGroup);
+			void AddModelToTagGroup(RenderModel& model, unsigned int tagGroup);
+			void RemoveModelFromTagGroup(RenderModel& model, unsigned int tagGroup);
+			void RevokeTagGroup(unsigned int tagGroup);
 
 		private:
 			static const glm::mat4 MAT4_IDENTITY;
@@ -130,17 +135,17 @@ namespace PRE
 			SDL_Window& _window;
 			SDL_GLContext& _glContext;
 
-			unordered_set<CompositingNode*> _rootCompositingNodes;
+#ifdef __PRE_DEBUG__
 			unordered_set<CompositingNode*> _compositingNodes;
 
 			unordered_set<const RenderCamera*> _cameras;
+#endif
 
 			unordered_map<CompositingNode*, RenderCamera*> _compositingNodeCameraPairs;
 
 #ifdef __PRE_DEBUG__
-			// Note: this should be a 1:1 match at all times, used for debugging
-			unordered_map<RenderCamera*, CompositingNode*> _cameraCompositingNodePairs;
-#endif
+			// Note: this should be a 1:1 match to the above at all times, used for debugging
+			unordered_map<const RenderCamera*, const CompositingNode*> _cameraCompositingNodePairs;
 
 			unordered_set<const RenderVertexShader*> _vertexShaders;
 			unordered_set<const RenderFragmentShader*> _fragmentShaders;
@@ -150,7 +155,15 @@ namespace PRE
 			unordered_set<const RenderTexture*> _textures;
 			unordered_set<const RenderMaterial*> _materials;
 
-			unordered_map<unsigned int, unordered_set<RenderModel*>> _models;
+			unordered_set<const RenderModel*> _models;
+#endif
+
+			unordered_map<unsigned int, unordered_set<RenderModel*>> _tagGroups;
+
+#ifdef __PRE_DEBUG__
+			// used to track whether a model is still part of a tag group
+			unordered_map<const RenderModel*, unordered_set<unsigned int>> _modelTagGroups;
+#endif
 
 			Renderer(SDL_Window& window, SDL_GLContext& glContext);
 			~Renderer();

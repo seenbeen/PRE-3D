@@ -1,13 +1,14 @@
 #pragma once
 #include <glad/glad.h>
+
 #include <glm/glm.hpp>
 
 namespace PRE
 {
 	namespace RenderingModule
 	{
-		class RenderModel;
 		class Renderer;
+		class RenderModel;
 
 		// TODO: bone-channels, weights
 		class RenderMesh
@@ -15,8 +16,8 @@ namespace PRE
 			RenderMesh& operator=(const RenderMesh&) = delete;
 			RenderMesh(const RenderMesh&) = delete;
 
-			friend class RenderModel;
 			friend class Renderer;
+			friend class RenderModel;
 
 			class Impl
 			{

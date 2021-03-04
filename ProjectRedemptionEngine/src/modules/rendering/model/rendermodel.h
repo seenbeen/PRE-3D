@@ -40,9 +40,7 @@ namespace PRE
 		private:
 			Impl& _impl;
 
-			const unsigned int _renderTag;
-
-			RenderModel(const unsigned int renderTag, RenderMesh& mesh, RenderMaterial& material);
+			RenderModel(RenderMesh& mesh, RenderMaterial& material);
 			~RenderModel();
 
 			void SetMesh(RenderMesh& mesh);

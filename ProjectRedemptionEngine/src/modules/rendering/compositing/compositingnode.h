@@ -1,15 +1,12 @@
 #pragma once
 #include <unordered_set>
 
-#include <glad/glad.h>
-
 namespace PRE
 {
 	namespace RenderingModule
 	{
-		class CompositingTarget;
-		class RenderTexture;
 		class Renderer;
+		class CompositingTarget;
 
 		using std::unordered_set;
 
@@ -36,16 +33,13 @@ namespace PRE
 				~Impl();
 			};
 
-		public:
-			enum class CompositingAttachment { POSITION, NORMALS, ALBEDO_SPECULAR };
-
 		private:
-			const unsigned int _renderTag;
-			CompositingTarget& _compositingTarget;
+			const unsigned int _tagGroup;
+			CompositingTarget* const _pCompositingTarget;
 
 			Impl& _impl;
 
-			CompositingNode(unsigned int renderTag, CompositingTarget& compositingTarget);
+			CompositingNode(unsigned int tagGroup, CompositingTarget* pCompositingTarget);
 			~CompositingNode();
 
 			void AddDependency(CompositingNode& compositingNode);

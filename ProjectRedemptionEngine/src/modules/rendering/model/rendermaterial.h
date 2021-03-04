@@ -9,14 +9,11 @@ namespace PRE
 {
 	namespace RenderingModule
 	{
-		class Camera;
-
+		class Renderer;
 		class RenderShaderProgram;
 		class RenderTexture;
-
 		class RenderModel;
-		class Renderer;
-		
+
 		using std::unordered_map;
 
 		class RenderMaterial
@@ -24,8 +21,8 @@ namespace PRE
 			RenderMaterial& operator=(const RenderMaterial&) = delete;
 			RenderMaterial(const RenderMaterial&) = delete;
 
-			friend class RenderModel;
 			friend class Renderer;
+			friend class RenderModel;
 
 			class Impl
 			{
