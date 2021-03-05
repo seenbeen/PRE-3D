@@ -140,14 +140,14 @@ namespace PRE
 			void SetRotation(const glm::fquat& rotation)
 			{
 				_rotation = rotation;
-				_euler = glm::eulerAngles(_rotation);
+				_euler = glm::degrees(glm::eulerAngles(_rotation));
 				UpdateMatrix();
 			}
 
 			void SetLocalRotation(const glm::fquat& localRotation)
 			{
 				_localRotation = localRotation;
-				_localEuler = glm::eulerAngles(_localRotation);
+				_localEuler = glm::degrees(glm::eulerAngles(_localRotation));
 				UpdateLocalMatrix();
 			}
 
@@ -164,14 +164,14 @@ namespace PRE
 			void SetEuler(const glm::vec3& euler)
 			{
 				_euler = euler;
-				_rotation = glm::quat(_euler);
+				_rotation = glm::quat(glm::radians(_euler));
 				UpdateMatrix();
 			}
 
 			void SetLocalEuler(const glm::vec3& localEuler)
 			{
 				_localEuler = localEuler;
-				_localRotation = glm::quat(_localEuler);
+				_localRotation = glm::quat(glm::radians(_localEuler));
 				UpdateLocalMatrix();
 			}
 #pragma endregion

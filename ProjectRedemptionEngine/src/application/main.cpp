@@ -17,8 +17,8 @@ protected:
 
     void OnUpdate() override
     {
-        // auto euler = _transform->GetEuler() + glm::vec3(30) * GetTime().GetDeltaTime();
-        // _transform->SetEuler(euler);
+         auto euler = _transform->GetEuler() + glm::vec3(60) * GetTime().GetDeltaTime();
+         _transform->SetEuler(euler);
     }
 
     void OnDestroy() override
