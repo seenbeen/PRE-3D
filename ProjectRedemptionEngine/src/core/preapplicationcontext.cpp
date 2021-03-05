@@ -72,19 +72,19 @@ namespace PRE
 		void PREApplicationContext::Update()
 		{
 			input.Update();
-			time.Update();
 			world.Update();
 			rendering.Update();
+			time.Update();
 		}
 
 		void PREApplicationContext::Shutdown()
 		{			
 			_onShutdown(*this);
 
-			rendering.Shutdown();
-			world.Shutdown();
-			time.Shutdown();
 			input.Shutdown();
+			world.Shutdown();
+			rendering.Shutdown();
+			time.Shutdown();
 		}
 	}
 }

@@ -621,43 +621,43 @@ namespace PRE
 
 		Renderer::~Renderer()
 		{
-#ifdef __PRE_DEBUG__
 			delete& rootCompositingNode;
-			for (auto it = _compositingNodes.begin(); it != _compositingNodes.end(); ++it)
+#ifdef __PRE_DEBUG__
+			if (_compositingNodes.size() > 0)
 			{
-				delete *it;
+				throw "Leak";
 			}
-			for (auto it = _cameras.begin(); it != _cameras.end(); ++it)
+			if (_cameras.size() > 0)
 			{
-				delete *it;
+				throw "Leak";
 			}
-			for (auto it = _vertexShaders.begin(); it != _vertexShaders.end(); ++it)
+			if (_vertexShaders.size() > 0)
 			{
-				delete *it;
+				throw "Leak";
 			}
-			for (auto it = _fragmentShaders.begin(); it != _fragmentShaders.end(); ++it)
+			if (_fragmentShaders.size() > 0)
 			{
-				delete *it;
+				throw "Leak";
 			}
-			for (auto it = _shaderPrograms.begin(); it != _shaderPrograms.end(); ++it)
+			if (_shaderPrograms.size() > 0)
 			{
-				delete *it;
+				throw "Leak";
 			}
-			for (auto it = _meshes.begin(); it != _meshes.end(); ++it)
+			if (_meshes.size() > 0)
 			{
-				delete *it;
+				throw "Leak";
 			}
-			for (auto it = _textures.begin(); it != _textures.end(); ++it)
+			if (_textures.size() > 0)
 			{
-				delete *it;
+				throw "Leak";
 			}
-			for (auto it = _materials.begin(); it != _materials.end(); ++it)
+			if (_materials.size() > 0)
 			{
-				delete *it;
+				throw "Leak";
 			}
-			for (auto it = _models.begin(); it != _models.end(); ++it)
+			if (_models.size() > 0)
 			{
-				delete *it;
+				throw "Leak";
 			}
 #endif
 		}

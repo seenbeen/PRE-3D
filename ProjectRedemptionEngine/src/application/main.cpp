@@ -15,7 +15,7 @@ protected:
     {
         std::cout << "Start!" << std::endl;
         _transform = gameObject().GetComponent<PRETransformComponent>();
-        auto& mesh = GetRendering().CreateMesh();
+        _pMesh = &GetRendering().CreateMesh();
 
         glm::vec3 vertices[] = {
             glm::vec3(-1, -1, 0),
@@ -38,10 +38,10 @@ protected:
 
         unsigned int triangles[] = { 0, 1, 2, 0, 2, 3 };
 
-        mesh.SetVertices(vertices, 4);
-        mesh.SetNormals(normals, 4);
-        mesh.SetUvs(uvs, 4);
-        mesh.SetTriangles(triangles, 6);
+        _pMesh->SetVertices(vertices, 4);
+        _pMesh->SetNormals(normals, 4);
+        _pMesh->SetUvs(uvs, 4);
+        _pMesh->SetTriangles(triangles, 6);
 
         string vertexShaderCode(
             "#version 330 core\n"
@@ -74,29 +74,29 @@ protected:
             "}\n"
         );
 
-        auto& shader = GetRendering().CreateShader(
+        _pShader = &GetRendering().CreateShader(
             vertexShaderCode,
             fragmentShadercode
         );
 
-        auto& texture = GetRendering().CreateTexture();
+        _pTexture = &GetRendering().CreateTexture();
         unsigned char data[] = {
             0, 0, 0, 255,
             255, 0, 0, 255,
             0, 255, 0, 255,
             0, 0, 255, 255
         };
-        texture.SetData(2, 2, data);
+        _pTexture->SetData(2, 2, data);
 
-        auto& material = GetRendering().CreateMaterial();
-        material.SetShader(&shader);
-        material.SetTextureBinding(&texture, 7);
+        _pMaterial = &GetRendering().CreateMaterial();
+        _pMaterial->SetShader(_pShader);
+        _pMaterial->SetTextureBinding(_pTexture, 7);
 
-        shader.SetInt("textureSampler", 7);
+        _pShader->SetInt("textureSampler", 7);
 
         auto& modelRendererComponent = *gameObject().GetComponent<PREModelRendererComponent>();
-        modelRendererComponent.SetMesh(&mesh);
-        modelRendererComponent.SetMaterial(&material);
+        modelRendererComponent.SetMesh(_pMesh);
+        modelRendererComponent.SetMaterial(_pMaterial);
     }
 
     void OnUpdate() override
@@ -108,10 +108,18 @@ protected:
     void OnDestroy() override
     {
         std::cout << "Destroy!" << std::endl;
+        GetRendering().DestroyShader(*_pShader);
+        GetRendering().DestroyMesh(*_pMesh);
+        GetRendering().DestroyTexture(*_pTexture);
+        GetRendering().DestroyMaterial(*_pMaterial);
     }
 
 private:
     PRETransformComponent* _transform = nullptr;
+    PREShader* _pShader = nullptr;
+    PREMesh* _pMesh = nullptr;
+    PRETexture* _pTexture = nullptr;
+    PREMaterial* _pMaterial = nullptr;
 };
 
 class CameraControllerComponent : public PREGameObjectComponent
