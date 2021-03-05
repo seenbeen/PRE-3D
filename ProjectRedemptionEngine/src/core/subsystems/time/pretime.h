@@ -19,9 +19,14 @@ namespace PRE
 			friend class PREApplicationContext;
 
 		public:
+			void SetFrameLimit(unsigned int frameLimit);
+			unsigned int GetFrameLimit();
+
 			float GetDeltaTime();
 
 		private:
+			static const float MILLIS_IN_SECOND;
+
 			static PRETime& MakePRETime(
 				const PRETimeConfig& timeConfig,
 				PREApplicationContext& applicationContext
@@ -29,6 +34,7 @@ namespace PRE
 
 			PREApplicationContext& _applicationContext;
 			Time& _time;
+			unsigned int _frameLimit;
 
 			PRETime(PREApplicationContext& applicationContext, Time& time);
 			~PRETime();

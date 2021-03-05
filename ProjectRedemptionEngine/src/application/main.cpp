@@ -69,7 +69,7 @@ protected:
 void OnInitialize(PREApplicationContext& applicationContext)
 {
     std::cout << "ON INITIALIZE" << std::endl;
-
+    applicationContext.time.SetFrameLimit(60);
     class : public PREGameObjectTemplate
     {
     protected:
