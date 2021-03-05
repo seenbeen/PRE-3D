@@ -135,6 +135,15 @@
     <Filter Include="Header Files\Other Dependencies\stb">
       <UniqueIdentifier>{b0a264bd-4711-47c5-817f-6dd10449855f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Core\Subsystems\Asset">
+      <UniqueIdentifier>{aca813cb-41e3-48a4-ab2e-6c59b122a9cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Modules\Asset">
+      <UniqueIdentifier>{acb7c594-8751-456b-8b66-b1f5ce0642d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Modules\Asset">
+      <UniqueIdentifier>{5a65ed51-040d-4d5c-a181-a81d269d8768}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\modules\gameobject\gameobject.h">
@@ -284,6 +293,15 @@
     <ClInclude Include="src\core\subsystems\rendering\pretexture.h">
       <Filter>Header Files\Core\Subsystems\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\subsystems\asset\preassetmanager.h">
+      <Filter>Header Files\Core\Subsystems\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\subsystems\asset\preassetmanagerconfig.h">
+      <Filter>Header Files\Core\Subsystems\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\asset\assetmanager.h">
+      <Filter>Header Files\Modules\Asset</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\modules\gameobject\gameobject.cpp">
@@ -411,6 +429,9 @@
     </ClCompile>
     <ClCompile Include="src\core\subsystems\rendering\prematerial.cpp">
       <Filter>Source Files\Core\Subsystems\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\asset\assetmanager.cpp">
+      <Filter>Source Files\Modules\Asset</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -2,9 +2,11 @@
 #include <string>
 
 #include <include/core.h>
+#include <modules/asset/assetmanager.h>
 
 using std::string;
 using namespace PRE::Core;
+using PRE::AssetModule::AssetManager;
 
 class CubeComponent : public PREGameObjectComponent
 {
@@ -187,6 +189,71 @@ void OnShutdown(PREApplicationContext& applicationContext)
     std::cout << "ON SHUTDOWN" << std::endl;
 }
 
+void AssetManagerTest()
+{
+    AssetManager aman(10);
+
+    auto kFoo = "foo";
+    auto pFoo = new string("foo s");
+
+    auto kBar = "bar";
+    auto pBar = new string("a bar");
+
+    auto kBaz = "baz";
+    auto pBaz = new string("zzzzzz");
+
+    auto kQux = "qux";
+    auto pQux = new string("q");
+
+    auto Unloader = [](void* context, void* payload) {
+        auto pString = static_cast<string*>(payload);
+        std::cout << "Unloading \"" << *pString << "\"" << std::endl;
+        delete pString;
+    };
+
+    aman.Store(
+        kFoo,
+        pFoo->length(),
+        pFoo,
+        Unloader,
+        nullptr
+    );
+
+    aman.Store(
+        kBar,
+        pBar->length(),
+        pBar,
+        Unloader,
+        nullptr
+    );
+
+    auto gBar = static_cast<string*>(aman.Get(kBar));
+    std::cout << "got \"" << *gBar << "\"" << std::endl;
+    aman.Release(kBar);
+
+    auto gFoo = static_cast<string*>(aman.Get(kFoo));
+    std::cout << "got \"" << *gFoo << "\"" << std::endl;
+    aman.Release(kFoo);
+
+    aman.Store(
+        kBaz,
+        pBaz->length(),
+        pBaz,
+        Unloader,
+        nullptr
+    );
+
+    aman.Store(
+        kQux,
+        pQux->length(),
+        pQux,
+        Unloader,
+        nullptr
+    );
+
+    std::cout << "---" << std::endl;
+}
+
 int main(int argc, char *argv[])
 {
     PREApplication::Run(
@@ -203,5 +270,6 @@ int main(int argc, char *argv[])
             OnShutdown
         )
     );
+
     return 0;
 }

@@ -35,6 +35,7 @@
     <ClCompile Include="src\core\subsystems\world\pregameobjecttemplate.cpp" />
     <ClCompile Include="src\core\subsystems\world\preworld.cpp" />
     <ClCompile Include="src\core\subsystems\world\preworldconfig.cpp" />
+    <ClCompile Include="src\modules\asset\assetmanager.cpp" />
     <ClCompile Include="src\modules\gameobject\gameobject.cpp" />
     <ClCompile Include="src\modules\gameobject\gameobjectcomponent.cpp" />
     <ClCompile Include="src\modules\gameobject\gameobjecttemplate.cpp" />
@@ -62,6 +63,8 @@
     <ClInclude Include="src\core\components\pretransformcomponent.h" />
     <ClInclude Include="src\core\preapplicationconfig.h" />
     <ClInclude Include="src\core\preapplicationcontext.h" />
+    <ClInclude Include="src\core\subsystems\asset\preassetmanager.h" />
+    <ClInclude Include="src\core\subsystems\asset\preassetmanagerconfig.h" />
     <ClInclude Include="src\core\subsystems\input\preinput.h" />
     <ClInclude Include="src\core\subsystems\input\preinputconfig.h" />
     <ClInclude Include="src\core\subsystems\input\prekeycode.h" />
@@ -85,6 +88,7 @@
     <ClInclude Include="src\include\modules\rendering.h" />
     <ClInclude Include="src\include\modules\time.h" />
     <ClInclude Include="src\include\modules\transform.h" />
+    <ClInclude Include="src\modules\asset\assetmanager.h" />
     <ClInclude Include="src\modules\gameobject\gameobject.h" />
     <ClInclude Include="src\modules\gameobject\gameobjectcomponent.h" />
     <ClInclude Include="src\modules\gameobject\gameobjecttemplate.h" />
