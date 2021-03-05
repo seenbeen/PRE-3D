@@ -35,6 +35,7 @@ namespace PRE
 			Renderer& renderer
 		)
 			:
+			tagGroupCounter(0),
 			applicationContext(applicationContext),
 			renderer(renderer) {}
 
@@ -43,14 +44,27 @@ namespace PRE
 			Renderer::ShutdownRenderer(renderer);
 		}
 
-		PRERenderTexture& PRERendering::CreateRenderTexture()
+		PRERenderTexture& PRERendering::CreateRenderTexture(unsigned int width, unsigned int height)
 		{
-
+			_impl.renderer.DeclareTagGroup(++_impl.tagGroupCounter);
+			return *(
+				new PRERenderTexture(
+					_impl.tagGroupCounter,
+					_impl.renderer.AllocateCompositingNode(
+						_impl.tagGroupCounter,
+						width,
+						height
+					)
+				)
+			);
 		}
 
 		void PRERendering::DestroyRenderTexture(PRERenderTexture& renderTexture)
 		{
-
+			auto tagGroup = renderTexture._tagGroup;
+			_impl.renderer.DeallocateCompositingNode(renderTexture._compositingNode);
+			delete &renderTexture;
+			_impl.renderer.RevokeTagGroup(tagGroup);
 		}
 
 		PREShader& PRERendering::CreateShader(const string& vertex, const string& fragment)
@@ -122,10 +136,19 @@ namespace PRE
 			Renderer& renderer
 		)
 			:
+			rootRenderTexture(
+				*(
+					new PRERenderTexture(
+						Renderer::ROOT_TAG_GROUP,
+						renderer.rootCompositingNode
+					)
+				)
+			),
 			_impl(Impl::MakeImpl(applicationContext, renderer)) {}
 		
 		PRERendering::~PRERendering()
 		{
+			delete &rootRenderTexture;
 			delete &_impl;
 		}
 
@@ -139,29 +162,6 @@ namespace PRE
 
 		void PRERendering::Shutdown() {}
 
-		/*
-		void PRERendering::BindCompositingPair(
-			PRECameraComponent& camera,
-			PRERenderTexture* pRenderTexture
-		)
-		{
-			if (pRenderTexture == nullptr)
-			{
-				_impl.renderer.UnbindCompositingPair(
-					*camera._pCamera,
-					_impl.renderer.rootCompositingNode
-				);
-			}
-			else
-			{
-				_impl.renderer.BindCompositingPair(
-					*camera._pCamera,
-					pRenderTexture->_compositingNode
-				);
-			}
-		}
-		*/
-
 		void PRERendering::AllocateCamera(PRECameraComponent& cameraComponent)
 		{
 			auto& camera = _impl.renderer.AllocateCamera(
@@ -174,6 +174,28 @@ namespace PRE
 				cameraComponent._farClippingPlane
 			);
 			cameraComponent._pCamera = &camera;
+
+			auto pRenderTexture = cameraComponent._pRenderTexture;
+			auto& associatedModelComponents = cameraComponent._associatedModelComponents;
+
+			if (pRenderTexture != nullptr)
+			{
+				_impl.renderer.BindCompositingPair(
+					*cameraComponent._pCamera,
+					pRenderTexture->_compositingNode
+				);
+
+				for (auto it = associatedModelComponents.begin(); it != associatedModelComponents.end(); ++it)
+				{
+					auto& modelRendererComponent = **it;
+					_impl.renderer.AddModelToTagGroup(
+						*modelRendererComponent._pModel,
+						pRenderTexture->_tagGroup
+					);
+				}
+
+				cameraComponent._pPreviousRenderTexture = pRenderTexture;
+			}
 		}
 
 		void PRERendering::UpdateCamera(PRECameraComponent& cameraComponent)
@@ -181,6 +203,7 @@ namespace PRE
 			cameraComponent._pCamera->SetViewMatrix(
 				cameraComponent._pTransformComponent->GetInverseMatrix()
 			);
+
 			if (cameraComponent._hasChanged)
 			{
 				cameraComponent._hasChanged = false;
@@ -193,24 +216,102 @@ namespace PRE
 				cameraComponent._pCamera->SetAspectRatio(cameraComponent._aspectRatio);
 				cameraComponent._pCamera->SetNearClippingPlane(cameraComponent._nearClippingPlane);
 				cameraComponent._pCamera->SetFarClippingPlane(cameraComponent._farClippingPlane);
+			}
 
-				// GetRendering().BindCompositingPair(*this, _pRenderTexture);
+			auto pPreviousRenderTexture = cameraComponent._pPreviousRenderTexture;
+			auto pRenderTexture = cameraComponent._pRenderTexture;
+			auto& associatedModelComponents = cameraComponent._associatedModelComponents;
+
+			if (pPreviousRenderTexture != pRenderTexture)
+			{
+				if (pPreviousRenderTexture != nullptr)
+				{
+					for (auto it = associatedModelComponents.begin(); it != associatedModelComponents.end(); ++it)
+					{
+						auto& modelRendererComponent = **it;
+						_impl.renderer.RemoveModelFromTagGroup(
+							*modelRendererComponent._pModel,
+							pPreviousRenderTexture->_tagGroup
+						);
+					}
+
+					_impl.renderer.UnbindCompositingPair(
+						*cameraComponent._pCamera,
+						pPreviousRenderTexture->_compositingNode
+					);
+				}
+
+				if (pRenderTexture != nullptr)
+				{
+					_impl.renderer.BindCompositingPair(
+						*cameraComponent._pCamera,
+						pRenderTexture->_compositingNode
+					);
+
+					for (auto it = associatedModelComponents.begin(); it != associatedModelComponents.end(); ++it)
+					{
+						auto& modelRendererComponent = **it;
+						_impl.renderer.AddModelToTagGroup(
+							*modelRendererComponent._pModel,
+							pRenderTexture->_tagGroup
+						);
+					}
+				}
+
+				cameraComponent._pPreviousRenderTexture = pRenderTexture;
 			}
 		}
 
 		void PRERendering::DeallocateCamera(PRECameraComponent& cameraComponent)
 		{
+			auto pRenderTexture = cameraComponent._pRenderTexture;
+			auto& associatedModelComponents = cameraComponent._associatedModelComponents;
+
+			if (pRenderTexture != nullptr)
+			{
+				for (auto it = associatedModelComponents.begin(); it != associatedModelComponents.end(); ++it)
+				{
+					auto& modelRendererComponent = **it;
+					_impl.renderer.RemoveModelFromTagGroup(
+						*modelRendererComponent._pModel,
+						pRenderTexture->_tagGroup
+					);
+				}
+
+				_impl.renderer.UnbindCompositingPair(
+					*cameraComponent._pCamera,
+					pRenderTexture->_compositingNode
+				);
+
+				// not necessary to re-assign pRenderTexture values
+				// ie: cameraComponent._pPreviousRenderTexture = cameraComponent._pRenderTexture = nullptr;
+			}
+
 			_impl.renderer.DeallocateCamera(*cameraComponent._pCamera);
 		}
 
 		void PRERendering::AllocateModel(PREModelRendererComponent& modelRendererComponent)
 		{
 			auto& model = _impl.renderer.AllocateModel();
-			_impl.renderer.AddModelToTagGroup(
-				*modelRendererComponent._pModel,
-				modelRendererComponent._tagGroup
-			);
 			modelRendererComponent._pModel = &model;
+
+			auto pCameraComponent = modelRendererComponent._pCameraComponent;
+
+			if (pCameraComponent != nullptr)
+			{
+				pCameraComponent->_associatedModelComponents.insert(
+					&modelRendererComponent
+				);
+				if (pCameraComponent->_pRenderTexture != nullptr)
+				{
+					_impl.renderer.AddModelToTagGroup(
+						*modelRendererComponent._pModel,
+						pCameraComponent->_pRenderTexture->_tagGroup
+					);
+				}
+
+				modelRendererComponent._pPreviousCameraComponent = pCameraComponent;
+			}
 		}
 
 		void PRERendering::UpdateModel(
@@ -218,8 +319,10 @@ namespace PRE
 		)
 		{
 			modelRendererComponent._pModel->modelMatrix = modelRendererComponent._pTransformComponent->GetMatrix();
+
 			if (modelRendererComponent._hasChanged)
 			{
+				modelRendererComponent._hasChanged = false;
 				_impl.renderer.SetModelMesh(
 					*modelRendererComponent._pModel,
 					modelRendererComponent._pMesh != nullptr ?
@@ -232,24 +335,66 @@ namespace PRE
 					&modelRendererComponent._pMaterial->_material :
 					nullptr
 				);
-				_impl.renderer.RemoveModelFromTagGroup(
-					*modelRendererComponent._pModel,
-					modelRendererComponent._oldTagGroup
-				);
-				_impl.renderer.AddModelToTagGroup(
-					*modelRendererComponent._pModel,
-					modelRendererComponent._tagGroup
-				);
-				modelRendererComponent._oldTagGroup = modelRendererComponent._tagGroup;
+			}
+
+			auto pPreviousCameraComponent = modelRendererComponent._pPreviousCameraComponent;
+			auto pCameraComponent = modelRendererComponent._pCameraComponent;
+
+			if (pPreviousCameraComponent != pCameraComponent)
+			{
+				if (pPreviousCameraComponent != nullptr)
+				{
+					if (pPreviousCameraComponent->_pRenderTexture != nullptr)
+					{
+						_impl.renderer.RemoveModelFromTagGroup(
+							*modelRendererComponent._pModel,
+							pPreviousCameraComponent->_pRenderTexture->_tagGroup
+						);
+					}
+					pPreviousCameraComponent->_associatedModelComponents.erase(
+						&modelRendererComponent
+					);
+				}
+
+				if (pCameraComponent != nullptr)
+				{
+					pCameraComponent->_associatedModelComponents.insert(
+						&modelRendererComponent
+					);
+					if (pCameraComponent->_pRenderTexture != nullptr)
+					{
+						_impl.renderer.AddModelToTagGroup(
+							*modelRendererComponent._pModel,
+							pCameraComponent->_pRenderTexture->_tagGroup
+						);
+					}
+				}
+
+				modelRendererComponent._pPreviousCameraComponent = pCameraComponent;
 			}
 		}
 
 		void PRERendering::DeallocateModel(PREModelRendererComponent& modelRendererComponent)
 		{
-			_impl.renderer.RemoveModelFromTagGroup(
-				*modelRendererComponent._pModel,
-				modelRendererComponent._tagGroup
-			);
+			auto pCameraComponent = modelRendererComponent._pCameraComponent;
+
+			if (pCameraComponent != nullptr)
+			{
+				if (pCameraComponent->_pRenderTexture != nullptr)
+				{
+					_impl.renderer.RemoveModelFromTagGroup(
+						*modelRendererComponent._pModel,
+						pCameraComponent->_pRenderTexture->_tagGroup
+					);
+				}
+				pCameraComponent->_associatedModelComponents.erase(
+					&modelRendererComponent
+				);
+
+				// not necessary to re-assign pCamera tracker values
+				// ie: modelRendererComponent._pPreviousCamera = modelRendererComponent._pCamera;
+			}
+
 			_impl.renderer.DeallocateModel(*modelRendererComponent._pModel);
 		}
 	}

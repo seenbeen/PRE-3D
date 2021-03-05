@@ -45,6 +45,7 @@ namespace PRE
 			private:
 				static Impl& MakeImpl(PREApplicationContext& applicationContext, Renderer& renderer);
 
+				unsigned int tagGroupCounter;
 				PREApplicationContext& applicationContext;
 				Renderer& renderer;
 
@@ -53,7 +54,9 @@ namespace PRE
 			};
 
 		public:
-			PRERenderTexture& CreateRenderTexture();
+			PRERenderTexture& rootRenderTexture;
+
+			PRERenderTexture& CreateRenderTexture(unsigned int width, unsigned int height);
 			void DestroyRenderTexture(PRERenderTexture& renderTexture);
 			
 			PREShader& CreateShader(const string& vertex, const string& fragment);

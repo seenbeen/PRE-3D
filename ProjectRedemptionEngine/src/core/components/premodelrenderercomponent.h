@@ -13,6 +13,7 @@ namespace PRE
 {
 	namespace Core
 	{
+		class PRECameraComponent;
 		class PRETransformComponent;
 
 		class PRERendering;
@@ -26,8 +27,8 @@ namespace PRE
 			friend class PRERendering;
 
 		public:
-			void SetTagGroup(unsigned int tagGroup);
-			unsigned int GetTagGroup() const;
+			void SetCameraComponent(PRECameraComponent* pCameraComponent);
+			PRECameraComponent* GetCameraComponent() const;
 
 			void SetMaterial(PREMaterial* pMaterial);
 			PREMaterial* GetMaterial() const;
@@ -46,8 +47,9 @@ namespace PRE
 			PRETransformComponent* _pTransformComponent = nullptr;
 			RenderModel* _pModel = nullptr;
 
-			unsigned int _oldTagGroup = 0;
-			unsigned int _tagGroup = 0;
+			PRECameraComponent* _pPreviousCameraComponent = nullptr;
+			PRECameraComponent* _pCameraComponent = nullptr;
+
 			PREMaterial* _pMaterial = nullptr;
 			PREMesh* _pMesh = nullptr;
 		};

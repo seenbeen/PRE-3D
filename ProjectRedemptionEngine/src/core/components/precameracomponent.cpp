@@ -73,7 +73,7 @@ namespace PRE
 		void PRECameraComponent::SetRenderTexture(PRERenderTexture* pRenderTexture)
 		{
 			_pRenderTexture = pRenderTexture;
-			_hasChanged = true;
+			// hasChanged does not need to be set here.
 		}
 
 		PRERenderTexture* PRECameraComponent::GetRenderTexture() const

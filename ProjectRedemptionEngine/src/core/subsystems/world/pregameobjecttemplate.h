@@ -9,7 +9,7 @@ namespace PRE
 	{
 		class PREApplicationContext;
 
-		class PREWorld;
+		class PRERendering;
 
 		using PRE::GameObjectModule::GameObjectTemplate;
 
@@ -28,7 +28,9 @@ namespace PRE
 
 			void OnInstantiate() override;
 
-			virtual void Instantiate() = 0;
+			virtual void OnInstantiateTemplate() = 0;
+
+			PRERendering& GetRendering();
 
 		private:
 			PREApplicationContext* _preApplicationContext = nullptr;

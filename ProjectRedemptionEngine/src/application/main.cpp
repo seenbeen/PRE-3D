@@ -4,25 +4,19 @@
 
 using namespace PRE::Core;
 
-class FooComponent : public PREGameObjectComponent
+class CubeComponent : public PREGameObjectComponent
 {
 protected:
     void OnStart() override
     {
         std::cout << "Start!" << std::endl;
         _transform = gameObject().GetComponent<PRETransformComponent>();
-        _derp = 0;
     }
 
     void OnUpdate() override
     {
-        _derp += GetTime().GetDeltaTime();
-        if (_derp >= 3.0f)
-        {
-            std::cout << "3 seconds, i'm out." << std::endl;
-            std::cout << _transform->GetEuler().x << std::endl;
-            gameObject().Destroy(gameObject());
-        }
+        auto euler = _transform->GetEuler() + glm::vec3(30) * GetTime().GetDeltaTime();
+        _transform->SetEuler(euler);
     }
 
     void OnDestroy() override
@@ -32,12 +26,18 @@ protected:
 
 private:
     PRETransformComponent* _transform = nullptr;
-    float _derp = 0;
 };
 
-class BarComponent : public PREGameObjectComponent
+class CameraControllerComponent : public PREGameObjectComponent
 {
 protected:
+    void OnStart() override
+    {
+        gameObject().GetComponent<PRETransformComponent>()->SetPosition(
+            glm::vec3(0, 0, -1)
+        );
+    }
+
     void OnUpdate() override
     {
         if (GetInput().ApplicationHasQuit())
@@ -71,23 +71,32 @@ void OnInitialize(PREApplicationContext& applicationContext)
     class : public PREGameObjectTemplate
     {
     protected:
-        void Instantiate() override
+        void OnInstantiateTemplate() override
         {
-            AddPREComponent<FooComponent>();
+            AddPREComponent<CubeComponent>();
+            AddPREComponent<PREModelRendererComponent>();
         }
-    } fooTemplate;
+    } cubeTemplate;
 
     class : public PREGameObjectTemplate
     {
     protected:
-        void Instantiate() override
+        void OnInstantiateTemplate() override
         {
-            AddPREComponent<BarComponent>();
+            AddPREComponent<CameraControllerComponent>();
+            auto& cameraComponent = *AddPREComponent<PRECameraComponent>();
+            cameraComponent.SetKind(PRECameraComponent::Kind::ORTHOGRAPHIC);
+            cameraComponent.SetRenderTexture(&GetRendering().rootRenderTexture);
         }
-    } barTemplate;
+    } cameraTemplate;
 
-    applicationContext.world.Instantiate(fooTemplate);
-    applicationContext.world.Instantiate(barTemplate);
+    auto& cube = applicationContext.world.Instantiate(cubeTemplate);
+    auto& modelRendererComponent = *cube.GetComponent<PREModelRendererComponent>();
+
+    auto& camera = applicationContext.world.Instantiate(cameraTemplate);
+    auto pCameraComponent = camera.GetComponent<PRECameraComponent>();
+
+    modelRendererComponent.SetCameraComponent(pCameraComponent);
 }
 
 void OnShutdown(PREApplicationContext& applicationContext)

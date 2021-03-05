@@ -10,15 +10,15 @@ namespace PRE
 	{
 		using PRE::RenderingModule::RenderModel;
 
-		void PREModelRendererComponent::SetTagGroup(unsigned int tagGroup)
+		void PREModelRendererComponent::SetCameraComponent(PRECameraComponent* pCameraComponent)
 		{
-			_tagGroup = tagGroup;
-			_hasChanged = true;
+			_pCameraComponent = pCameraComponent;
+			// hasChanged does not need to be set here.
 		}
 
-		unsigned int PREModelRendererComponent::GetTagGroup() const
+		PRECameraComponent* PREModelRendererComponent::GetCameraComponent() const
 		{
-			return _tagGroup;
+			return _pCameraComponent;
 		}
 
 		void PREModelRendererComponent::SetMaterial(PREMaterial* pMaterial)

@@ -20,5 +20,6 @@
 #include <core/subsystems/world/pregameobjectcomponent.h>
 
 // components
-#include <core/components/pretransformcomponent.h>
+#include <core/components/precameracomponent.h>
 #include <core/components/premodelrenderercomponent.h>
+#include <core/components/pretransformcomponent.h>

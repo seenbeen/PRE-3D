@@ -1,4 +1,6 @@
 #pragma once
+#include <unordered_set>
+
 #include <include/modules/rendering.h>
 
 #include <core/subsystems/world/pregameobjectcomponent.h>
@@ -7,11 +9,13 @@ namespace PRE
 {
 	namespace Core
 	{
+		class PREModelRendererComponent;
 		class PRETransformComponent;
 
 		class PRERendering;
 		class PRERenderTexture;
 
+		using std::unordered_set;
 		using PRE::RenderingModule::RenderCamera;
 
 		class PRECameraComponent : public PREGameObjectComponent
@@ -45,6 +49,8 @@ namespace PRE
 			void OnDestroy() override;
 
 		private:
+			unordered_set<PREModelRendererComponent*> _associatedModelComponents;
+
 			bool _hasChanged = false;
 
 			PRETransformComponent* _pTransformComponent = nullptr;
@@ -57,6 +63,7 @@ namespace PRE
 			float _nearClippingPlane = 0.1f;
 			float _farClippingPlane = 1000.0f;
 
+			PRERenderTexture* _pPreviousRenderTexture = nullptr;
 			PRERenderTexture* _pRenderTexture = nullptr;
 		};
 	} // namespace Core

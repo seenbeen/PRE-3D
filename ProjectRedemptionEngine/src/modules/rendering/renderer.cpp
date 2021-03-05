@@ -248,7 +248,7 @@ namespace PRE
 			{
 				throw "Cannot bind unknown Camera";
 			}
-			if (_compositingNodes.find(pCompositingNode) == _compositingNodes.end())
+			if (&compositingNode != &rootCompositingNode && _compositingNodes.find(pCompositingNode) == _compositingNodes.end())
 			{
 				throw "Cannot bind unknown CompositingNode";
 			}
@@ -285,7 +285,7 @@ namespace PRE
 			{
 				throw "Cannot unbind unknown Camera";
 			}
-			if (_compositingNodes.find(&compositingNode) == _compositingNodes.end())
+			if (&compositingNode != &rootCompositingNode && _compositingNodes.find(&compositingNode) == _compositingNodes.end())
 			{
 				throw "Cannot unbind unknown CompositingNode";
 			}

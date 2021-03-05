@@ -8,8 +8,12 @@ namespace PRE
 	{
 		using PRE::RenderingModule::RenderCompositingNode;
 
-		PRERenderTexture::PRERenderTexture(RenderCompositingNode& compositingNode)
+		PRERenderTexture::PRERenderTexture(
+			unsigned int tagGroup,
+			RenderCompositingNode& compositingNode
+		)
 			:
+			_tagGroup(tagGroup),
 			_compositingNode(compositingNode) {}
 
 		PRERenderTexture::~PRERenderTexture() {}

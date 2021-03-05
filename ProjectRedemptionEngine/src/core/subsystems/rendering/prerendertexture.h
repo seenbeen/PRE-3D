@@ -19,9 +19,10 @@ namespace PRE
 			friend class PREMaterial;
 
 		private:
+			const unsigned int _tagGroup;
 			RenderCompositingNode& _compositingNode;
 
-			PRERenderTexture(RenderCompositingNode& compositingNode);
+			PRERenderTexture(unsigned int tagGroup, RenderCompositingNode& compositingNode);
 			~PRERenderTexture();
 		};
 	} // namespace Core
