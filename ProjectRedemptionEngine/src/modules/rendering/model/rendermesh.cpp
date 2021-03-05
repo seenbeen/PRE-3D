@@ -1,6 +1,7 @@
 #include <modules/rendering/model/rendermesh.h>
 
 #include <cstring>
+#include <iostream>
 
 #include <glad/glad.h>
 
@@ -27,16 +28,16 @@ namespace PRE
 			glBindVertexArray(vertexArrayObject);
 
 			glBindBuffer(GL_ARRAY_BUFFER, vertexVerticesBuffer);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, sizeof(glm::vec3), GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
 
 			glBindBuffer(GL_ARRAY_BUFFER, vertexNormalsBuffer);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, sizeof(glm::vec3), GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
 
 			glBindBuffer(GL_ARRAY_BUFFER, vertexUVsBuffer);
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 			glEnableVertexAttribArray(2);
-			glVertexAttribPointer(2, sizeof(glm::vec2), GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
 
 			glBindVertexArray(0);
 
@@ -231,21 +232,22 @@ namespace PRE
 			if (_impl.normalsHaveChanged)
 			{
 				_impl.normalsHaveChanged = false;
-				glBindBuffer(GL_ARRAY_BUFFER, _impl.vertexVerticesBuffer);
+				glBindBuffer(GL_ARRAY_BUFFER, _impl.vertexNormalsBuffer);
 				glBufferData(GL_ARRAY_BUFFER, _impl.nNormals * sizeof(glm::vec3), &_impl.normals[0], GL_STATIC_DRAW);
 			}
 			if (_impl.uvsHaveChanged)
 			{
 				_impl.uvsHaveChanged = false;
-				glBindBuffer(GL_ARRAY_BUFFER, _impl.vertexVerticesBuffer);
+				glBindBuffer(GL_ARRAY_BUFFER, _impl.vertexUVsBuffer);
 				glBufferData(GL_ARRAY_BUFFER, _impl.nUvs * sizeof(glm::vec2), &_impl.uvs[0], GL_STATIC_DRAW);
 			}
 			if (_impl.triangleIndicesHaveChanged)
 			{
 				_impl.triangleIndicesHaveChanged = false;
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _impl.elementsTrianglesBuffer);
-				glBufferData(GL_ELEMENT_ARRAY_BUFFER, _impl.nTriangleIndices * sizeof(unsigned int), &_impl.triangleIndices[0], GL_STATIC_DRAW);
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER, _impl.nTriangleIndices * sizeof(unsigned int), _impl.triangleIndices, GL_STATIC_DRAW);
 			}
+
 			glDrawElements(GL_TRIANGLES, _impl.nTriangleIndices, GL_UNSIGNED_INT, 0);
 			glBindVertexArray(GL_NONE);
 		}

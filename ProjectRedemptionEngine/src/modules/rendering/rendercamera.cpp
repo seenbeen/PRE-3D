@@ -87,10 +87,10 @@ namespace PRE
 					{
 						auto hAspect = _impl.size * _impl.aspectRatio;
 						_impl.projectionMatrix = glm::ortho(
-							-_impl.size,
-							_impl.size,
 							-hAspect,
 							hAspect,
+							-_impl.size,
+							_impl.size,
 							_impl.nearClippingPlane,
 							_impl.farClippingPlane
 						);

@@ -15,7 +15,7 @@ namespace PRE
 		PREMaterial::PREMaterial(RenderMaterial& material)
 			: _material(material) {}
 
-		void PREMaterial::SetShaderProgram(PREShader* pShader)
+		void PREMaterial::SetShader(PREShader* pShader)
 		{
 			_material.SetShaderProgram(
 				pShader != nullptr ?

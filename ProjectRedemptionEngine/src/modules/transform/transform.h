@@ -21,10 +21,20 @@ namespace PRE
 
 		public:
 			Transform(TNodeAssociation& association)
-				: _association(association)
-			{
-				_parentTransform = nullptr;
-			}
+				:
+				_association(association),
+				_parentTransform(nullptr),
+				_matrix(),
+				_inverseMatrix(),
+				_localMatrix(),
+				_position(),
+				_localPosition(),
+				_rotation(glm::vec3()),
+				_localRotation(glm::vec3()),
+				_euler(),
+				_localEuler(),
+				_scale(1),
+				_localScale(1) {}
 
 			~Transform()
 			{

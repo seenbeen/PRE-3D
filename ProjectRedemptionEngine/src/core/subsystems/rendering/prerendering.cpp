@@ -174,28 +174,6 @@ namespace PRE
 				cameraComponent._farClippingPlane
 			);
 			cameraComponent._pCamera = &camera;
-
-			auto pRenderTexture = cameraComponent._pRenderTexture;
-			auto& associatedModelComponents = cameraComponent._associatedModelComponents;
-
-			if (pRenderTexture != nullptr)
-			{
-				_impl.renderer.BindCompositingPair(
-					*cameraComponent._pCamera,
-					pRenderTexture->_compositingNode
-				);
-
-				for (auto it = associatedModelComponents.begin(); it != associatedModelComponents.end(); ++it)
-				{
-					auto& modelRendererComponent = **it;
-					_impl.renderer.AddModelToTagGroup(
-						*modelRendererComponent._pModel,
-						pRenderTexture->_tagGroup
-					);
-				}
-
-				cameraComponent._pPreviousRenderTexture = pRenderTexture;
-			}
 		}
 
 		void PRERendering::UpdateCamera(PRECameraComponent& cameraComponent)
@@ -294,24 +272,6 @@ namespace PRE
 		{
 			auto& model = _impl.renderer.AllocateModel();
 			modelRendererComponent._pModel = &model;
-
-			auto pCameraComponent = modelRendererComponent._pCameraComponent;
-
-			if (pCameraComponent != nullptr)
-			{
-				pCameraComponent->_associatedModelComponents.insert(
-					&modelRendererComponent
-				);
-				if (pCameraComponent->_pRenderTexture != nullptr)
-				{
-					_impl.renderer.AddModelToTagGroup(
-						*modelRendererComponent._pModel,
-						pCameraComponent->_pRenderTexture->_tagGroup
-					);
-				}
-
-				modelRendererComponent._pPreviousCameraComponent = pCameraComponent;
-			}
 		}
 
 		void PRERendering::UpdateModel(
@@ -344,11 +304,11 @@ namespace PRE
 			{
 				if (pPreviousCameraComponent != nullptr)
 				{
-					if (pPreviousCameraComponent->_pRenderTexture != nullptr)
+					if (pPreviousCameraComponent->_pPreviousRenderTexture != nullptr)
 					{
 						_impl.renderer.RemoveModelFromTagGroup(
 							*modelRendererComponent._pModel,
-							pPreviousCameraComponent->_pRenderTexture->_tagGroup
+							pPreviousCameraComponent->_pPreviousRenderTexture->_tagGroup
 						);
 					}
 					pPreviousCameraComponent->_associatedModelComponents.erase(
@@ -361,11 +321,11 @@ namespace PRE
 					pCameraComponent->_associatedModelComponents.insert(
 						&modelRendererComponent
 					);
-					if (pCameraComponent->_pRenderTexture != nullptr)
+					if (pCameraComponent->_pPreviousRenderTexture != nullptr)
 					{
 						_impl.renderer.AddModelToTagGroup(
 							*modelRendererComponent._pModel,
-							pCameraComponent->_pRenderTexture->_tagGroup
+							pCameraComponent->_pPreviousRenderTexture->_tagGroup
 						);
 					}
 				}
@@ -380,11 +340,11 @@ namespace PRE
 
 			if (pCameraComponent != nullptr)
 			{
-				if (pCameraComponent->_pRenderTexture != nullptr)
+				if (pCameraComponent->_pPreviousRenderTexture != nullptr)
 				{
 					_impl.renderer.RemoveModelFromTagGroup(
 						*modelRendererComponent._pModel,
-						pCameraComponent->_pRenderTexture->_tagGroup
+						pCameraComponent->_pPreviousRenderTexture->_tagGroup
 					);
 				}
 				pCameraComponent->_associatedModelComponents.erase(

@@ -10,6 +10,11 @@
 
 #include <core/subsystems/rendering/prerenderingconfig.h>
 #include <core/subsystems/rendering/prerendering.h>
+#include <core/subsystems/rendering/prerendertexture.h>
+#include <core/subsystems/rendering/preshader.h>
+#include <core/subsystems/rendering/premesh.h>
+#include <core/subsystems/rendering/pretexture.h>
+#include <core/subsystems/rendering/prematerial.h>
 
 #include <core/subsystems/time/pretimeconfig.h>
 #include <core/subsystems/time/pretime.h>

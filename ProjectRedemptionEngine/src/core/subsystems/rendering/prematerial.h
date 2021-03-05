@@ -22,7 +22,7 @@ namespace PRE
 		public:
 			enum class CompositingAttachment { POSITIONS, NORMALS, ALBEDO_SPECULAR };
 
-			void SetShaderProgram(PREShader* pShader);
+			void SetShader(PREShader* pShader);
 			void SetTextureBinding(PRETexture* pTexture, unsigned int bindUnit);
 			void SetTextureBinding(
 				PRERenderTexture& renderTexture,
