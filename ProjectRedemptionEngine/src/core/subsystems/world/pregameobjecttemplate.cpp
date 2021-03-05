@@ -4,8 +4,6 @@
 
 #include <core/components/pretransformcomponent.h>
 
-#include <core/subsystems/rendering/prerendering.h>
-
 namespace PRE
 {
 	namespace Core
@@ -14,11 +12,6 @@ namespace PRE
 		{
 			AddPREComponent<PRETransformComponent>();
 			OnInstantiateTemplate();
-		}
-
-		PRERendering& PREGameObjectTemplate::GetRendering()
-		{
-			return _preApplicationContext->rendering;
 		}
 	} // namespace Core
 } // namespace PRE

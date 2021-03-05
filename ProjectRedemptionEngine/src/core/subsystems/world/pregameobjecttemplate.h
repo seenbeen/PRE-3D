@@ -30,8 +30,6 @@ namespace PRE
 
 			virtual void OnInstantiateTemplate() = 0;
 
-			PRERendering& GetRendering();
-
 		private:
 			PREApplicationContext* _preApplicationContext = nullptr;
 

@@ -15,6 +15,88 @@ protected:
     {
         std::cout << "Start!" << std::endl;
         _transform = gameObject().GetComponent<PRETransformComponent>();
+        auto& mesh = GetRendering().CreateMesh();
+
+        glm::vec3 vertices[] = {
+            glm::vec3(-1, -1, 0),
+            glm::vec3(1, -1, 0),
+            glm::vec3(1, 1, 0),
+            glm::vec3(-1, 1, 0)
+        };
+        glm::vec3 normals[] = {
+            glm::vec3(0, 1, 0),
+            glm::vec3(-1, 0, 0),
+            glm::vec3(0, -1, 0),
+            glm::vec3(1, 0, 0)
+        };
+        glm::vec2 uvs[] = {
+            glm::vec2(0, 0),
+            glm::vec2(0, 1),
+            glm::vec2(1, 1),
+            glm::vec2(1, 0)
+        };
+
+        unsigned int triangles[] = { 0, 1, 2, 0, 2, 3 };
+
+        mesh.SetVertices(vertices, 4);
+        mesh.SetNormals(normals, 4);
+        mesh.SetUvs(uvs, 4);
+        mesh.SetTriangles(triangles, 6);
+
+        string vertexShaderCode(
+            "#version 330 core\n"
+            "layout (location = 0) in vec3 iPos;\n"
+            "layout (location = 1) in vec3 iNorm;\n"
+            "layout (location = 2) in vec2 iUV;\n"
+            "\n"
+            "uniform mat4 PRE_MVP;\n"
+            "\n"
+            "out vec2 TexCoord;\n"
+            "\n"
+            "void main()\n"
+            "{\n"
+            "    gl_Position = PRE_MVP * vec4(iPos, 1.0);\n"
+            "    TexCoord = iUV;\n"
+            "}\n"
+        );
+
+        string fragmentShadercode(
+            "#version 330 core\n"
+            "out vec4 FragColor;\n"
+            "\n"
+            "in vec2 TexCoord;\n"
+            "\n"
+            "uniform sampler2D textureSampler;\n"
+            "\n"
+            "void main()\n"
+            "{\n"
+            "    FragColor = texture(textureSampler, TexCoord);\n"
+            "}\n"
+        );
+
+        auto& shader = GetRendering().CreateShader(
+            vertexShaderCode,
+            fragmentShadercode
+        );
+
+        auto& texture = GetRendering().CreateTexture();
+        unsigned char data[] = {
+            0, 0, 0, 255,
+            255, 0, 0, 255,
+            0, 255, 0, 255,
+            0, 0, 255, 255
+        };
+        texture.SetData(2, 2, data);
+
+        auto& material = GetRendering().CreateMaterial();
+        material.SetShader(&shader);
+        material.SetTextureBinding(&texture, 7);
+
+        shader.SetInt("textureSampler", 7);
+
+        auto& modelRendererComponent = *gameObject().GetComponent<PREModelRendererComponent>();
+        modelRendererComponent.SetMesh(&mesh);
+        modelRendererComponent.SetMaterial(&material);
     }
 
     void OnUpdate() override
@@ -37,6 +119,10 @@ class CameraControllerComponent : public PREGameObjectComponent
 protected:
     void OnStart() override
     {
+        auto& cameraComponent = *gameObject().GetComponent<PRECameraComponent>();
+        cameraComponent.SetKind(PRECameraComponent::Kind::ORTHOGRAPHIC);
+        cameraComponent.SetRenderTexture(&GetRendering().rootRenderTexture);
+
         gameObject().GetComponent<PRETransformComponent>()->SetPosition(
             glm::vec3(0, 0, 2)
         );
@@ -78,88 +164,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
         void OnInstantiateTemplate() override
         {
             AddPREComponent<CubeComponent>();
-            auto& modelRendererComponent = *AddPREComponent<PREModelRendererComponent>();
-            auto& mesh = GetRendering().CreateMesh();
-
-            glm::vec3 vertices[] = {
-                glm::vec3(-1, -1, 0),
-                glm::vec3(1, -1, 0),
-                glm::vec3(1, 1, 0),
-                glm::vec3(-1, 1, 0)
-            };
-            glm::vec3 normals[] = {
-                glm::vec3(0, 1, 0),
-                glm::vec3(-1, 0, 0),
-                glm::vec3(0, -1, 0),
-                glm::vec3(1, 0, 0)
-            };
-            glm::vec2 uvs[] = {
-                glm::vec2(0, 0),
-                glm::vec2(0, 1),
-                glm::vec2(1, 1),
-                glm::vec2(1, 0)
-            };
-
-            unsigned int triangles[] = { 0, 1, 2, 0, 2, 3 };
-
-            mesh.SetVertices(vertices, 4);
-            mesh.SetNormals(normals, 4);
-            mesh.SetUvs(uvs, 4);
-            mesh.SetTriangles(triangles, 6);
-
-            string vertexShaderCode(
-                "#version 330 core\n"
-                "layout (location = 0) in vec3 iPos;\n"
-                "layout (location = 1) in vec3 iNorm;\n"
-                "layout (location = 2) in vec2 iUV;\n"
-                "\n"
-                "uniform mat4 PRE_MVP;\n"
-                "\n"
-                "out vec2 TexCoord;\n"
-                "\n"
-                "void main()\n"
-                "{\n"
-                "    gl_Position = PRE_MVP * vec4(iPos, 1.0);\n"
-                "    TexCoord = iUV;\n"
-                "}\n"
-            );
-
-            string fragmentShadercode(
-                "#version 330 core\n"
-                "out vec4 FragColor;\n"
-                "\n"
-                "in vec2 TexCoord;\n"
-                "\n"
-                "uniform sampler2D textureSampler;\n"
-                "\n"
-                "void main()\n"
-                "{\n"
-                "    FragColor = texture(textureSampler, TexCoord);\n"
-                "}\n"
-            );
-
-            auto& shader = GetRendering().CreateShader(
-                vertexShaderCode,
-                fragmentShadercode
-            );
-
-            auto& texture = GetRendering().CreateTexture();
-            unsigned char data[] = {
-                0, 0, 0, 255,
-                255, 0, 0, 255,
-                0, 255, 0, 255,
-                0, 0, 255, 255
-            };
-            texture.SetData(2, 2, data);
-
-            auto& material = GetRendering().CreateMaterial();
-            material.SetShader(&shader);
-            material.SetTextureBinding(&texture, 7);
-
-            shader.SetInt("textureSampler", 7);
-
-            modelRendererComponent.SetMesh(&mesh);
-            modelRendererComponent.SetMaterial(&material);
+            AddPREComponent<PREModelRendererComponent>();
         }
     } cubeTemplate;
 
@@ -169,9 +174,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
         void OnInstantiateTemplate() override
         {
             AddPREComponent<CameraControllerComponent>();
-            auto& cameraComponent = *AddPREComponent<PRECameraComponent>();
-            cameraComponent.SetKind(PRECameraComponent::Kind::ORTHOGRAPHIC);
-            cameraComponent.SetRenderTexture(&GetRendering().rootRenderTexture);
+            AddPREComponent<PRECameraComponent>();
         }
     } cameraTemplate;
 
@@ -256,6 +259,7 @@ void AssetManagerTest()
 
 int main(int argc, char *argv[])
 {
+    //AssetManagerTest();
     PREApplication::Run(
         PREApplicationConfig(
             PREInputConfig(),
