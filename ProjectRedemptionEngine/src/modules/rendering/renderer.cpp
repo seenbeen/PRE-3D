@@ -76,6 +76,11 @@ namespace PRE
 			}
 
 			glViewport(0, 0, windowWidth, windowHeight);
+
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_BACK);
+			glFrontFace(GL_CCW);
+
 			return *(new Renderer(*pWindow, glContext));
 		}
 

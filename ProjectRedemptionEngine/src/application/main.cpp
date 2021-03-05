@@ -36,7 +36,7 @@ protected:
     void OnStart() override
     {
         gameObject().GetComponent<PRETransformComponent>()->SetPosition(
-            glm::vec3(0, 0, 1)
+            glm::vec3(0, 0, 2)
         );
     }
 
@@ -80,16 +80,16 @@ void OnInitialize(PREApplicationContext& applicationContext)
             auto& mesh = GetRendering().CreateMesh();
 
             glm::vec3 vertices[] = {
-                glm::vec3(-0.5f, -0.5f, -1),
-                glm::vec3(0.5f, -0.5f, -1),
-                glm::vec3(0.5f, 0.5f, -1),
-                glm::vec3(-0.5f, 0.5f, -1)
+                glm::vec3(-1, -1, 0),
+                glm::vec3(1, -1, 0),
+                glm::vec3(1, 1, 0),
+                glm::vec3(-1, 1, 0)
             };
             glm::vec3 normals[] = {
-                glm::vec3(0, 1, -1),
-                glm::vec3(1, 0, -1),
-                glm::vec3(0, -1, -1),
-                glm::vec3(-1, 0, -1)
+                glm::vec3(0, 1, 0),
+                glm::vec3(-1, 0, 0),
+                glm::vec3(0, -1, 0),
+                glm::vec3(1, 0, 0)
             };
             glm::vec2 uvs[] = {
                 glm::vec2(1, 0),
@@ -117,7 +117,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
                 "\n"
                 "void main()\n"
                 "{\n"
-                "    gl_Position = PRE_MVP * vec4(iNorm, 1.0);\n"
+                "    gl_Position = PRE_MVP * vec4(iPos, 1.0);\n"
                 "    TexCoord = iUV;\n"
                 "}\n"
             );
