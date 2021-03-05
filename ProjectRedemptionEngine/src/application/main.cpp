@@ -69,7 +69,7 @@ protected:
 void OnInitialize(PREApplicationContext& applicationContext)
 {
     std::cout << "ON INITIALIZE" << std::endl;
-    applicationContext.time.SetFrameLimit(60);
+    // applicationContext.time.SetFrameLimit(60);
     class : public PREGameObjectTemplate
     {
     protected:
@@ -92,10 +92,10 @@ void OnInitialize(PREApplicationContext& applicationContext)
                 glm::vec3(1, 0, 0)
             };
             glm::vec2 uvs[] = {
-                glm::vec2(1, 0),
+                glm::vec2(0, 0),
                 glm::vec2(0, 1),
-                glm::vec2(1, 0),
-                glm::vec2(0, 1)
+                glm::vec2(1, 1),
+                glm::vec2(1, 0)
             };
 
             unsigned int triangles[] = { 0, 1, 2, 0, 2, 3 };
@@ -128,9 +128,11 @@ void OnInitialize(PREApplicationContext& applicationContext)
                 "\n"
                 "in vec2 TexCoord;\n"
                 "\n"
+                "uniform sampler2D textureSampler;\n"
+                "\n"
                 "void main()\n"
                 "{\n"
-                "    FragColor = vec4(TexCoord, 0.0f, 1.0f);\n"
+                "    FragColor = texture(textureSampler, TexCoord);\n"
                 "}\n"
             );
 
@@ -139,9 +141,21 @@ void OnInitialize(PREApplicationContext& applicationContext)
                 fragmentShadercode
             );
 
+            auto& texture = GetRendering().CreateTexture();
+            unsigned char data[] = {
+                0, 0, 0, 255,
+                255, 0, 0, 255,
+                0, 255, 0, 255,
+                0, 0, 255, 255
+            };
+            texture.SetData(2, 2, data);
+
             auto& material = GetRendering().CreateMaterial();
             material.SetShader(&shader);
-            
+            material.SetTextureBinding(&texture, 7);
+
+            shader.SetInt("textureSampler", 7);
+
             modelRendererComponent.SetMesh(&mesh);
             modelRendererComponent.SetMaterial(&material);
         }
