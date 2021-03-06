@@ -98,7 +98,7 @@ namespace PRE
 					else
 					{
 						_impl.projectionMatrix = glm::perspective(
-							_impl.size,
+							glm::radians(_impl.size),
 							_impl.aspectRatio,
 							_impl.nearClippingPlane,
 							_impl.farClippingPlane

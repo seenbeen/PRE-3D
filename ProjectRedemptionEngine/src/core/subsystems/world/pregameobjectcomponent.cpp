@@ -33,6 +33,11 @@ namespace PRE
 			return _preApplicationContext->world;
 		}
 
+		PREAssetManager& PREGameObjectComponent::GetAssetManager()
+		{
+			return _preApplicationContext->assetManager;
+		}
+
 		void PREGameObjectComponent::Quit()
 		{
 			_preApplicationContext->Quit();

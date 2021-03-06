@@ -26,6 +26,16 @@ namespace PRE
 				return newComponent;
 			}
 
+			template<class TPREGameObjectComponent>
+			TPREGameObjectComponent* GetPREComponent()
+			{
+				auto pComponent = GetComponent<TPREGameObjectComponent>();
+#ifdef __PRE_DEBUG__
+				static_cast<PREGameObjectComponent*>(pComponent);
+#endif
+				return pComponent;
+			}
+
 			void OnInstantiate() override;
 
 			virtual void OnInstantiateTemplate() = 0;
@@ -34,6 +44,7 @@ namespace PRE
 			PREApplicationContext* _preApplicationContext = nullptr;
 
 			using GameObjectTemplate::AddComponent;
+			using GameObjectTemplate::GetComponent;
 		};
 	} // namespace Core
 } // namespace PRE

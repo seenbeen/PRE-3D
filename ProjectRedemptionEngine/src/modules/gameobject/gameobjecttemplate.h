@@ -25,6 +25,12 @@ namespace PRE
 				return _currentGameObject->AddComponent<TGameObjectComponent>();
 			}
 
+			template<class TGameObjectComponent>
+			TGameObjectComponent* GetComponent()
+			{
+				return _currentGameObject->GetComponent<TGameObjectComponent>();
+			}
+
 			GameObject& Instantiate(GameObjectTemplate& gameObjectTemplate);
 
 			virtual void OnInstantiate() = 0;

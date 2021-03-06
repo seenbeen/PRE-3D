@@ -24,6 +24,9 @@
 #include <core/subsystems/world/pregameobjecttemplate.h>
 #include <core/subsystems/world/pregameobjectcomponent.h>
 
+#include <core/subsystems/asset/preassetmanagerconfig.h>
+#include <core/subsystems/asset/preassetmanager.h>
+
 // components
 #include <core/components/precameracomponent.h>
 #include <core/components/premodelrenderercomponent.h>

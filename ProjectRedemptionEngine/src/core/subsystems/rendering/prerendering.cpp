@@ -254,6 +254,7 @@ namespace PRE
 						*modelRendererComponent._pModel,
 						pRenderTexture->_tagGroup
 					);
+					modelRendererComponent._pCameraComponent = nullptr;
 				}
 
 				_impl.renderer.UnbindCompositingPair(

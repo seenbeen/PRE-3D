@@ -235,9 +235,9 @@ namespace PRE
 
 			void UpdateMatrix()
 			{
-				_matrix = glm::scale(glm::mat4(), _scale);
-				_matrix = glm::mat4_cast(_rotation) * _matrix;
-				_matrix = glm::translate(_matrix, _position);
+				_matrix = glm::translate(glm::mat4(), _position);
+				_matrix = _matrix * glm::mat4_cast(_rotation);
+				_matrix = glm::scale(_matrix, _scale);
 
 				if (_parentTransform != nullptr)
 				{
@@ -266,9 +266,9 @@ namespace PRE
 
 			void UpdateLocalMatrix()
 			{
-				_localMatrix = glm::scale(glm::mat4(), _localScale);
-				_localMatrix = glm::mat4_cast(_localRotation) * _matrix;
-				_localMatrix = glm::translate(_matrix, _localPosition);
+				_localMatrix = glm::translate(glm::mat4(), _localPosition);
+				_localMatrix = _localMatrix * glm::mat4_cast(_localRotation);
+				_localMatrix = glm::scale(_localMatrix, _localScale);
 
 				if (_parentTransform != nullptr)
 				{

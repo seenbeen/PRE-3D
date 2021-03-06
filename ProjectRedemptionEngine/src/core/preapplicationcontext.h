@@ -9,6 +9,7 @@ namespace PRE
 		class PRERendering;
 		class PRETime;
 		class PREWorld;
+		class PREAssetManager;
 
 		class PREApplication;
 
@@ -24,6 +25,8 @@ namespace PRE
 			PRERendering& rendering;
 			PRETime& time;
 			PREWorld& world;
+			PREAssetManager& assetManager;
+
 			void Quit();
 
 		private:

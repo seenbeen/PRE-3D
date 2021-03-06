@@ -9,6 +9,7 @@
 #include <core/subsystems/rendering/prerendering.h>
 #include <core/subsystems/time/pretime.h>
 #include <core/subsystems/world/preworld.h>
+#include <core/subsystems/asset/preassetmanager.h>
 
 namespace PRE
 {
@@ -47,44 +48,54 @@ namespace PRE
 					*this
 				)
 			),
+			assetManager(
+				PREAssetManager::MakePREAssetManager(
+					applicationConfig._assetManagerConfig,
+					*this
+				)
+			),
 			_application(application),
 			_onInitialize(applicationConfig._onInitialize),
 			_onShutdown(applicationConfig._onShutdown) {}
 
 		PREApplicationContext::~PREApplicationContext()
 		{
-			delete &world;
-			delete &time;
-			delete &rendering;
-			delete &input;
+			delete& time;
+			delete& input;
+			delete& world;
+			delete& assetManager;
+			delete& rendering;
 		}
 
 		void PREApplicationContext::Initialize()
 		{
-			input.Initialize();
 			time.Initialize();
-			world.Initialize();
+			input.Initialize();
 			rendering.Initialize();
+			world.Initialize();
+			assetManager.Initialize();
 
 			_onInitialize(*this);
 		}
 
 		void PREApplicationContext::Update()
 		{
+			time.Update();
 			input.Update();
 			world.Update();
 			rendering.Update();
-			time.Update();
+			assetManager.Update();
 		}
 
 		void PREApplicationContext::Shutdown()
 		{			
 			_onShutdown(*this);
 
+			time.Shutdown();
 			input.Shutdown();
 			world.Shutdown();
+			assetManager.Shutdown();
 			rendering.Shutdown();
-			time.Shutdown();
 		}
 	}
 }

@@ -11,6 +11,7 @@ namespace PRE
 		class PRERendering;
 		class PRETime;
 		class PREWorld;
+		class PREAssetManager;
 
 		class PREGameObjectTemplate;
 
@@ -25,6 +26,7 @@ namespace PRE
 			PRERendering& GetRendering();
 			PRETime& GetTime();
 			PREWorld& GetWorld();
+			PREAssetManager& GetAssetManager();
 
 			void Quit();
 

@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Deps\glad\src\glad.c" />
+    <ClCompile Include="..\Deps\stb\stb_image.cpp" />
     <ClCompile Include="src\application\main.cpp" />
     <ClCompile Include="src\core\components\precameracomponent.cpp" />
     <ClCompile Include="src\core\components\premodelrenderercomponent.cpp" />
@@ -19,6 +20,8 @@
     <ClCompile Include="src\core\components\pretransformcomponent.cpp" />
     <ClCompile Include="src\core\preapplicationconfig.cpp" />
     <ClCompile Include="src\core\preapplicationcontext.cpp" />
+    <ClCompile Include="src\core\subsystems\asset\preassetmanager.cpp" />
+    <ClCompile Include="src\core\subsystems\asset\preassetmanagerconfig.cpp" />
     <ClCompile Include="src\core\subsystems\input\preinput.cpp" />
     <ClCompile Include="src\core\subsystems\input\preinputconfig.cpp" />
     <ClCompile Include="src\core\subsystems\physics\prephysics.cpp" />
@@ -56,7 +59,6 @@
     <ClCompile Include="src\modules\time\time.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Deps\stb\stb_image.h" />
     <ClInclude Include="src\core\components\precameracomponent.h" />
     <ClInclude Include="src\core\components\premodelrenderercomponent.h" />
     <ClInclude Include="src\core\preapplication.h" />
@@ -83,6 +85,7 @@
     <ClInclude Include="src\core\subsystems\world\preworld.h" />
     <ClInclude Include="src\core\subsystems\world\preworldconfig.h" />
     <ClInclude Include="src\include\core.h" />
+    <ClInclude Include="src\include\modules\asset.h" />
     <ClInclude Include="src\include\modules\gameobject.h" />
     <ClInclude Include="src\include\modules\input.h" />
     <ClInclude Include="src\include\modules\rendering.h" />
@@ -146,14 +149,14 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\ProjectRedemptionEngine\src;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\include;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\glad\include;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\ProjectRedemptionEngine\src;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\include;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\glad\include;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\assimp\include;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\lib\x64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)Build\</OutDir>
     <IntDir>$(SolutionDir)Build\Intermediate\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\ProjectRedemptionEngine\src;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\include;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\glad\include;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\assimp\include;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\ProjectRedemptionEngine\src;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\include;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\glad\include;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\lib\x64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)Build\</OutDir>
     <IntDir>$(SolutionDir)Build\Intermediate\</IntDir>
@@ -173,11 +176,12 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;assimp-vc142-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\lib\x64;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\assimp\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(SolutionDir)Deps\SDL2-2.0.14\lib\x64\SDL2.dll" "$(SolutionDir)Build\SDL2.dll"</Command>
+      <Command>copy /Y "$(SolutionDir)Deps\SDL2-2.0.14\lib\x64\SDL2.dll" "$(SolutionDir)Build\SDL2.dll"
+copy /Y "$(SolutionDir)Deps\assimp\lib\x64\assimp-vc142-mt.dll" "$(SolutionDir)Build\assimp-vc142-mt.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -195,11 +199,12 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;assimp-vc142-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\SDL2-2.0.14\lib\x64;C:\Users\shiya\Desktop\For the Liberation of Seenbeen\ProjectRedemption\Deps\assimp\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(SolutionDir)Deps\SDL2-2.0.14\lib\x64\SDL2.dll" "$(SolutionDir)Build\SDL2.dll"</Command>
+      <Command>copy /Y "$(SolutionDir)Deps\SDL2-2.0.14\lib\x64\SDL2.dll" "$(SolutionDir)Build\SDL2.dll"
+copy /Y "$(SolutionDir)Deps\assimp\lib\x64\assimp-vc142-mt.dll" "$(SolutionDir)Build\assimp-vc142-mt.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
