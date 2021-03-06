@@ -84,6 +84,11 @@ namespace PRE
 					}
 
 					_parentTransform = transform;
+					
+					if (_parentTransform != nullptr)
+					{
+						_parentTransform->_childTransforms.push_back(this);
+					}
 
 					if (worldPositionStays)
 					{

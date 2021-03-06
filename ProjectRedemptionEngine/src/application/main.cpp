@@ -162,6 +162,10 @@ void OnInitialize(PREApplicationContext& applicationContext)
 
     auto& camera = applicationContext.world.Instantiate(cameraTemplate);
     auto pCameraComponent = camera.GetComponent<PRECameraComponent>();
+    
+    auto& backpack = applicationContext.world.Instantiate(backpackTemplate);
+    backpack.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
+    auto pBackpackTransform = backpack.GetComponent<PRETransformComponent>();
 
     {
         auto& linkA = applicationContext.world.Instantiate(linkTemplate);
@@ -169,6 +173,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
         pLinkATransform->SetPosition(
             pLinkATransform->GetPosition() + glm::vec3(-4, 0, 0)
         );
+        pLinkATransform->SetParent(pBackpackTransform, true);
         linkA.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
     }
 
@@ -178,11 +183,9 @@ void OnInitialize(PREApplicationContext& applicationContext)
         pLinkBTransform->SetPosition(
             pLinkBTransform->GetPosition() + glm::vec3(4, 0, 0)
         );
+        pLinkBTransform->SetParent(pBackpackTransform, true);
         linkB.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
     }
-
-    auto& backpack = applicationContext.world.Instantiate(backpackTemplate);
-    backpack.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
 }
 
 void OnShutdown(PREApplicationContext& applicationContext)
