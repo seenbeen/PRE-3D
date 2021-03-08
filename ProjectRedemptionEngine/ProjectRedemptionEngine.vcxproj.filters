@@ -320,11 +320,14 @@
     <ClInclude Include="src\modules\rendering\animation\renderanimationbone.h">
       <Filter>Header Files\Modules\Rendering\Animation</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\components\preanimatorcomponent.h">
-      <Filter>Header Files\Core\Components</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\subsystems\rendering\preanimation.h">
       <Filter>Header Files\Core\Subsystems\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\subsystems\rendering\preanimator.h">
+      <Filter>Header Files\Core\Subsystems\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\components\preanimatorcomponent.h">
+      <Filter>Header Files\Core\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -474,6 +477,9 @@
     </ClCompile>
     <ClCompile Include="src\modules\rendering\animation\renderanimation.cpp">
       <Filter>Source Files\Modules\Rendering\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\components\preanimatorcomponent.cpp">
+      <Filter>Source Files\Core\Components</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

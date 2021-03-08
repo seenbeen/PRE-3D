@@ -14,4 +14,8 @@
 #include <modules/rendering/model/rendermesh.h>
 #include <modules/rendering/model/rendermodel.h>
 
+#include <modules/rendering/animation/renderanimation.h>
+#include <modules/rendering/animation/renderanimationboneconfig.h>
+#include <modules/rendering/animation/renderanimationbone.h>
+
 #include <modules/rendering/renderer.h>

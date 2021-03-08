@@ -52,10 +52,18 @@ namespace PRE
 				);
 				~Impl();
 			};
-		public:
-			const string name; // lambdas needa capture this to sort .-.
 
 		private:
+			static bool TimeVecKeyFrameCmp(
+				const pair<float, glm::vec3>& keyPairA,
+				const pair<float, glm::vec3>& keyPairB
+			);
+
+			static bool TimeQuatKeyFrameCmp(
+				const pair<float, glm::fquat>& keyPairA,
+				const pair<float, glm::fquat>& keyPairB
+			);
+
 			static void GetBlendedStateAt(
 				const RenderAnimationBone& a,
 				const RenderAnimationBone& b,
@@ -66,6 +74,7 @@ namespace PRE
 				unordered_map<string, glm::mat4>& result
 			);
 
+			const string name;
 			Impl& _impl;
 
 			RenderAnimationBone(const RenderAnimationBoneConfig& animationBoneConfig);

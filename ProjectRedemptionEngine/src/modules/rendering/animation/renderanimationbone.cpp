@@ -35,7 +35,7 @@ namespace PRE
 			std::sort(
 				children.begin(),
 				children.end(),
-				[&](const RenderAnimationBone* a, const RenderAnimationBone* b)
+				[](const RenderAnimationBone* a, const RenderAnimationBone* b)
 				{
 					return a->name.compare(b->name);
 				}
@@ -108,7 +108,21 @@ namespace PRE
 			}
 		}
 
-		// TODO: BINARY-SEARCH FOR TIME KEYS.
+		bool RenderAnimationBone::TimeVecKeyFrameCmp(
+			const pair<float, glm::vec3>& keyPairA,
+			const pair<float, glm::vec3>& keyPairB
+		)
+		{
+			return keyPairA.first < keyPairB.first;
+		}
+
+		bool RenderAnimationBone::TimeQuatKeyFrameCmp(
+			const pair<float, glm::fquat>& keyPairA,
+			const pair<float, glm::fquat>& keyPairB
+		)
+		{
+			return keyPairA.first < keyPairB.first;
+		}
 
 		void RenderAnimationBone::GetBlendedStateAt(
 			const RenderAnimationBone& a,
@@ -126,138 +140,129 @@ namespace PRE
 				throw "Cannot blend animations with different skeletal structures";
 			}
 #endif
-
 			// animation A
-			auto itPositionKeyFrameA = std::find_if(
+			auto timeVecNeedleA = std::make_pair(timeA, glm::vec3());
+			auto timeQuatNeedleA = std::make_pair(timeA, glm::fquat());
+			auto itPositionKeyFrameA = std::upper_bound(
 				a._impl.positionKeyFrames.begin(),
 				a._impl.positionKeyFrames.end(),
-				[&timeA](const pair<float, glm::vec3>& keyPair)
-				{
-					return keyPair.first > timeA;
-				}
+				timeVecNeedleA,
+				RenderAnimationBone::TimeVecKeyFrameCmp
 			);
-			auto itRotationKeyFrameA = std::find_if(
+			auto itRotationKeyFrameA = std::upper_bound(
 				a._impl.rotationKeyFrames.begin(),
 				a._impl.rotationKeyFrames.end(),
-				[&timeA](const pair<float, glm::fquat>& keyPair)
-				{
-					return keyPair.first > timeA;
-				}
+				timeQuatNeedleA,
+				RenderAnimationBone::TimeQuatKeyFrameCmp
 			);
-			auto itScaleKeyFrameA = std::find_if(
+			auto itScaleKeyFrameA = std::upper_bound(
 				a._impl.scaleKeyFrames.begin(),
 				a._impl.scaleKeyFrames.end(),
-				[&timeA](const pair<float, glm::vec3>& keyPair)
-				{
-					return keyPair.first >= timeA;
-				}
+				timeVecNeedleA,
+				RenderAnimationBone::TimeVecKeyFrameCmp
 			);
 
 			// calculate keyframe properties
 			glm::vec3 positionVectorA;
 			{
-				auto tA = itPositionKeyFrameA->first;
-				auto vA = itPositionKeyFrameA->second;
-				++itPositionKeyFrameA;
-				auto tB = itPositionKeyFrameA->first;
-				auto vB = itPositionKeyFrameA->second;
+				auto tEnd = itPositionKeyFrameA->first;
+				auto vEnd = itPositionKeyFrameA->second;
+				--itPositionKeyFrameA;
+				auto tStart = itPositionKeyFrameA->first;
+				auto vStart = itPositionKeyFrameA->second;
 				positionVectorA = glm::mix(
-					vA,
-					vB,
-					(timeA - tA) / (tB - tA)
+					vStart,
+					vEnd,
+					(timeA - tStart) / (tEnd - tStart)
 				);
 			}
 			glm::fquat rotationQuatA;
 			{
-				auto tA = itRotationKeyFrameA->first;
-				auto qA = itRotationKeyFrameA->second;
-				++itRotationKeyFrameA;
-				auto tB = itRotationKeyFrameA->first;
-				auto qB = itRotationKeyFrameA->second;
+				auto tEnd = itRotationKeyFrameA->first;
+				auto qEnd = itRotationKeyFrameA->second;
+				--itRotationKeyFrameA;
+				auto tStart = itRotationKeyFrameA->first;
+				auto qStart = itRotationKeyFrameA->second;
 				rotationQuatA = glm::slerp(
-					qA,
-					qB,
-					(timeA - tA) / (tB - tA)
+					qStart,
+					qEnd,
+					(timeA - tStart) / (tEnd - tStart)
 				);
 			}
 			glm::vec3 scaleVectorA;
 			{
-				auto tA = itScaleKeyFrameA->first;
-				auto vA = itScaleKeyFrameA->second;
-				++itScaleKeyFrameA;
-				auto tB = itScaleKeyFrameA->first;
-				auto vB = itScaleKeyFrameA->second;
+				auto tEnd = itScaleKeyFrameA->first;
+				auto vEnd = itScaleKeyFrameA->second;
+				--itScaleKeyFrameA;
+				auto tStart = itScaleKeyFrameA->first;
+				auto vStart = itScaleKeyFrameA->second;
 				scaleVectorA = glm::mix(
-					vA,
-					vB,
-					(timeA - tA) / (tB - tA)
+					vStart,
+					vEnd,
+					(timeA - tStart) / (tEnd - tStart)
 				);
 			}
 
 			// animation B
-			auto itPositionKeyFrameB = std::find_if(
+			auto timeVecNeedleB = std::make_pair(timeB, glm::vec3());
+			auto timeQuatNeedleB = std::make_pair(timeB, glm::fquat());
+			auto itPositionKeyFrameB = std::upper_bound(
 				b._impl.positionKeyFrames.begin(),
 				b._impl.positionKeyFrames.end(),
-				[&timeB](const pair<float, glm::vec3>& keyPair)
-				{
-					return keyPair.first >= timeB;
-				}
+				timeVecNeedleB,
+				RenderAnimationBone::TimeVecKeyFrameCmp
 			);
-			auto itRotationKeyFrameB = std::find_if(
+			auto itRotationKeyFrameB = std::upper_bound(
 				b._impl.rotationKeyFrames.begin(),
 				b._impl.rotationKeyFrames.end(),
-				[&timeB](const pair<float, glm::fquat>& keyPair)
-				{
-					return keyPair.first >= timeB;
-				}
+				timeQuatNeedleB,
+				RenderAnimationBone::TimeQuatKeyFrameCmp
 			);
-			auto itScaleKeyFrameB = std::find_if(
+			auto itScaleKeyFrameB = std::upper_bound(
 				b._impl.scaleKeyFrames.begin(),
 				b._impl.scaleKeyFrames.end(),
-				[&timeB](const pair<float, glm::vec3>& keyPair)
-				{
-					return keyPair.first >= timeB;
-				}
+				timeVecNeedleB,
+				RenderAnimationBone::TimeVecKeyFrameCmp
 			);
 
 			// calculate keyframe properties
 			glm::vec3 positionVectorB;
 			{
-				auto tA = itPositionKeyFrameB->first;
-				auto vA = itPositionKeyFrameB->second;
-				++itPositionKeyFrameB;
-				auto tB = itPositionKeyFrameB->first;
-				auto vB = itPositionKeyFrameB->second;
+				auto tEnd = itPositionKeyFrameB->first;
+				auto vEnd = itPositionKeyFrameB->second;
+				--itPositionKeyFrameB;
+				auto tStart = itPositionKeyFrameB->first;
+				auto vStart = itPositionKeyFrameB->second;
 				positionVectorB = glm::mix(
-					vA,
-					vB,
-					(timeB - tA) / (tB - tA)
+					vStart,
+					vEnd,
+					(timeB - tStart) / (tEnd - tStart)
 				);
 			}
 			glm::fquat rotationQuatB;
 			{
-				auto tA = itRotationKeyFrameB->first;
-				auto qA = itRotationKeyFrameB->second;
-				++itRotationKeyFrameB;
-				auto tB = itRotationKeyFrameB->first;
-				auto qB = itRotationKeyFrameB->second;
+				auto tEnd = itRotationKeyFrameB->first;
+				auto qEnd = itRotationKeyFrameB->second;
+				--itRotationKeyFrameB;
+				auto tStart = itRotationKeyFrameB->first;
+				auto qStart = itRotationKeyFrameB->second;
 				rotationQuatB = glm::slerp(
-					qA,
-					qB,
-					(timeB - tA) / (tB - tA)
+					qStart,
+					qEnd,
+					(timeB - tStart) / (tEnd - tStart)
 				);
 			}
 			glm::vec3 scaleVectorB;
 			{
-				auto tA = itScaleKeyFrameB->first;
-				auto vA = itScaleKeyFrameB->second;
-				++itScaleKeyFrameB;
-				auto tB = itScaleKeyFrameB->first;
-				auto vB = itScaleKeyFrameB->second;
+				auto tEnd = itScaleKeyFrameB->first;
+				auto vEnd = itScaleKeyFrameB->second;
+				--itScaleKeyFrameB;
+				auto tStart = itScaleKeyFrameB->first;
+				auto vStart = itScaleKeyFrameB->second;
 				scaleVectorB = glm::mix(
-					vA,
-					vB,
-					(timeB - tA) / (tB - tA)
+					vStart,
+					vEnd,
+					(timeB - tStart) / (tEnd - tStart)
 				);
 			}
 
@@ -308,69 +313,65 @@ namespace PRE
 			unordered_map<string, glm::mat4>& result
 		) const
 		{
-			auto itPositionKeyFrame = std::find_if(
+			auto timeVecNeedle = std::make_pair(time, glm::vec3());
+			auto timeQuatNeedle = std::make_pair(time, glm::fquat());
+			auto itPositionKeyFrame = std::upper_bound(
 				_impl.positionKeyFrames.begin(),
 				_impl.positionKeyFrames.end(),
-				[&time](const pair<float, glm::vec3>& keyPair)
-				{
-					return keyPair.first >= time;
-				}
+				timeVecNeedle,
+				RenderAnimationBone::TimeVecKeyFrameCmp
 			);
-			auto itRotationKeyFrame = std::find_if(
+			auto itRotationKeyFrame = std::upper_bound(
 				_impl.rotationKeyFrames.begin(),
 				_impl.rotationKeyFrames.end(),
-				[&time](const pair<float, glm::fquat>& keyPair)
-				{
-					return keyPair.first >= time;
-				}
+				timeQuatNeedle,
+				RenderAnimationBone::TimeQuatKeyFrameCmp
 			);
-			auto itScaleKeyFrame = std::find_if(
+			auto itScaleKeyFrame = std::upper_bound(
 				_impl.scaleKeyFrames.begin(),
 				_impl.scaleKeyFrames.end(),
-				[&time](const pair<float, glm::vec3>& keyPair)
-				{
-					return keyPair.first >= time;
-				}
+				timeVecNeedle,
+				RenderAnimationBone::TimeVecKeyFrameCmp
 			);
 
 			// calculate keyframe properties
 			glm::vec3 positionVector;
 			{
-				auto tA = itPositionKeyFrame->first;
-				auto vA = itPositionKeyFrame->second;
-				++itPositionKeyFrame;
-				auto tB = itPositionKeyFrame->first;
-				auto vB = itPositionKeyFrame->second;
+				auto tEnd = itPositionKeyFrame->first;
+				auto vEnd = itPositionKeyFrame->second;
+				--itPositionKeyFrame;
+				auto tStart = itPositionKeyFrame->first;
+				auto vStart = itPositionKeyFrame->second;
 				positionVector = glm::mix(
-					vA,
-					vB,
-					(time - tA) / (tB - tA)
+					vStart,
+					vEnd,
+					(time - tStart) / (tEnd - tStart)
 				);
 			}
 			glm::fquat rotationQuat;
 			{
-				auto tA = itRotationKeyFrame->first;
-				auto qA = itRotationKeyFrame->second;
-				++itRotationKeyFrame;
-				auto tB = itRotationKeyFrame->first;
-				auto qB = itRotationKeyFrame->second;
+				auto tEnd = itRotationKeyFrame->first;
+				auto qEnd = itRotationKeyFrame->second;
+				--itRotationKeyFrame;
+				auto tStart = itRotationKeyFrame->first;
+				auto qStart = itRotationKeyFrame->second;
 				rotationQuat = glm::slerp(
-					qA,
-					qB,
-					(time - tA) / (tB - tA)
+					qStart,
+					qEnd,
+					(time - tStart) / (tEnd - tStart)
 				);
 			}
 			glm::vec3 scaleVector;
 			{
-				auto tA = itScaleKeyFrame->first;
-				auto vA = itScaleKeyFrame->second;
-				++itScaleKeyFrame;
-				auto tB = itScaleKeyFrame->first;
-				auto vB = itScaleKeyFrame->second;
+				auto tEnd = itScaleKeyFrame->first;
+				auto vEnd = itScaleKeyFrame->second;
+				--itScaleKeyFrame;
+				auto tStart = itScaleKeyFrame->first;
+				auto vStart = itScaleKeyFrame->second;
 				scaleVector = glm::mix(
-					vA,
-					vB,
-					(time - tA) / (tB - tA)
+					vStart,
+					vEnd,
+					(time - tStart) / (tEnd - tStart)
 				);
 			}
 
