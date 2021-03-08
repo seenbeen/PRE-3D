@@ -23,8 +23,6 @@
 #include <core/subsystems/rendering/pretexture.h>
 #include <core/subsystems/rendering/premesh.h>
 
-#include <iostream>
-
 namespace PRE
 {
 	namespace Core

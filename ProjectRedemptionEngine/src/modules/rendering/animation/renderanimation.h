@@ -1,5 +1,4 @@
 #pragma once
-#include <string>
 #include <unordered_map>
 
 #include <glm/glm.hpp>
@@ -9,10 +8,10 @@ namespace PRE
 	namespace RenderingModule
 	{
 		class Renderer;
-		class RenderAnimationBoneConfig;
-		class RenderAnimationBone;
+		class RenderAnimationConfig;
+		class RenderAnimationChannelConfig;
+		class RenderAnimationChannel;
 
-		using std::string;
 		using std::unordered_map;
 
 		class RenderAnimation
@@ -33,18 +32,18 @@ namespace PRE
 				static Impl& MakeImpl(
 					float ticksPerSecond,
 					float duration,
-					RenderAnimationBoneConfig& rootBoneConfig
+					const RenderAnimationConfig& animationConfig
 				);
 
 				const float ticksPerSecond;
 				const float duration;
 
-				RenderAnimationBone& rootBone;
+				unordered_map<int, RenderAnimationChannel*> channels;
 
 				Impl(
 					float ticksPerSecond,
 					float duration,
-					RenderAnimationBone& rootBone
+					unordered_map<int, RenderAnimationChannel*>& channels
 				);
 				~Impl();
 			};
@@ -56,16 +55,23 @@ namespace PRE
 				float timeA,
 				float timeB,
 				float blendFactor,
-				unordered_map<string, glm::mat4>& result
+				unordered_map<int, glm::mat4>& result
 			);
 
 			float GetDuration() const;
-			void GetStateAt(float time, unordered_map<string, glm::mat4>& result) const;
+			void GetStateAt(
+				float time,
+				unordered_map<int, glm::mat4>& result
+			) const;
 
 		private:
 			Impl& _impl;
 
-			RenderAnimation(float ticksPerSecond, float duration, RenderAnimationBoneConfig& rootBoneConfig);
+			RenderAnimation(
+				float ticksPerSecond,
+				float duration,
+				RenderAnimationConfig& animationConfig
+			);
 			~RenderAnimation();
 		};
 	} // namespace RenderingModule

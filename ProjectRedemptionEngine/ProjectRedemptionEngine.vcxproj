@@ -47,8 +47,9 @@
     <ClCompile Include="src\modules\input\input.cpp" />
     <ClCompile Include="src\modules\input\keycode.cpp" />
     <ClCompile Include="src\modules\rendering\animation\renderanimation.cpp" />
-    <ClCompile Include="src\modules\rendering\animation\renderanimationbone.cpp" />
-    <ClCompile Include="src\modules\rendering\animation\renderanimationboneconfig.cpp" />
+    <ClCompile Include="src\modules\rendering\animation\renderanimationchannel.cpp" />
+    <ClCompile Include="src\modules\rendering\animation\renderanimationchannelconfig.cpp" />
+    <ClCompile Include="src\modules\rendering\animation\renderanimationconfig.cpp" />
     <ClCompile Include="src\modules\rendering\compositing\rendercompositingnode.cpp" />
     <ClCompile Include="src\modules\rendering\compositing\rendercompositingtarget.cpp" />
     <ClCompile Include="src\modules\rendering\model\rendermaterial.cpp" />
@@ -106,8 +107,9 @@
     <ClInclude Include="src\modules\input\input.h" />
     <ClInclude Include="src\modules\input\keycode.h" />
     <ClInclude Include="src\modules\rendering\animation\renderanimation.h" />
-    <ClInclude Include="src\modules\rendering\animation\renderanimationbone.h" />
-    <ClInclude Include="src\modules\rendering\animation\renderanimationboneconfig.h" />
+    <ClInclude Include="src\modules\rendering\animation\renderanimationchannelconfig.h" />
+    <ClInclude Include="src\modules\rendering\animation\renderanimationchannel.h" />
+    <ClInclude Include="src\modules\rendering\animation\renderanimationconfig.h" />
     <ClInclude Include="src\modules\rendering\compositing\rendercompositingnode.h" />
     <ClInclude Include="src\modules\rendering\compositing\rendercompositingtarget.h" />
     <ClInclude Include="src\modules\rendering\model\rendermaterial.h" />

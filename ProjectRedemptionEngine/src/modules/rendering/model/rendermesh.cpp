@@ -307,8 +307,8 @@ namespace PRE
 				_impl.nVertices == 0 ||
 				_impl.nNormals == 0 ||
 				_impl.nUvs == 0 ||
-				_impl.nVertexBoneIds == 0 ||
-				_impl.nVertexBoneWeights == 0 ||
+				//_impl.nVertexBoneIds == 0 ||
+				//_impl.nVertexBoneWeights == 0 ||
 				_impl.nTriangleIndices == 0
 			)
 			{

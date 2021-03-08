@@ -7,8 +7,9 @@ namespace PRE
 	{
 		class Renderer;
 		class RenderMesh;
+		class RenderBone;
 		class RenderMaterial;
-	
+
 		class RenderModel
 		{
 			RenderModel& operator=(const RenderModel&) = delete;
@@ -24,8 +25,9 @@ namespace PRE
 				friend class RenderModel;
 
 			private:
-				RenderMaterial* pMaterial;
 				RenderMesh* pMesh;
+				RenderBone* pRootBone;
+				RenderMaterial* pMaterial;
 
 				static Impl& MakeImpl();
 
@@ -43,6 +45,7 @@ namespace PRE
 			~RenderModel();
 
 			void SetMesh(RenderMesh* pMesh);
+			void SetRootBone(RenderBone* pRootBone);
 			void SetMaterial(RenderMaterial* pMaterial);
 
 			void Render(const glm::mat4& viewProjectionMatrix);

@@ -163,9 +163,9 @@ void OnInitialize(PREApplicationContext& applicationContext)
     auto& camera = applicationContext.world.Instantiate(cameraTemplate);
     auto pCameraComponent = camera.GetComponent<PRECameraComponent>();
     
-    auto& backpack = applicationContext.world.Instantiate(backpackTemplate);
-    backpack.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
-    auto pBackpackTransform = backpack.GetComponent<PRETransformComponent>();
+    //auto& backpack = applicationContext.world.Instantiate(backpackTemplate);
+    //backpack.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
+    //auto pBackpackTransform = backpack.GetComponent<PRETransformComponent>();
 
     {
         auto& linkA = applicationContext.world.Instantiate(linkTemplate);
