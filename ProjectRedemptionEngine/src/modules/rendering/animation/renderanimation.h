@@ -40,21 +40,27 @@ namespace PRE
 				const float duration;
 
 				RenderAnimationBone& rootBone;
-				const unordered_map<string, RenderAnimationBone*> boneMap;
 
 				Impl(
 					float ticksPerSecond,
 					float duration,
-					RenderAnimationBone& rootBone,
-					unordered_map<string, RenderAnimationBone*>& boneMap
+					RenderAnimationBone& rootBone
 				);
 				~Impl();
 			};
 
 		public:
-			void SetTime(float time);
-			float GetDuration();
-			const glm::mat4& GetCurrentBoneMatrix(const string& boneName) const;
+			static void GetBlendedStateAt(
+				const RenderAnimation& a,
+				const RenderAnimation& b,
+				float timeA,
+				float timeB,
+				float blendFactor,
+				unordered_map<string, glm::mat4>& result
+			);
+
+			float GetDuration() const;
+			void GetStateAt(float time, unordered_map<string, glm::mat4>& result) const;
 
 		private:
 			Impl& _impl;

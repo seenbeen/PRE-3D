@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -15,6 +16,7 @@ namespace PRE
 
 		using std::pair;
 		using std::string;
+		using std::unordered_map;
 		using std::vector;
 
 		class RenderAnimationBone
@@ -34,35 +36,46 @@ namespace PRE
 			private:
 				static Impl& MakeImpl(const RenderAnimationBoneConfig& animationBoneConfig);
 
+				const vector<RenderAnimationBone*> children;
+
 				// TODO: Can optimize for locality by storing current frame index
 				//       for position, rotation, scale keyframes
-				vector<pair<float, glm::vec3>> positionKeyFrames;
-				vector<pair<float, glm::fquat>> rotationKeyFrames;
-				vector<pair<float, glm::vec3>> scaleKeyFrames;
-
-
-				glm::mat4 parentMatrix;
-				glm::mat4 currentMatrix;
+				const vector<pair<float, glm::vec3>> positionKeyFrames;
+				const vector<pair<float, glm::fquat>> rotationKeyFrames;
+				const vector<pair<float, glm::vec3>> scaleKeyFrames;
 
 				Impl(
+					vector<RenderAnimationBone*>& children,
 					vector<pair<float, glm::vec3>>& positionKeyFrames,
 					vector<pair<float, glm::fquat>>& rotationKeyFrames,
 					vector<pair<float, glm::vec3>>& scaleKeyFrames
 				);
 				~Impl();
 			};
+		public:
+			const string name; // lambdas needa capture this to sort .-.
 
 		private:
-			const string _name;			
-			vector<RenderAnimationBone*> _children;
+			static void GetBlendedStateAt(
+				const RenderAnimationBone& a,
+				const RenderAnimationBone& b,
+				float timeA,
+				float timeB,
+				float blendFactor,
+				const glm::mat4& parentMatrix,
+				unordered_map<string, glm::mat4>& result
+			);
 
 			Impl& _impl;
 
 			RenderAnimationBone(const RenderAnimationBoneConfig& animationBoneConfig);
 			~RenderAnimationBone();
 
-			void SetTime(float time);
-			const glm::mat4& GetCurrentMatrix() const;
+			void GetStateAt(
+				float time,
+				const glm::mat4& parentMatrix,
+				unordered_map<string, glm::mat4>& result
+			) const;
 		};
 	} // namespace RenderingModule
 } // namespace PRE

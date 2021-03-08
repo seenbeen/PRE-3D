@@ -1,7 +1,6 @@
 #include <modules/rendering/animation/renderanimation.h>
 
 #include <cmath>
-#include <queue>
 #include <string>
 #include <unordered_map>
 
@@ -14,7 +13,6 @@ namespace PRE
 {
 	namespace RenderingModule
 	{
-		using std::queue;
 		using std::string;
 		using std::unordered_map;
 
@@ -25,41 +23,18 @@ namespace PRE
 		)
 		{
 			auto pRootBone = new RenderAnimationBone(rootBoneConfig);
-			
-			unordered_map<string, RenderAnimationBone*> boneMap;
-
-			// bfs through pRootBone's descendants and map them via name
-			queue<RenderAnimationBone*> boneQueue;
-			boneQueue.push(pRootBone);
-			while (!boneQueue.empty())
-			{
-				auto pCurrent = boneQueue.front();
-				boneQueue.pop();
-
-				boneMap[pCurrent->_name] = pCurrent;
-
-				for (
-					auto it = pCurrent->_children.begin();
-					it != pCurrent->_children.end();
-					++it
-				)
-				{
-					boneQueue.push(*it);
-				}
-			}
+			return *(new Impl(ticksPerSecond, duration, *pRootBone));
 		}
 
 		RenderAnimation::Impl::Impl(
 			float ticksPerSecond,
 			float duration,
-			RenderAnimationBone& rootBone,
-			unordered_map<string, RenderAnimationBone*>& boneMap
+			RenderAnimationBone& rootBone
 		)
 			:
 			ticksPerSecond(ticksPerSecond),
 			duration(duration),
-			rootBone(rootBone),
-			boneMap(std::move(boneMap)) {}
+			rootBone(rootBone) {}
 
 		RenderAnimation::Impl::~Impl()
 		{
@@ -68,26 +43,43 @@ namespace PRE
 			// recursively take care of all of its children
 		}
 
-		void RenderAnimation::SetTime(float time)
+
+		void RenderAnimation::GetBlendedStateAt(
+			const RenderAnimation& a,
+			const RenderAnimation& b,
+			float timeA,
+			float timeB,
+			float blendFactor,
+			unordered_map<string, glm::mat4>& result
+		)
 		{
-			_impl.rootBone.SetTime(std::fmod(time * _impl.ticksPerSecond, _impl.duration));
+			timeA = std::fmod(timeA * a._impl.ticksPerSecond, a._impl.duration);
+			timeB = std::fmod(timeB * a._impl.ticksPerSecond, b._impl.duration);
+			blendFactor = std::fmod(blendFactor, 1.0f);
+
+			RenderAnimationBone::GetBlendedStateAt(
+				a._impl.rootBone,
+				b._impl.rootBone,
+				timeA,
+				timeB,
+				blendFactor,
+				glm::mat4(),
+				result
+			);
 		}
 
-		float RenderAnimation::GetDuration()
+		float RenderAnimation::GetDuration() const
 		{
 			return _impl.duration / _impl.ticksPerSecond;
 		}
 
-		const glm::mat4& RenderAnimation::GetCurrentBoneMatrix(const string& boneName) const
+		void RenderAnimation::GetStateAt(
+			float time,
+			unordered_map<string, glm::mat4>& result
+		) const
 		{
-#ifdef __PRE_DEBUG__
-			if (_impl.boneMap.find(boneName) == _impl.boneMap.end())
-			{
-				throw "Non-existant AnimationBone matrix requested";
-			}
-#endif
-
-			return _impl.boneMap.find(boneName)->second->GetCurrentMatrix();
+			time = std::fmod(time * _impl.ticksPerSecond, _impl.duration);
+			_impl.rootBone.GetStateAt(time, glm::mat4(), result);
 		}
 
 		RenderAnimation::RenderAnimation(
