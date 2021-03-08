@@ -51,9 +51,25 @@ namespace PRE
 			void SetVec3(const string& name, const glm::vec3& value);
 			void SetVec4(const string& name, const glm::vec4& value);
 
+			void SetIVec2(const string& name, const glm::ivec2& value);
+			void SetIVec3(const string& name, const glm::ivec3& value);
+			void SetIVec4(const string& name, const glm::ivec4& value);
+
 			void SetMat2(const string& name, const glm::mat2& value);
 			void SetMat3(const string& name, const glm::mat3& value);
 			void SetMat4(const string& name, const glm::mat4& value);
+
+			void SetVec2(const string& name, const glm::vec2* values, unsigned int nValues);
+			void SetVec3(const string& name, const glm::vec3* values, unsigned int nValues);
+			void SetVec4(const string& name, const glm::vec4* values, unsigned int nValues);
+
+			void SetIVec2(const string& name, const glm::ivec2* values, unsigned int nValues);
+			void SetIVec3(const string& name, const glm::ivec3* values, unsigned int nValues);
+			void SetIVec4(const string& name, const glm::ivec4* values, unsigned int nValues);
+
+			void SetMat2(const string& name, const glm::mat2* values, unsigned int nValues);
+			void SetMat3(const string& name, const glm::mat3* values, unsigned int nValues);
+			void SetMat4(const string& name, const glm::mat4* values, unsigned int nValues);
 
 		private:
 			Impl& _impl;

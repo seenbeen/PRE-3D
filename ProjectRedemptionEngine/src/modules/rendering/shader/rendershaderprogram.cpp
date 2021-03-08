@@ -75,6 +75,21 @@ namespace PRE
 			glUniform4fv(glGetUniformLocation(_impl.programId, name.c_str()), 1, &value[0]);
 		}
 
+		void RenderShaderProgram::SetIVec2(const string& name, const glm::ivec2& value)
+		{
+			glUniform2iv(glGetUniformLocation(_impl.programId, name.c_str()), 1, &value[0]);
+		}
+
+		void RenderShaderProgram::SetIVec3(const string& name, const glm::ivec3& value)
+		{
+			glUniform3iv(glGetUniformLocation(_impl.programId, name.c_str()), 1, &value[0]);
+		}
+
+		void RenderShaderProgram::SetIVec4(const string& name, const glm::ivec4& value)
+		{
+			glUniform4iv(glGetUniformLocation(_impl.programId, name.c_str()), 1, &value[0]);
+		}
+
 		void RenderShaderProgram::SetMat2(const string& name, const glm::mat2& value)
 		{
 			glUniformMatrix2fv(glGetUniformLocation(_impl.programId, name.c_str()), 1, GL_FALSE, &value[0][0]);
@@ -88,6 +103,51 @@ namespace PRE
 		void RenderShaderProgram::SetMat4(const string& name, const glm::mat4& value)
 		{
 			glUniformMatrix4fv(glGetUniformLocation(_impl.programId, name.c_str()), 1, GL_FALSE, &value[0][0]);
+		}
+
+		void RenderShaderProgram::SetVec2(const string& name, const glm::vec2* values, unsigned int nValues)
+		{
+			glUniform2fv(glGetUniformLocation(_impl.programId, name.c_str()), nValues, &values[0][0]);
+		}
+
+		void RenderShaderProgram::SetVec3(const string& name, const glm::vec3* values, unsigned int nValues)
+		{
+			glUniform3fv(glGetUniformLocation(_impl.programId, name.c_str()), nValues, &values[0][0]);
+		}
+
+		void RenderShaderProgram::SetVec4(const string& name, const glm::vec4* values, unsigned int nValues)
+		{
+			glUniform4fv(glGetUniformLocation(_impl.programId, name.c_str()), nValues, &values[0][0]);
+		}
+
+		void RenderShaderProgram::SetIVec2(const string& name, const glm::ivec2* values, unsigned int nValues)
+		{
+			glUniform2iv(glGetUniformLocation(_impl.programId, name.c_str()), nValues, &values[0][0]);
+		}
+
+		void RenderShaderProgram::SetIVec3(const string& name, const glm::ivec3* values, unsigned int nValues)
+		{
+			glUniform3iv(glGetUniformLocation(_impl.programId, name.c_str()), nValues, &values[0][0]);
+		}
+
+		void RenderShaderProgram::SetIVec4(const string& name, const glm::ivec4* values, unsigned int nValues)
+		{
+			glUniform4iv(glGetUniformLocation(_impl.programId, name.c_str()), nValues, &values[0][0]);
+		}
+
+		void RenderShaderProgram::SetMat2(const string& name, const glm::mat2* value, unsigned int nValues)
+		{
+			glUniformMatrix2fv(glGetUniformLocation(_impl.programId, name.c_str()), nValues, GL_FALSE, &value[0][0][0]);
+		}
+
+		void RenderShaderProgram::SetMat3(const string& name, const glm::mat3* value, unsigned int nValues)
+		{
+			glUniformMatrix3fv(glGetUniformLocation(_impl.programId, name.c_str()), nValues, GL_FALSE, &value[0][0][0]);
+		}
+
+		void RenderShaderProgram::SetMat4(const string& name, const glm::mat4* value, unsigned int nValues)
+		{
+			glUniformMatrix4fv(glGetUniformLocation(_impl.programId, name.c_str()), nValues, GL_FALSE, &value[0][0][0]);
 		}
 
 		RenderShaderProgram::RenderShaderProgram(
