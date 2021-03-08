@@ -1,5 +1,6 @@
 #include <modules/rendering/animation/renderanimationchannelconfig.h>
 
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -11,11 +12,14 @@ namespace PRE
 	namespace RenderingModule
 	{
 		using std::pair;
+		using std::string;
 		using std::vector;
 
-		RenderAnimationChannelConfig::RenderAnimationChannelConfig(int id)
+		RenderAnimationChannelConfig::RenderAnimationChannelConfig(
+			const string& channelName
+		)
 			:
-			id(id) {}
+			channelName(channelName) {}
 
 		RenderAnimationChannelConfig::~RenderAnimationChannelConfig() {}
 

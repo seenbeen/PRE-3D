@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -13,6 +14,7 @@ namespace PRE
 		class RenderAnimationConfig;
 
 		using std::pair;
+		using std::string;
 		using std::vector;
 
 		class RenderAnimationChannelConfig
@@ -28,11 +30,11 @@ namespace PRE
 			vector<pair<float, glm::fquat>> _rotationKeyFrames;
 			vector<pair<float, glm::vec3>> _scaleKeyFrames;
 
-			RenderAnimationChannelConfig(int id);
+			RenderAnimationChannelConfig(const string& channelName);
 			~RenderAnimationChannelConfig();
 
 		public:
-			const int id;
+			const string channelName;
 
 			void AddPositionKeyFrame(
 				float time,

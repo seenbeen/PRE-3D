@@ -1,6 +1,7 @@
 #include <modules/rendering/animation/renderanimation.h>
 
 #include <cmath>
+#include <string>
 #include <unordered_map>
 
 #include <glm/glm.hpp>
@@ -13,6 +14,7 @@ namespace PRE
 {
 	namespace RenderingModule
 	{
+		using std::string;
 		using std::unordered_map;
 
 		RenderAnimation::Impl& RenderAnimation::Impl::MakeImpl(
@@ -21,14 +23,14 @@ namespace PRE
 			const RenderAnimationConfig& animationConfig
 		)
 		{
-			unordered_map<int, RenderAnimationChannel*> channels;
+			unordered_map<string, RenderAnimationChannel*> channels;
 			for (
 				auto it = animationConfig._animationChannelConfigs.begin();
 				it != animationConfig._animationChannelConfigs.end();
 				++it
 			)
 			{
-				channels[(*it)->id] = new RenderAnimationChannel(**it);
+				channels[(*it)->channelName] = new RenderAnimationChannel(**it);
 			}
 			return *(new Impl(ticksPerSecond, duration, channels));
 		}
@@ -36,7 +38,7 @@ namespace PRE
 		RenderAnimation::Impl::Impl(
 			float ticksPerSecond,
 			float duration,
-			unordered_map<int, RenderAnimationChannel*>& channels
+			unordered_map<string, RenderAnimationChannel*>& channels
 		)
 			:
 			ticksPerSecond(ticksPerSecond),
@@ -57,7 +59,7 @@ namespace PRE
 			float timeA,
 			float timeB,
 			float blendFactor,
-			unordered_map<int, glm::mat4>& result
+			unordered_map<string, glm::mat4>& result
 		)
 		{
 			result.clear();
@@ -114,7 +116,7 @@ namespace PRE
 
 		void RenderAnimation::GetStateAt(
 			float time,
-			unordered_map<int, glm::mat4>& result
+			unordered_map<string, glm::mat4>& result
 		) const
 		{
 			result.clear();

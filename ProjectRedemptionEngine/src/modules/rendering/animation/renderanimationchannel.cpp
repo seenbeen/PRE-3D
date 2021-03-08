@@ -129,12 +129,6 @@ namespace PRE
 			float blendFactor
 		)
 		{
-#ifdef __PRE_DEBUG__
-			if (a._id != b._id)
-			{
-				throw "Cannot blend different channel ids";
-			}
-#endif
 			// animation A
 			auto positionVectorA = Impl::GetInterpolatedVec(
 				a._impl.positionKeyFrames,
@@ -175,7 +169,7 @@ namespace PRE
 			const RenderAnimationChannelConfig& animationChannelConfig
 		)
 			:
-			_id(animationChannelConfig.id),
+			_channelName(animationChannelConfig.channelName),
 			_impl(Impl::MakeImpl(animationChannelConfig)) {}
 
 		RenderAnimationChannel::~RenderAnimationChannel()

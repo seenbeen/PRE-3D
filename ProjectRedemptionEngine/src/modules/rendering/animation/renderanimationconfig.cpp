@@ -4,6 +4,7 @@
 #include <algorithm>
 #endif
 
+#include <string>
 #include <vector>
 
 #include <modules/rendering/animation/renderanimationchannelconfig.h>
@@ -12,6 +13,9 @@ namespace PRE
 {
 	namespace RenderingModule
 	{
+		using std::string;
+		using std::vector;
+
 		RenderAnimationConfig::RenderAnimationConfig() {}
 
 		RenderAnimationConfig::~RenderAnimationConfig()
@@ -22,16 +26,17 @@ namespace PRE
 			}
 		}
 
-		RenderAnimationChannelConfig& RenderAnimationConfig::AddAnimationChannelConfig(int channelId)
+		RenderAnimationChannelConfig& RenderAnimationConfig::AddAnimationChannelConfig(
+			const string& channelName
+		)
 		{
 #ifdef __PRE_DEBUG__
-			auto localChannelId = channelId;
 			auto it = std::find_if(
 				_animationChannelConfigs.begin(),
 				_animationChannelConfigs.end(),
-				[localChannelId](RenderAnimationChannelConfig* config)
+				[&channelName](RenderAnimationChannelConfig* config)
 				{
-					return config->id == localChannelId;
+					return config->channelName == channelName;
 				}
 			);
 			if (it != _animationChannelConfigs.end())
@@ -41,7 +46,7 @@ namespace PRE
 #endif
 
 			auto pAnimationChannelConfig = new RenderAnimationChannelConfig(
-				channelId
+				channelName
 			);
 			_animationChannelConfigs.push_back(pAnimationChannelConfig);
 			return *pAnimationChannelConfig;

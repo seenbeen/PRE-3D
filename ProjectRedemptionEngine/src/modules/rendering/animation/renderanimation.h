@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <unordered_map>
 
 #include <glm/glm.hpp>
@@ -12,6 +13,7 @@ namespace PRE
 		class RenderAnimationChannelConfig;
 		class RenderAnimationChannel;
 
+		using std::string;
 		using std::unordered_map;
 
 		class RenderAnimation
@@ -38,12 +40,12 @@ namespace PRE
 				const float ticksPerSecond;
 				const float duration;
 
-				unordered_map<int, RenderAnimationChannel*> channels;
+				unordered_map<string, RenderAnimationChannel*> channels;
 
 				Impl(
 					float ticksPerSecond,
 					float duration,
-					unordered_map<int, RenderAnimationChannel*>& channels
+					unordered_map<string, RenderAnimationChannel*>& channels
 				);
 				~Impl();
 			};
@@ -55,13 +57,13 @@ namespace PRE
 				float timeA,
 				float timeB,
 				float blendFactor,
-				unordered_map<int, glm::mat4>& result
+				unordered_map<string, glm::mat4>& result
 			);
 
 			float GetDuration() const;
 			void GetStateAt(
 				float time,
-				unordered_map<int, glm::mat4>& result
+				unordered_map<string, glm::mat4>& result
 			) const;
 
 		private:

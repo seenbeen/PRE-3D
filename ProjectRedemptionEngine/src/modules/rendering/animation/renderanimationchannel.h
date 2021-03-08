@@ -77,8 +77,6 @@ namespace PRE
 			};
 
 		private:
-
-
 			static glm::mat4 GetBlendedStateAt(
 				const RenderAnimationChannel& a,
 				const RenderAnimationChannel& b,
@@ -87,7 +85,7 @@ namespace PRE
 				float blendFactor
 			);
 
-			const int _id;
+			const string _channelName;
 			Impl& _impl;
 
 			RenderAnimationChannel(const RenderAnimationChannelConfig& animationChannelConfig);

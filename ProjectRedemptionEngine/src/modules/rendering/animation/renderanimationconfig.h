@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <vector>
 
 namespace PRE
@@ -8,6 +9,7 @@ namespace PRE
 		class RenderAnimation;
 		class RenderAnimationChannelConfig;
 
+		using std::string;
 		using std::vector;
 
 		class RenderAnimationConfig
@@ -24,7 +26,9 @@ namespace PRE
 			RenderAnimationConfig();
 			~RenderAnimationConfig();
 
-			RenderAnimationChannelConfig& AddAnimationChannelConfig(int channelId);
+			RenderAnimationChannelConfig& AddAnimationChannelConfig(
+				const string& channelName
+			);
 		};
 	} // namespace RenderingModule
 } // namespace PRE
