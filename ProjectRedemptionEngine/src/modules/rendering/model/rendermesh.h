@@ -46,11 +46,11 @@ namespace PRE
 				unsigned int nUvs;
 				glm::vec2* uvs;
 
-				unsigned int nBoneIds;
-				glm::ivec4* boneIds;
+				unsigned int nVertexBoneIds;
+				glm::ivec4* vertexBoneIds;
 
-				unsigned int nBoneWeights;
-				glm::vec4* boneWeights;
+				unsigned int nVertexBoneWeights;
+				glm::vec4* vertexBoneWeights;
 
 				unsigned int nTriangleIndices;
 				unsigned int* triangleIndices;
@@ -87,11 +87,11 @@ namespace PRE
 			void SetUvs(const glm::vec2* uvs, unsigned int nUvs);
 			const glm::vec2* const GetUvs(unsigned int& nUvs) const;
 
-			void SetBoneIds(const glm::ivec4* boneIds, unsigned int nBoneIds);
-			const glm::ivec4* const GetBoneIds(unsigned int& nBoneIds) const;
+			void SetVertexBoneIds(const glm::ivec4* vertexBoneIds, unsigned int nVertexBoneIds);
+			const glm::ivec4* const GetVertexBoneIds(unsigned int& nVertexBoneIds) const;
 
-			void SetBoneWeights(const glm::vec4* boneWeights, unsigned int nBoneWeights);
-			const glm::vec4* const GetBoneWeights(unsigned int& nBoneWeights) const;
+			void SetVertexBoneWeights(const glm::vec4* vertexBoneWeights, unsigned int nVertexBoneWeights);
+			const glm::vec4* const GetVertexBoneWeights(unsigned int& nVertexBoneWeights) const;
 
 			void SetTriangles(const unsigned int* const triangles, unsigned int nTriangles);
 			const unsigned int* const GetTriangles(unsigned int& nTriangles) const;

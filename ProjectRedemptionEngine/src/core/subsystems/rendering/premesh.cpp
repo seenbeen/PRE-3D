@@ -38,24 +38,24 @@ namespace PRE
 			return _mesh.GetUvs(nUvs);
 		}
 
-		void PREMesh::SetBoneIds(const glm::ivec4* const boneIds, unsigned int nBoneIds)
+		void PREMesh::SetVertexBoneIds(const glm::ivec4* const vertexBoneIds, unsigned int nVertexBoneIds)
 		{
-			_mesh.SetBoneIds(boneIds, nBoneIds);
+			_mesh.SetVertexBoneIds(vertexBoneIds, nVertexBoneIds);
 		}
 
-		const glm::ivec4* const PREMesh::GetBoneIds(unsigned int& nBoneIds) const
+		const glm::ivec4* const PREMesh::GetVertexBoneIds(unsigned int& nVertexBoneIds) const
 		{
-			return _mesh.GetBoneIds(nBoneIds);
+			return _mesh.GetVertexBoneIds(nVertexBoneIds);
 		}
 
-		void PREMesh::SetBoneWeights(const glm::vec4* const boneWeights, unsigned int nBoneWeights)
+		void PREMesh::SetVertexBoneWeights(const glm::vec4* const vertexBoneWeights, unsigned int nVertexBoneWeights)
 		{
-			_mesh.SetBoneWeights(boneWeights, nBoneWeights);
+			_mesh.SetVertexBoneWeights(vertexBoneWeights, nVertexBoneWeights);
 		}
 
-		const glm::vec4* const PREMesh::GetBoneWeights(unsigned int& nBoneWeights) const
+		const glm::vec4* const PREMesh::GetVertexBoneWeights(unsigned int& nVertexBoneWeights) const
 		{
-			return _mesh.GetBoneWeights(nBoneWeights);
+			return _mesh.GetVertexBoneWeights(nVertexBoneWeights);
 		}
 
 		void PREMesh::SetTriangles(const unsigned int* const triangles, unsigned int nTriangles)

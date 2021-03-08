@@ -28,11 +28,11 @@ namespace PRE
 			void SetUvs(const glm::vec2* const uvs, unsigned int nUvs);
 			const glm::vec2* const GetUvs(unsigned int& nUvs) const;
 
-			void SetBoneIds(const glm::ivec4* const boneIds, unsigned int nBoneIds);
-			const glm::ivec4* const GetBoneIds(unsigned int& nBoneIds) const;
+			void SetVertexBoneIds(const glm::ivec4* const vertexBoneIds, unsigned int nVertexBoneIds);
+			const glm::ivec4* const GetVertexBoneIds(unsigned int& nVertexBoneIds) const;
 
-			void SetBoneWeights(const glm::vec4* const boneWeights, unsigned int nBoneWeights);
-			const glm::vec4* const GetBoneWeights(unsigned int& nBoneWeights) const;
+			void SetVertexBoneWeights(const glm::vec4* const vertexBoneWeights, unsigned int nVertexBoneWeights);
+			const glm::vec4* const GetVertexBoneWeights(unsigned int& nVertexBoneWeights) const;
 
 			void SetTriangles(const unsigned int* const triangles, unsigned int nTriangles);
 			const unsigned int* const GetTriangles(unsigned int& nTriangles) const;
