@@ -46,8 +46,8 @@ protected:
 
     void OnUpdate() override
     {
-         auto euler = _transform->GetEuler() + glm::vec3(0, 60, 0) * GetTime().GetDeltaTime();
-         _transform->SetEuler(euler);
+         auto euler = _transform->GetLocalEuler() + glm::vec3(0, 60, 0) * GetTime().GetDeltaTime();
+         _transform->SetLocalEuler(euler);
     }
 
     void OnDestroy() override
@@ -128,11 +128,11 @@ void OnInitialize(PREApplicationContext& applicationContext)
             auto &modelComponent = *AddPREComponent<SimpleModelComponent>();
             modelComponent.vertexShaderPath = "/shaders/simplevertex.vs";
             modelComponent.fragmentShaderPath = "/shaders/simplefragment.fs";
-            modelComponent.meshPath = "/models/Link (Adult)/Link Adult.obj";
-            modelComponent.albedoPath = "/models/Link (Adult)/Link_grp.png";
+            modelComponent.meshPath = "/models/vampire_a_lusth/vampire_a_lusth.dae";
+            modelComponent.albedoPath = "/models/vampire_a_lusth/textures/Vampire_diffuse.png";
             auto pTransform = GetPREComponent<PRETransformComponent>();
-            pTransform->SetLocalScale(glm::vec3(0.05f));
-            pTransform->SetPosition(glm::vec3(0, -3.5, 0));
+            pTransform->SetLocalScale(glm::vec3(4.0f));
+            pTransform->SetPosition(glm::vec3(0, -5, 0));
         }
     } linkTemplate;
 
@@ -173,7 +173,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
         pLinkATransform->SetPosition(
             pLinkATransform->GetPosition() + glm::vec3(-4, 0, 0)
         );
-        pLinkATransform->SetParent(pBackpackTransform, true);
+        //pLinkATransform->SetParent(pBackpackTransform, true);
         linkA.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
     }
 
@@ -183,7 +183,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
         pLinkBTransform->SetPosition(
             pLinkBTransform->GetPosition() + glm::vec3(4, 0, 0)
         );
-        pLinkBTransform->SetParent(pBackpackTransform, true);
+        //pLinkBTransform->SetParent(pBackpackTransform, true);
         linkB.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
     }
 }
@@ -200,8 +200,8 @@ int main(int argc, char *argv[])
             PREInputConfig(),
             PRERenderingConfig(
                 "Yes hi.",
-                800,
-                600
+                1024,
+                768
             ),
             PRETimeConfig(),
             PREWorldConfig(),

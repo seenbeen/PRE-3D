@@ -161,7 +161,6 @@ namespace PRE
 			auto aiScene = _impl.assimp.ReadFile(
 				meshPath,
 				aiProcess_Triangulate |
-				aiProcess_FlipUVs |
 				aiProcess_GenSmoothNormals |
 				aiProcess_CalcTangentSpace |
 				aiProcess_OptimizeMeshes

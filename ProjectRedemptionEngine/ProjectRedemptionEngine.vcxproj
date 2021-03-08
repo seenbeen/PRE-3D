@@ -45,6 +45,9 @@
     <ClCompile Include="src\modules\gameobject\gameobjectworld.cpp" />
     <ClCompile Include="src\modules\input\input.cpp" />
     <ClCompile Include="src\modules\input\keycode.cpp" />
+    <ClCompile Include="src\modules\rendering\animation\renderanimation.cpp" />
+    <ClCompile Include="src\modules\rendering\animation\renderanimationbone.cpp" />
+    <ClCompile Include="src\modules\rendering\animation\renderanimationboneconfig.cpp" />
     <ClCompile Include="src\modules\rendering\compositing\rendercompositingnode.cpp" />
     <ClCompile Include="src\modules\rendering\compositing\rendercompositingtarget.cpp" />
     <ClCompile Include="src\modules\rendering\model\rendermaterial.cpp" />
@@ -59,6 +62,7 @@
     <ClCompile Include="src\modules\time\time.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\core\components\preanimatorcomponent.h" />
     <ClInclude Include="src\core\components\precameracomponent.h" />
     <ClInclude Include="src\core\components\premodelrenderercomponent.h" />
     <ClInclude Include="src\core\preapplication.h" />
@@ -71,6 +75,7 @@
     <ClInclude Include="src\core\subsystems\input\preinputconfig.h" />
     <ClInclude Include="src\core\subsystems\input\prekeycode.h" />
     <ClInclude Include="src\core\subsystems\physics\prephysics.h" />
+    <ClInclude Include="src\core\subsystems\rendering\preanimation.h" />
     <ClInclude Include="src\core\subsystems\rendering\prematerial.h" />
     <ClInclude Include="src\core\subsystems\rendering\premesh.h" />
     <ClInclude Include="src\core\subsystems\rendering\prerendering.h" />
@@ -98,6 +103,9 @@
     <ClInclude Include="src\modules\gameobject\gameobjectworld.h" />
     <ClInclude Include="src\modules\input\input.h" />
     <ClInclude Include="src\modules\input\keycode.h" />
+    <ClInclude Include="src\modules\rendering\animation\renderanimation.h" />
+    <ClInclude Include="src\modules\rendering\animation\renderanimationbone.h" />
+    <ClInclude Include="src\modules\rendering\animation\renderanimationboneconfig.h" />
     <ClInclude Include="src\modules\rendering\compositing\rendercompositingnode.h" />
     <ClInclude Include="src\modules\rendering\compositing\rendercompositingtarget.h" />
     <ClInclude Include="src\modules\rendering\model\rendermaterial.h" />

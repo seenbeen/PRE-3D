@@ -250,7 +250,7 @@ namespace PRE
 				}
 				else
 				{
-					_localMatrix = glm::mat4();
+					_localMatrix = _matrix;
 				}
 
 				glm::vec3 skew;
