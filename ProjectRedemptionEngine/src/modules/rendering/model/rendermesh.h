@@ -32,6 +32,8 @@ namespace PRE
 				const GLuint vertexVerticesBuffer;
 				const GLuint vertexNormalsBuffer;
 				const GLuint vertexUVsBuffer;
+				const GLuint vertexBoneIdsBuffer;
+				const GLuint vertexBoneWeightsBuffer;
 
 				const GLuint elementsTrianglesBuffer;
 
@@ -44,12 +46,21 @@ namespace PRE
 				unsigned int nUvs;
 				glm::vec2* uvs;
 
+				unsigned int nBoneIds;
+				glm::ivec4* boneIds;
+
+				unsigned int nBoneWeights;
+				glm::vec4* boneWeights;
+
 				unsigned int nTriangleIndices;
 				unsigned int* triangleIndices;
 
 				bool verticesHaveChanged;
 				bool normalsHaveChanged;
 				bool uvsHaveChanged;
+
+				bool boneIdsHaveChanged;
+				bool boneWeightsHaveChanged;
 
 				bool triangleIndicesHaveChanged;
 
@@ -59,23 +70,31 @@ namespace PRE
 					GLuint vertexVerticesBuffer,
 					GLuint vertexNormalsBuffer,
 					GLuint vertexUVsBuffer,
+					GLuint vertexBoneIdsBuffer,
+					GLuint vertexWeightsBuffer,
 					GLuint elementsTrianglesBuffer
 				);
 				~Impl();
 			};
 
 		public:
-			void SetVertices(const glm::vec3* const vertices, unsigned int nVertices);
-			const glm::vec3* const GetVertices() const;
+			void SetVertices(const glm::vec3* vertices, unsigned int nVertices);
+			const glm::vec3* const GetVertices(unsigned int& nVertices) const;
 
-			void SetNormals(const glm::vec3* const normals, unsigned int nNormals);
-			const glm::vec3* const GetNormals() const;
+			void SetNormals(const glm::vec3* normals, unsigned int nNormals);
+			const glm::vec3* const GetNormals(unsigned int& nNormals) const;
 
-			void SetUvs(const glm::vec2* const uvs, unsigned int nUvs);
-			const glm::vec2* const GetUvs() const;
+			void SetUvs(const glm::vec2* uvs, unsigned int nUvs);
+			const glm::vec2* const GetUvs(unsigned int& nUvs) const;
+
+			void SetBoneIds(const glm::ivec4* boneIds, unsigned int nBoneIds);
+			const glm::ivec4* const GetBoneIds(unsigned int& nBoneIds) const;
+
+			void SetBoneWeights(const glm::vec4* boneWeights, unsigned int nBoneWeights);
+			const glm::vec4* const GetBoneWeights(unsigned int& nBoneWeights) const;
 
 			void SetTriangles(const unsigned int* const triangles, unsigned int nTriangles);
-			const unsigned int* const GetTriangles() const;
+			const unsigned int* const GetTriangles(unsigned int& nTriangles) const;
 
 		private:
 			Impl& _impl;

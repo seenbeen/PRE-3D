@@ -14,15 +14,19 @@ namespace PRE
 		RenderMesh::Impl& RenderMesh::Impl::MakeImpl()
 		{
 			GLuint vertexArrayObject;
-			GLuint 	vertexVerticesBuffer;
-			GLuint 	vertexNormalsBuffer;
-			GLuint 	vertexUVsBuffer;
-			GLuint 	elementsTrianglesBuffer;
+			GLuint vertexVerticesBuffer;
+			GLuint vertexNormalsBuffer;
+			GLuint vertexUVsBuffer;
+			GLuint vertexBoneIdsBuffer;
+			GLuint vertexBoneWeightsBuffer;
+			GLuint elementsTrianglesBuffer;
 			
 			glGenVertexArrays(1, &vertexArrayObject);
 			glGenBuffers(1, &vertexVerticesBuffer);
 			glGenBuffers(1, &vertexNormalsBuffer);
 			glGenBuffers(1, &vertexUVsBuffer);
+			glGenBuffers(1, &vertexBoneIdsBuffer);
+			glGenBuffers(1, &vertexBoneWeightsBuffer);
 			glGenBuffers(1, &elementsTrianglesBuffer);
 
 			glBindVertexArray(vertexArrayObject);
@@ -39,6 +43,14 @@ namespace PRE
 			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 			glEnableVertexAttribArray(2);
 
+			glBindBuffer(GL_ARRAY_BUFFER, vertexBoneIdsBuffer);
+			glVertexAttribIPointer(3, 4, GL_INT, 0, (void*)0);
+			glEnableVertexAttribArray(3);
+
+			glBindBuffer(GL_ARRAY_BUFFER, vertexBoneWeightsBuffer);
+			glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
+			glEnableVertexAttribArray(4);
+
 			glBindVertexArray(0);
 
 			return *(new Impl(
@@ -46,6 +58,8 @@ namespace PRE
 				vertexVerticesBuffer,
 				vertexNormalsBuffer,
 				vertexUVsBuffer,
+				vertexBoneIdsBuffer,
+				vertexBoneWeightsBuffer,
 				elementsTrianglesBuffer
 			));
 		}
@@ -55,6 +69,8 @@ namespace PRE
 			GLuint vertexVerticesBuffer,
 			GLuint vertexNormalsBuffer,
 			GLuint vertexUVsBuffer,
+			GLuint vertexBoneIdsBuffer,
+			GLuint vertexBoneWeightsBuffer,
 			GLuint elementsTrianglesBuffer
 		)
 			:
@@ -62,6 +78,8 @@ namespace PRE
 			vertexVerticesBuffer(vertexVerticesBuffer),
 			vertexNormalsBuffer(vertexNormalsBuffer),
 			vertexUVsBuffer(vertexUVsBuffer),
+			vertexBoneIdsBuffer(vertexBoneIdsBuffer),
+			vertexBoneWeightsBuffer(vertexBoneWeightsBuffer),
 			elementsTrianglesBuffer(elementsTrianglesBuffer),
 			nVertices(0),
 			vertices(nullptr),
@@ -69,11 +87,17 @@ namespace PRE
 			normals(nullptr),
 			nUvs(0),
 			uvs(nullptr),
+			nBoneIds(0),
+			boneIds(nullptr),
+			nBoneWeights(0),
+			boneWeights(nullptr),
 			nTriangleIndices(0),
 			triangleIndices(nullptr),
 			verticesHaveChanged(false),
 			normalsHaveChanged(false),
 			uvsHaveChanged(false),
+			boneIdsHaveChanged(false),
+			boneWeightsHaveChanged(false),
 			triangleIndicesHaveChanged(false) {}
 
 		RenderMesh::Impl::~Impl()
@@ -81,6 +105,14 @@ namespace PRE
 			if (triangleIndices != nullptr)
 			{
 				delete[] triangleIndices;
+			}
+			if (boneWeights != nullptr)
+			{
+				delete[] boneWeights;
+			}
+			if (boneIds != nullptr)
+			{
+				delete[] boneIds;
 			}
 			if (uvs != nullptr)
 			{
@@ -96,13 +128,15 @@ namespace PRE
 			}
 
 			glDeleteBuffers(1, &elementsTrianglesBuffer);
+			glDeleteBuffers(1, &vertexBoneWeightsBuffer);
+			glDeleteBuffers(1, &vertexBoneIdsBuffer);
 			glDeleteBuffers(1, &vertexUVsBuffer);
 			glDeleteBuffers(1, &vertexNormalsBuffer);
 			glDeleteBuffers(1, &vertexVerticesBuffer);
 			glDeleteVertexArrays(1, &vertexArrayObject);
 		}
 
-		void RenderMesh::SetVertices(const glm::vec3* const vertices, unsigned int nVertices)
+		void RenderMesh::SetVertices(const glm::vec3* vertices, unsigned int nVertices)
 		{
 			if (_impl.vertices != nullptr)
 			{
@@ -122,12 +156,13 @@ namespace PRE
 			_impl.verticesHaveChanged = true;
 		}
 
-		const glm::vec3* const RenderMesh::GetVertices() const
+		const glm::vec3* const RenderMesh::GetVertices(unsigned int& nVertices) const
 		{
+			nVertices = _impl.nVertices;
 			return _impl.vertices;
 		}
 
-		void RenderMesh::SetNormals(const glm::vec3* const normals, unsigned int nNormals)
+		void RenderMesh::SetNormals(const glm::vec3* normals, unsigned int nNormals)
 		{
 			if (_impl.normals != nullptr)
 			{
@@ -147,12 +182,13 @@ namespace PRE
 			_impl.normalsHaveChanged = true;
 		}
 
-		const glm::vec3* const RenderMesh::GetNormals() const
+		const glm::vec3* const RenderMesh::GetNormals(unsigned int& nNormals) const
 		{
+			nNormals = _impl.nNormals;
 			return _impl.normals;
 		}
 
-		void RenderMesh::SetUvs(const glm::vec2* const uvs, unsigned int nuvs)
+		void RenderMesh::SetUvs(const glm::vec2* uvs, unsigned int nuvs)
 		{
 			if (_impl.uvs != nullptr)
 			{
@@ -172,12 +208,65 @@ namespace PRE
 			_impl.uvsHaveChanged = true;
 		}
 
-		const glm::vec2* const RenderMesh::GetUvs() const
+		const glm::vec2* const RenderMesh::GetUvs(unsigned int& nUvs) const
 		{
+			nUvs = _impl.nUvs;
 			return _impl.uvs;
 		}
 
-		void RenderMesh::SetTriangles(const unsigned int* const triangles, unsigned int nTriangleIndices)
+		void RenderMesh::SetBoneIds(const glm::ivec4* boneIds, unsigned int nBoneIds)
+		{
+			if (_impl.boneIds != nullptr)
+			{
+				delete[] _impl.boneIds;
+			}
+			if (boneIds != nullptr && nBoneIds != 0)
+			{
+				_impl.nBoneIds = nBoneIds;
+				_impl.boneIds = new glm::ivec4[_impl.nBoneIds];
+				std::memcpy(_impl.boneIds, boneIds, _impl.nBoneIds * sizeof(glm::ivec4));
+			}
+			else
+			{
+				_impl.nBoneIds = 0;
+				_impl.boneIds = nullptr;
+			}
+			_impl.boneIdsHaveChanged = true;
+		}
+
+		const glm::ivec4* const RenderMesh::GetBoneIds(unsigned int& nBoneIds) const
+		{
+			nBoneIds = _impl.nBoneIds;
+			return _impl.boneIds;
+		}
+
+		void RenderMesh::SetBoneWeights(const glm::vec4* boneWeights, unsigned int nBoneWeights)
+		{
+			if (_impl.boneWeights != nullptr)
+			{
+				delete[] _impl.boneWeights;
+			}
+			if (boneWeights != nullptr && nBoneWeights != 0)
+			{
+				_impl.nBoneWeights = nBoneWeights;
+				_impl.boneWeights = new glm::vec4[_impl.nBoneWeights];
+				std::memcpy(_impl.boneWeights, boneWeights, _impl.nBoneWeights * sizeof(glm::vec4));
+			}
+			else
+			{
+				_impl.nBoneWeights = 0;
+				_impl.boneWeights = nullptr;
+			}
+			_impl.boneWeightsHaveChanged = true;
+		}
+
+		const glm::vec4* const RenderMesh::GetBoneWeights(unsigned int& nBoneWeights) const
+		{
+			nBoneWeights = _impl.nBoneWeights;
+			return _impl.boneWeights;
+		}
+
+		void RenderMesh::SetTriangles(const unsigned int* triangles, unsigned int nTriangleIndices)
 		{
 			if (_impl.triangleIndices != nullptr)
 			{
@@ -198,8 +287,9 @@ namespace PRE
 			_impl.triangleIndicesHaveChanged = true;
 		}
 
-		const unsigned int* const RenderMesh::GetTriangles() const
+		const unsigned int* const RenderMesh::GetTriangles(unsigned int& nTriangles) const
 		{
+			nTriangles = _impl.nTriangleIndices;
 			return _impl.triangleIndices;
 		}
 
@@ -217,12 +307,16 @@ namespace PRE
 				_impl.nVertices == 0 ||
 				_impl.nNormals == 0 ||
 				_impl.nUvs == 0 ||
+				_impl.nBoneIds == 0 ||
+				_impl.nBoneWeights == 0 ||
 				_impl.nTriangleIndices == 0
 			)
 			{
 				return;
 			}
+
 			glBindVertexArray(_impl.vertexArrayObject);
+
 			if (_impl.verticesHaveChanged)
 			{
 				_impl.verticesHaveChanged = false;
@@ -241,6 +335,20 @@ namespace PRE
 				glBindBuffer(GL_ARRAY_BUFFER, _impl.vertexUVsBuffer);
 				glBufferData(GL_ARRAY_BUFFER, _impl.nUvs * sizeof(glm::vec2), &_impl.uvs[0], GL_STATIC_DRAW);
 			}
+
+			if (_impl.boneIdsHaveChanged)
+			{
+				_impl.boneIdsHaveChanged = false;
+				glBindBuffer(GL_ARRAY_BUFFER, _impl.vertexBoneIdsBuffer);
+				glBufferData(GL_ARRAY_BUFFER, _impl.nBoneIds * sizeof(glm::ivec4), &_impl.boneIds[0], GL_STATIC_DRAW);
+			}
+			if (_impl.boneWeightsHaveChanged)
+			{
+				_impl.boneWeightsHaveChanged = false;
+				glBindBuffer(GL_ARRAY_BUFFER, _impl.vertexBoneWeightsBuffer);
+				glBufferData(GL_ARRAY_BUFFER, _impl.nBoneWeights * sizeof(glm::vec4), &_impl.boneWeights[0], GL_STATIC_DRAW);
+			}
+
 			if (_impl.triangleIndicesHaveChanged)
 			{
 				_impl.triangleIndicesHaveChanged = false;
@@ -249,6 +357,7 @@ namespace PRE
 			}
 
 			glDrawElements(GL_TRIANGLES, _impl.nTriangleIndices, GL_UNSIGNED_INT, 0);
+
 			glBindVertexArray(GL_NONE);
 		}
 	} // namespace RenderingModule
