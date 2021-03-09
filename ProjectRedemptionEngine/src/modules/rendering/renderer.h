@@ -2,6 +2,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 // TODO: migrate SDL to its own namespace to reduce global clutter
 struct SDL_Window;
@@ -10,6 +11,8 @@ typedef void* SDL_GLContext;
 #include <glad/glad.h>
 
 #include <glm/glm.hpp>
+
+#include <modules/rendering/model/renderskeleton.h>
 
 namespace PRE
 {
@@ -28,6 +31,7 @@ namespace PRE
 		using std::string;
 		using std::unordered_map;
 		using std::unordered_set;
+		using std::vector;
 
 		class Renderer
 		{
@@ -101,6 +105,12 @@ namespace PRE
 			RenderMesh& AllocateMesh();
 			void DeallocateMesh(RenderMesh& mesh);
 
+			RenderSkeleton& AllocateSkeleton(
+				const string& rootBone,
+				const vector<RenderSkeleton::BoneConfig>& bones
+			);
+			void DeallocateSkeleton(RenderSkeleton& skeleton);
+
 			RenderTexture& AllocateTexture();
 			void DeallocateTexture(RenderTexture& texture);
 
@@ -140,6 +150,7 @@ namespace PRE
 			unordered_set<const RenderShaderProgram*> _shaderPrograms;
 
 			unordered_set<const RenderMesh*> _meshes;
+			unordered_set<const RenderSkeleton*> _skeletons;
 			unordered_set<const RenderTexture*> _textures;
 			unordered_set<const RenderMaterial*> _materials;
 

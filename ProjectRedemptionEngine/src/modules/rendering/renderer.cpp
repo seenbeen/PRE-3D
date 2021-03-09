@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
+#include <vector>
 
 #include <SDL.h>
 
@@ -18,6 +19,7 @@
 #include <modules/rendering/shader/renderfragmentshader.h>
 #include <modules/rendering/shader/rendershaderprogram.h>
 #include <modules/rendering/model/rendermesh.h>
+#include <modules/rendering/model/renderskeleton.h>
 #include <modules/rendering/model/rendertexture.h>
 #include <modules/rendering/model/rendermaterial.h>
 #include <modules/rendering/model/rendermodel.h>
@@ -29,6 +31,7 @@ namespace PRE
 		using std::string;
 		using std::unordered_map;
 		using std::unordered_set;
+		using std::vector;
 
 		const unsigned int Renderer::ROOT_TAG_GROUP = 0;
 
@@ -418,10 +421,40 @@ namespace PRE
 				throw "Cannot deallocate unknown Mesh";
 			}
 
-			_meshes.erase(_meshes.find(pMesh));
+			_meshes.erase(pMesh);
 #endif
 
 			delete pMesh;
+		}
+
+		RenderSkeleton& Renderer::AllocateSkeleton(
+			const string& rootBone,
+			const vector<RenderSkeleton::BoneConfig>& bones
+		)
+		{
+			auto pSkeleton = new RenderSkeleton(rootBone, bones);
+
+#ifdef __PRE_DEBUG__
+			_skeletons.insert(pSkeleton);
+#endif
+
+			return *pSkeleton;
+		}
+
+		void Renderer::DeallocateSkeleton(RenderSkeleton& skeleton)
+		{
+			auto pSkeleton = &skeleton;
+
+#ifdef __PRE_DEBUG__
+			if (_skeletons.find(pSkeleton) == _skeletons.end())
+			{
+				throw "Cannot deallocate unknown Skeleton";
+			}
+
+			_skeletons.erase(pSkeleton);
+#endif
+
+			delete pSkeleton;
 		}
 
 		RenderTexture& Renderer::AllocateTexture()
@@ -646,6 +679,10 @@ namespace PRE
 				throw "Leak";
 			}
 			if (_meshes.size() > 0)
+			{
+				throw "Leak";
+			}
+			if (_skeletons.size() > 0)
 			{
 				throw "Leak";
 			}
