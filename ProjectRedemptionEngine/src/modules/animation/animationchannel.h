@@ -8,28 +8,28 @@
 
 namespace PRE
 {
-	namespace RenderingModule
+	namespace AnimationModule
 	{
-		class RenderAnimation;
-		class RenderAnimationChannelConfig;
+		class Animation;
+		class AnimationChannelConfig;
 
 		using std::pair;
 		using std::string;
 		using std::vector;
 
-		class RenderAnimationChannel
+		class AnimationChannel
 		{
-			RenderAnimationChannel& operator=(const RenderAnimationChannel&) = delete;
-			RenderAnimationChannel(const RenderAnimationChannel&) = delete;
+			AnimationChannel& operator=(const AnimationChannel&) = delete;
+			AnimationChannel(const AnimationChannel&) = delete;
 
-			friend class RenderAnimation;
+			friend class Animation;
 
 			class Impl
 			{
 				Impl& operator=(const Impl&) = delete;
 				Impl(const Impl&) = delete;
 
-				friend class RenderAnimationChannel;
+				friend class AnimationChannel;
 
 			private:
 				static const glm::mat4 MAT4_IDENTITY;
@@ -60,7 +60,7 @@ namespace PRE
 					const pair<float, glm::fquat>& keyPairB
 				);
 
-				static Impl& MakeImpl(const RenderAnimationChannelConfig& animationChannelConfig);
+				static Impl& MakeImpl(const AnimationChannelConfig& animationChannelConfig);
 
 				// TODO: Can optimize for locality by storing current frame index
 				//       for position, rotation, scale keyframes
@@ -78,8 +78,8 @@ namespace PRE
 
 		private:
 			static glm::mat4 GetBlendedStateAt(
-				const RenderAnimationChannel& a,
-				const RenderAnimationChannel& b,
+				const AnimationChannel& a,
+				const AnimationChannel& b,
 				float timeA,
 				float timeB,
 				float blendFactor
@@ -88,10 +88,10 @@ namespace PRE
 			const string _channelName;
 			Impl& _impl;
 
-			RenderAnimationChannel(const RenderAnimationChannelConfig& animationChannelConfig);
-			~RenderAnimationChannel();
+			AnimationChannel(const AnimationChannelConfig& animationChannelConfig);
+			~AnimationChannel();
 
 			glm::mat4 GetStateAt(float time) const;
 		};
-	} // namespace RenderingModule
+	} // namespace AnimationModule
 } // namespace PRE

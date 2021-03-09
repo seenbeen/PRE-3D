@@ -106,7 +106,7 @@ namespace PRE
 				_impl.pShaderProgram->SetMat4(
 					"PRE_BONETRANSFORMS",
 					&boneTransforms[0],
-					boneTransforms.size()
+					(unsigned int)boneTransforms.size()
 				);
 			}
 		}

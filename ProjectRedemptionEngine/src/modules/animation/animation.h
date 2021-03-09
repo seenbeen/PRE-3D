@@ -6,20 +6,19 @@
 
 namespace PRE
 {
-	namespace RenderingModule
+	namespace AnimationModule
 	{
-		class Renderer;
-		class RenderAnimationConfig;
-		class RenderAnimationChannelConfig;
-		class RenderAnimationChannel;
+		class AnimationConfig;
+		class AnimationChannelConfig;
+		class AnimationChannel;
 
 		using std::string;
 		using std::unordered_map;
 
-		class RenderAnimation
+		class Animation
 		{
-			RenderAnimation& operator=(const RenderAnimation&) = delete;
-			RenderAnimation(const RenderAnimation&) = delete;
+			Animation& operator=(const Animation&) = delete;
+			Animation(const Animation&) = delete;
 
 			friend class Renderer;
 
@@ -28,32 +27,39 @@ namespace PRE
 				Impl& operator=(const Impl&) = delete;
 				Impl(const Impl&) = delete;
 
-				friend class RenderAnimation;
+				friend class Animation;
 
 			private:
 				static Impl& MakeImpl(
 					float ticksPerSecond,
 					float duration,
-					const RenderAnimationConfig& animationConfig
+					const AnimationConfig& animationConfig
 				);
 
 				const float ticksPerSecond;
 				const float duration;
 
-				unordered_map<string, RenderAnimationChannel*> channels;
+				unordered_map<string, AnimationChannel*> channels;
 
 				Impl(
 					float ticksPerSecond,
 					float duration,
-					unordered_map<string, RenderAnimationChannel*>& channels
+					unordered_map<string, AnimationChannel*>& channels
 				);
 				~Impl();
 			};
 
 		public:
+			Animation(
+				float ticksPerSecond,
+				float duration,
+				AnimationConfig& animationConfig
+			);
+			~Animation();
+
 			static void GetBlendedStateAt(
-				const RenderAnimation& a,
-				const RenderAnimation& b,
+				const Animation& a,
+				const Animation& b,
 				float timeA,
 				float timeB,
 				float blendFactor,
@@ -68,13 +74,6 @@ namespace PRE
 
 		private:
 			Impl& _impl;
-
-			RenderAnimation(
-				float ticksPerSecond,
-				float duration,
-				RenderAnimationConfig& animationConfig
-			);
-			~RenderAnimation();
 		};
-	} // namespace RenderingModule
+	} // namespace AnimationModule
 } // namespace PRE

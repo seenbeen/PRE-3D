@@ -26,8 +26,10 @@ namespace PRE
 			friend class Renderer;
 			friend class RenderModel;
 
-		private:
+		public:
 			class BoneConfig;
+
+		private:
 			struct Bone;
 
 			class Impl
@@ -92,6 +94,7 @@ namespace PRE
 
 			public:
 				BoneConfig(const string& name, const glm::mat4& bindPos);
+
 				void AddChild(const string& child);
 				void AddVertexInfluence(int vertexId, float weight);
 			};

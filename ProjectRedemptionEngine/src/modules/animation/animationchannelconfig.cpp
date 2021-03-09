@@ -1,4 +1,4 @@
-#include <modules/rendering/animation/renderanimationchannelconfig.h>
+#include <modules/animation/animationchannelconfig.h>
 
 #include <string>
 #include <utility>
@@ -9,21 +9,21 @@
 
 namespace PRE
 {
-	namespace RenderingModule
+	namespace AnimationModule
 	{
 		using std::pair;
 		using std::string;
 		using std::vector;
 
-		RenderAnimationChannelConfig::RenderAnimationChannelConfig(
+		AnimationChannelConfig::AnimationChannelConfig(
 			const string& channelName
 		)
 			:
 			channelName(channelName) {}
 
-		RenderAnimationChannelConfig::~RenderAnimationChannelConfig() {}
+		AnimationChannelConfig::~AnimationChannelConfig() {}
 
-		void RenderAnimationChannelConfig::AddPositionKeyFrame(
+		void AnimationChannelConfig::AddPositionKeyFrame(
 			float time,
 			const glm::vec3& position
 		)
@@ -33,7 +33,7 @@ namespace PRE
 			);
 		}
 
-		void RenderAnimationChannelConfig::AddRotationKeyFrame(
+		void AnimationChannelConfig::AddRotationKeyFrame(
 			float time,
 			const glm::fquat& rotation
 		)
@@ -43,7 +43,7 @@ namespace PRE
 			);
 		}
 
-		void RenderAnimationChannelConfig::AddScaleKeyFrame(
+		void AnimationChannelConfig::AddScaleKeyFrame(
 			float time,
 			const glm::vec3& scale
 		)
@@ -52,5 +52,5 @@ namespace PRE
 				std::make_pair(time, scale)
 			);
 		}
-	} // namespace RenderingModule
+	} // namespace AnimationModule
 } // namespace PRE

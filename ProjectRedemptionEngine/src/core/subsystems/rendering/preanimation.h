@@ -1,5 +1,5 @@
 #pragma once
-#include <include/modules/rendering.h>
+#include <include/modules/animation.h>
 
 namespace PRE
 {
@@ -10,7 +10,7 @@ namespace PRE
 		class PRERendering;
 		class PREAnimator;
 
-		using PRE::RenderingModule::RenderAnimation;
+		using PRE::AnimationModule::Animation;
 
 		class PREAnimation
 		{
@@ -21,9 +21,9 @@ namespace PRE
 			friend class PREAnimatorComponent;
 
 		private:
-			RenderAnimation& _animation;
+			Animation& _animation;
 
-			PREAnimation(RenderAnimation& animation);
+			PREAnimation(Animation& animation);
 			~PREAnimation();
 		};
 	} // namespace Core

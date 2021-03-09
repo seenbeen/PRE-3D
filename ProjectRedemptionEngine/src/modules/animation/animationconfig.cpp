@@ -1,4 +1,4 @@
-#include <modules/rendering/animation/renderanimationconfig.h>
+#include <modules/animation/animationconfig.h>
 
 #ifdef __PRE_DEBUG__
 #include <algorithm>
@@ -7,18 +7,18 @@
 #include <string>
 #include <vector>
 
-#include <modules/rendering/animation/renderanimationchannelconfig.h>
+#include <modules/animation/animationchannelconfig.h>
 
 namespace PRE
 {
-	namespace RenderingModule
+	namespace AnimationModule
 	{
 		using std::string;
 		using std::vector;
 
-		RenderAnimationConfig::RenderAnimationConfig() {}
+		AnimationConfig::AnimationConfig() {}
 
-		RenderAnimationConfig::~RenderAnimationConfig()
+		AnimationConfig::~AnimationConfig()
 		{
 			for (auto it = _animationChannelConfigs.begin(); it != _animationChannelConfigs.end(); ++it)
 			{
@@ -26,7 +26,7 @@ namespace PRE
 			}
 		}
 
-		RenderAnimationChannelConfig& RenderAnimationConfig::AddAnimationChannelConfig(
+		AnimationChannelConfig& AnimationConfig::AddAnimationChannelConfig(
 			const string& channelName
 		)
 		{
@@ -34,7 +34,7 @@ namespace PRE
 			auto it = std::find_if(
 				_animationChannelConfigs.begin(),
 				_animationChannelConfigs.end(),
-				[&channelName](RenderAnimationChannelConfig* config)
+				[&channelName](AnimationChannelConfig* config)
 				{
 					return config->channelName == channelName;
 				}
@@ -45,11 +45,11 @@ namespace PRE
 			}
 #endif
 
-			auto pAnimationChannelConfig = new RenderAnimationChannelConfig(
+			auto pAnimationChannelConfig = new AnimationChannelConfig(
 				channelName
 			);
 			_animationChannelConfigs.push_back(pAnimationChannelConfig);
 			return *pAnimationChannelConfig;
 		}
-	} // namespace RenderingModule
+	} // namespace AnimationModule
 } // namespace PRE

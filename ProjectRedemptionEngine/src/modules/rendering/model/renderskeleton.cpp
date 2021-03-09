@@ -70,7 +70,7 @@ namespace PRE
 				)
 				{
 					auto &indices = vertexBoneInfluenceIndices[itInfluence->first];
-					auto &weights = vertexBoneInfluenceIndices[itInfluence->first];
+					auto &weights = vertexBoneInfluenceWeights[itInfluence->first];
 
 #ifdef __PRE_DEBUG__
 					if (indices[3] != -1)

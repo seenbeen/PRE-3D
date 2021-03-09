@@ -1,4 +1,4 @@
-#include <modules/rendering/animation/renderanimationchannel.h>
+#include <modules/animation/animationchannel.h>
 
 #include <algorithm>
 #include <string>
@@ -9,19 +9,19 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include <modules/rendering/animation/renderanimationchannelconfig.h>
+#include <modules/animation/animationchannelconfig.h>
 
 namespace PRE
 {
-	namespace RenderingModule
+	namespace AnimationModule
 	{
 		using std::pair;
 		using std::string;
 		using std::vector;
 
-		const glm::mat4 RenderAnimationChannel::Impl::MAT4_IDENTITY = glm::mat4();
+		const glm::mat4 AnimationChannel::Impl::MAT4_IDENTITY = glm::mat4();
 
-		glm::mat4 RenderAnimationChannel::Impl::ComputeTransformMatrix(
+		glm::mat4 AnimationChannel::Impl::ComputeTransformMatrix(
 			const glm::vec3& position,
 			const glm::fquat& rotation,
 			const glm::vec3& scale
@@ -33,7 +33,7 @@ namespace PRE
 			return currentMatrix;
 		}
 
-		glm::vec3 RenderAnimationChannel::Impl::GetInterpolatedVec(
+		glm::vec3 AnimationChannel::Impl::GetInterpolatedVec(
 			const vector<pair<float, glm::vec3>>& keyFrames,
 			float time
 		)
@@ -58,7 +58,7 @@ namespace PRE
 			);
 		}
 
-		glm::fquat RenderAnimationChannel::Impl::GetInterpolatedQuat(
+		glm::fquat AnimationChannel::Impl::GetInterpolatedQuat(
 			const vector<pair<float, glm::fquat>>& keyFrames,
 			float time
 		)
@@ -82,7 +82,7 @@ namespace PRE
 			);
 		}
 
-		bool RenderAnimationChannel::Impl::TimeVecKeyFrameCmp(
+		bool AnimationChannel::Impl::TimeVecKeyFrameCmp(
 			const pair<float, glm::vec3>& keyPairA,
 			const pair<float, glm::vec3>& keyPairB
 		)
@@ -90,7 +90,7 @@ namespace PRE
 			return keyPairA.first < keyPairB.first;
 		}
 
-		bool RenderAnimationChannel::Impl::TimeQuatKeyFrameCmp(
+		bool AnimationChannel::Impl::TimeQuatKeyFrameCmp(
 			const pair<float, glm::fquat>& keyPairA,
 			const pair<float, glm::fquat>& keyPairB
 		)
@@ -98,8 +98,8 @@ namespace PRE
 			return keyPairA.first < keyPairB.first;
 		}
 
-		RenderAnimationChannel::Impl& RenderAnimationChannel::Impl::MakeImpl(
-			const RenderAnimationChannelConfig& animationChannelConfig
+		AnimationChannel::Impl& AnimationChannel::Impl::MakeImpl(
+			const AnimationChannelConfig& animationChannelConfig
 		)
 		{
 			return *(new Impl(
@@ -109,7 +109,7 @@ namespace PRE
 			));
 		}
 
-		RenderAnimationChannel::Impl::Impl(
+		AnimationChannel::Impl::Impl(
 			const vector<pair<float, glm::vec3>>& positionKeyFrames,
 			const vector<pair<float, glm::fquat>>& rotationKeyFrames,
 			const vector<pair<float, glm::vec3>>& scaleKeyFrames
@@ -119,11 +119,11 @@ namespace PRE
 			rotationKeyFrames(rotationKeyFrames),
 			scaleKeyFrames(scaleKeyFrames) {}
 
-		RenderAnimationChannel::Impl::~Impl() {}
+		AnimationChannel::Impl::~Impl() {}
 
-		glm::mat4 RenderAnimationChannel::GetBlendedStateAt(
-			const RenderAnimationChannel& a,
-			const RenderAnimationChannel& b,
+		glm::mat4 AnimationChannel::GetBlendedStateAt(
+			const AnimationChannel& a,
+			const AnimationChannel& b,
 			float timeA,
 			float timeB,
 			float blendFactor
@@ -165,19 +165,19 @@ namespace PRE
 			);
 		}
 
-		RenderAnimationChannel::RenderAnimationChannel(
-			const RenderAnimationChannelConfig& animationChannelConfig
+		AnimationChannel::AnimationChannel(
+			const AnimationChannelConfig& animationChannelConfig
 		)
 			:
 			_channelName(animationChannelConfig.channelName),
 			_impl(Impl::MakeImpl(animationChannelConfig)) {}
 
-		RenderAnimationChannel::~RenderAnimationChannel()
+		AnimationChannel::~AnimationChannel()
 		{
 			delete &_impl;
 		}
 
-		glm::mat4 RenderAnimationChannel::GetStateAt(float time) const
+		glm::mat4 AnimationChannel::GetStateAt(float time) const
 		{
 			auto positionVector = Impl::GetInterpolatedVec(
 				_impl.positionKeyFrames,
@@ -198,5 +198,5 @@ namespace PRE
 				scaleVector
 			);
 		}
-	} // namespace RenderingModule
+	} // namespace AnimationModule
 } // namespace PRE

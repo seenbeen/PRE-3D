@@ -1,4 +1,4 @@
-#include <modules/rendering/animation/renderanimation.h>
+#include <modules/animation/animation.h>
 
 #include <cmath>
 #include <string>
@@ -6,46 +6,46 @@
 
 #include <glm/glm.hpp>
 
-#include <modules/rendering/animation/renderanimationconfig.h>
-#include <modules/rendering/animation/renderanimationchannelconfig.h>
-#include <modules/rendering/animation/renderanimationchannel.h>
+#include <modules/animation/animationconfig.h>
+#include <modules/animation/animationchannelconfig.h>
+#include <modules/animation/animationchannel.h>
 
 namespace PRE
 {
-	namespace RenderingModule
+	namespace AnimationModule
 	{
 		using std::string;
 		using std::unordered_map;
 
-		RenderAnimation::Impl& RenderAnimation::Impl::MakeImpl(
+		Animation::Impl& Animation::Impl::MakeImpl(
 			float ticksPerSecond,
 			float duration,
-			const RenderAnimationConfig& animationConfig
+			const AnimationConfig& animationConfig
 		)
 		{
-			unordered_map<string, RenderAnimationChannel*> channels;
+			unordered_map<string, AnimationChannel*> channels;
 			for (
 				auto it = animationConfig._animationChannelConfigs.begin();
 				it != animationConfig._animationChannelConfigs.end();
 				++it
 			)
 			{
-				channels[(*it)->channelName] = new RenderAnimationChannel(**it);
+				channels[(*it)->channelName] = new AnimationChannel(**it);
 			}
 			return *(new Impl(ticksPerSecond, duration, channels));
 		}
 
-		RenderAnimation::Impl::Impl(
+		Animation::Impl::Impl(
 			float ticksPerSecond,
 			float duration,
-			unordered_map<string, RenderAnimationChannel*>& channels
+			unordered_map<string, AnimationChannel*>& channels
 		)
 			:
 			ticksPerSecond(ticksPerSecond),
 			duration(duration),
 			channels(std::move(channels)) {}
 
-		RenderAnimation::Impl::~Impl()
+		Animation::Impl::~Impl()
 		{
 			for (auto it = channels.begin(); it != channels.end(); ++it)
 			{
@@ -53,9 +53,22 @@ namespace PRE
 			}
 		}
 
-		void RenderAnimation::GetBlendedStateAt(
-			const RenderAnimation& a,
-			const RenderAnimation& b,
+		Animation::Animation(
+			float ticksPerSecond,
+			float duration,
+			AnimationConfig& animationConfig
+		)
+			:
+			_impl(Impl::MakeImpl(ticksPerSecond, duration, animationConfig)) {}
+
+		Animation::~Animation()
+		{
+			delete& _impl;
+		}
+
+		void Animation::GetBlendedStateAt(
+			const Animation& a,
+			const Animation& b,
 			float timeA,
 			float timeB,
 			float blendFactor,
@@ -78,7 +91,7 @@ namespace PRE
 				auto itB = b._impl.channels.find(itA->first);
 				if (itB != b._impl.channels.end())
 				{
-					result[itA->first] = RenderAnimationChannel::GetBlendedStateAt(
+					result[itA->first] = AnimationChannel::GetBlendedStateAt(
 						*itA->second,
 						*itB->second,
 						timeA,
@@ -109,12 +122,12 @@ namespace PRE
 			}
 		}
 
-		float RenderAnimation::GetDuration() const
+		float Animation::GetDuration() const
 		{
 			return _impl.duration / _impl.ticksPerSecond;
 		}
 
-		void RenderAnimation::GetStateAt(
+		void Animation::GetStateAt(
 			float time,
 			unordered_map<string, glm::mat4>& result
 		) const
@@ -126,18 +139,5 @@ namespace PRE
 				result[it->first] = it->second->GetStateAt(time);
 			}
 		}
-
-		RenderAnimation::RenderAnimation(
-			float ticksPerSecond,
-			float duration,
-			RenderAnimationConfig& animationConfig
-		)
-			:
-			_impl(Impl::MakeImpl(ticksPerSecond, duration, animationConfig)) {}
-
-		RenderAnimation::~RenderAnimation()
-		{
-			delete &_impl;
-		}
-	} // namespace RenderingModule
+	} // namespace AnimationModule
 } // namespace PRE

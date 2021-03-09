@@ -247,7 +247,7 @@ namespace PRE
 
 			for (auto i = 0u; i < pCurrentNode->mNumMeshes; ++i)
 			{
-				unsigned int vertexOffset = vertices.size();
+				auto vertexOffset = (unsigned int)vertices.size();
 				auto pMesh = pMeshes[pCurrentNode->mMeshes[i]];
 				for (auto j = 0u; j < pMesh->mNumVertices; ++j)
 				{
