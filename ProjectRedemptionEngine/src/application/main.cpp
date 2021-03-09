@@ -12,7 +12,10 @@ public:
     string vertexShaderPath;
     string fragmentShaderPath;
     string meshPath;
-    string albedoPath;
+    string diffusePath;
+    string emissionPath;
+    string normalPath;
+    string specularPath;
 
 protected:
     void OnStart() override
@@ -29,15 +32,33 @@ protected:
             GetAssetManager().rootAssetPath + meshPath
         );
 
-        _pTexture = &GetAssetManager().LoadTexture(
-            GetAssetManager().rootAssetPath + albedoPath
+        _pDiffuseTexture = &GetAssetManager().LoadTexture(
+            GetAssetManager().rootAssetPath + diffusePath
+        );
+
+        _pEmissionTexture = &GetAssetManager().LoadTexture(
+            GetAssetManager().rootAssetPath + emissionPath
+        );
+
+        _pNormalTexture = &GetAssetManager().LoadTexture(
+            GetAssetManager().rootAssetPath + normalPath
+        );
+
+        _pSpecularTexture = &GetAssetManager().LoadTexture(
+            GetAssetManager().rootAssetPath + specularPath
         );
 
         _pMaterial = &GetRendering().CreateMaterial();
         _pMaterial->SetShader(_pShader);
-        _pMaterial->SetTextureBinding(_pTexture, 7);
+        _pMaterial->SetTextureBinding(_pDiffuseTexture, 0);
+        _pMaterial->SetTextureBinding(_pEmissionTexture, 1);
+        _pMaterial->SetTextureBinding(_pNormalTexture, 2);
+        _pMaterial->SetTextureBinding(_pSpecularTexture, 3);
 
-        _pShader->SetInt("textureSampler", 7);
+        _pShader->SetInt("diffuseSampler", 0);
+        _pShader->SetInt("emissionSampler", 1);
+        _pShader->SetInt("normalSampler", 2);
+        _pShader->SetInt("specularSampler", 3);
 
         auto& modelRendererComponent = *gameObject().GetComponent<PREModelRendererComponent>();
         modelRendererComponent.SetMesh(_pMesh);
@@ -55,7 +76,10 @@ protected:
         std::cout << "Destroy!" << std::endl;
         GetRendering().DestroyShader(*_pShader);
         GetRendering().DestroyMesh(*_pMesh);
-        GetRendering().DestroyTexture(*_pTexture);
+        GetRendering().DestroyTexture(*_pDiffuseTexture);
+        GetRendering().DestroyTexture(*_pEmissionTexture);
+        GetRendering().DestroyTexture(*_pNormalTexture);
+        GetRendering().DestroyTexture(*_pSpecularTexture);
         GetRendering().DestroyMaterial(*_pMaterial);
     }
 
@@ -63,7 +87,10 @@ private:
     PRETransformComponent* _transform = nullptr;
     PREShader* _pShader = nullptr;
     PREMesh* _pMesh = nullptr;
-    PRETexture* _pTexture = nullptr;
+    PRETexture* _pDiffuseTexture = nullptr;
+    PRETexture* _pEmissionTexture = nullptr;
+    PRETexture* _pNormalTexture = nullptr;
+    PRETexture* _pSpecularTexture = nullptr;
     PREMaterial* _pMaterial = nullptr;
 };
 
@@ -122,7 +149,10 @@ void OnInitialize(PREApplicationContext& applicationContext)
             modelComponent.vertexShaderPath = "/shaders/simplevertex.vs";
             modelComponent.fragmentShaderPath = "/shaders/simplefragment.fs";
             modelComponent.meshPath = "/models/vampire_a_lusth/vampire_a_lusth.dae";
-            modelComponent.albedoPath = "/models/vampire_a_lusth/textures/Vampire_diffuse.png";
+            modelComponent.diffusePath = "/models/vampire_a_lusth/textures/Vampire_diffuse.png";
+            modelComponent.emissionPath = "/models/vampire_a_lusth/textures/Vampire_emission.png";
+            modelComponent.normalPath = "/models/vampire_a_lusth/textures/Vampire_normal.png";
+            modelComponent.specularPath = "/models/vampire_a_lusth/textures/Vampire_specular.png";
             auto pTransform = GetPREComponent<PRETransformComponent>();
             pTransform->SetLocalScale(glm::vec3(4.0f));
             pTransform->SetPosition(glm::vec3(0, -5, 0));
@@ -139,7 +169,10 @@ void OnInitialize(PREApplicationContext& applicationContext)
             modelComponent.vertexShaderPath = "/shaders/simplevertex.vs";
             modelComponent.fragmentShaderPath = "/shaders/simplefragment.fs";
             modelComponent.meshPath = "/models/backpack/backpack.obj";
-            modelComponent.albedoPath = "/models/backpack/diffuse.jpg";
+            modelComponent.diffusePath = "/models/backpack/diffuse.jpg";
+            modelComponent.emissionPath = "/models/backpack/roughness.jpg";
+            modelComponent.normalPath = "/models/backpack/normal.png";
+            modelComponent.specularPath = "/models/backpack/specular.jpg";
         }
     } backpackTemplate;
 

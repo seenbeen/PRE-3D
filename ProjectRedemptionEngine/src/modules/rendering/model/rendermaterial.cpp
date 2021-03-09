@@ -35,6 +35,7 @@ namespace PRE
 
 		void RenderMaterial::SetTextureBinding(RenderTexture* pRenderTexture, GLenum bindUnit)
 		{
+			bindUnit = GL_TEXTURE0 + bindUnit;
 			if (pRenderTexture == nullptr)
 			{
 				auto it = _impl.textureBindings.find(bindUnit);
