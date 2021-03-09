@@ -10,7 +10,6 @@ namespace PRE
 		class Renderer;
 		class RenderModel;
 
-		// TODO: bone-channels, weights
 		class RenderMesh
 		{
 			RenderMesh& operator=(const RenderMesh&) = delete;

@@ -1,5 +1,7 @@
 #include <modules/rendering/model/rendermaterial.h>
 
+#include <vector>
+
 #include <glad/glad.h>
 
 #include <glm/glm.hpp>
@@ -13,6 +15,8 @@ namespace PRE
 {
 	namespace RenderingModule
 	{
+		using std::vector;
+
 		RenderMaterial::Impl& RenderMaterial::Impl::MakeImpl()
 		{
 			return *(new Impl());
@@ -80,7 +84,10 @@ namespace PRE
 			delete &_impl;
 		}
 
-		void RenderMaterial::Bind(const glm::mat4& mvp)
+		void RenderMaterial::Bind(
+			const glm::mat4& mvp,
+			const vector<glm::mat4>* pBoneTransforms
+		)
 		{
 			if (_impl.pShaderProgram == nullptr)
 			{
@@ -93,6 +100,15 @@ namespace PRE
 			}
 			_impl.pShaderProgram->Bind();
 			_impl.pShaderProgram->SetMat4("PRE_MVP", mvp);
+			if (pBoneTransforms != nullptr)
+			{
+				auto& boneTransforms = *pBoneTransforms;
+				_impl.pShaderProgram->SetMat4(
+					"PRE_BONETRANSFORMS",
+					&boneTransforms[0],
+					boneTransforms.size()
+				);
+			}
 		}
 	} // namespace RenderingModule
 } // namespace PRE

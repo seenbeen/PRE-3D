@@ -5,7 +5,12 @@ layout (location = 2) in vec2 iUV;
 layout (location = 3) in ivec4 iBoneIndices;
 layout (location = 4) in vec4 iBoneWeights;
 
+const int MAX_BONES = 100;
+const int MAX_BONE_INFLUENCE = 4;
+
 uniform mat4 PRE_MVP;
+
+uniform mat4 PRE_BONETRANSFORMS[MAX_BONES];
 
 out vec2 TexCoord;
 

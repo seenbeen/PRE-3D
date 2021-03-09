@@ -1,5 +1,6 @@
 #pragma once
 #include <unordered_map>
+#include <vector>
 
 #include <glad/glad.h>
 
@@ -16,6 +17,7 @@ namespace PRE
 		class RenderModel;
 
 		using std::unordered_map;
+		using std::vector;
 
 		class RenderMaterial
 		{
@@ -59,7 +61,10 @@ namespace PRE
 			RenderMaterial();
 			~RenderMaterial();
 
-			void Bind(const glm::mat4& mvp);
+			void Bind(
+				const glm::mat4& mvp,
+				const vector<glm::mat4>* pBoneTransforms
+			);
 		};
 	} // namespace RenderingModule
 } // namespace PRE

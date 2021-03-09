@@ -7,7 +7,7 @@ namespace PRE
 	{
 		class Renderer;
 		class RenderMesh;
-		class RenderBone;
+		class RenderSkeleton;
 		class RenderMaterial;
 
 		class RenderModel
@@ -26,7 +26,7 @@ namespace PRE
 
 			private:
 				RenderMesh* pMesh;
-				RenderBone* pRootBone;
+				RenderSkeleton* pSkeleton;
 				RenderMaterial* pMaterial;
 
 				static Impl& MakeImpl();
@@ -45,7 +45,7 @@ namespace PRE
 			~RenderModel();
 
 			void SetMesh(RenderMesh* pMesh);
-			void SetRootBone(RenderBone* pRootBone);
+			void SetSkeleton(RenderSkeleton* pSkeleton);
 			void SetMaterial(RenderMaterial* pMaterial);
 
 			void Render(const glm::mat4& viewProjectionMatrix);

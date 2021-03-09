@@ -55,6 +55,7 @@
     <ClCompile Include="src\modules\rendering\model\rendermaterial.cpp" />
     <ClCompile Include="src\modules\rendering\model\rendermesh.cpp" />
     <ClCompile Include="src\modules\rendering\model\rendermodel.cpp" />
+    <ClCompile Include="src\modules\rendering\model\renderskeleton.cpp" />
     <ClCompile Include="src\modules\rendering\model\rendertexture.cpp" />
     <ClCompile Include="src\modules\rendering\rendercamera.cpp" />
     <ClCompile Include="src\modules\rendering\renderer.cpp" />
@@ -115,6 +116,7 @@
     <ClInclude Include="src\modules\rendering\model\rendermaterial.h" />
     <ClInclude Include="src\modules\rendering\model\rendermesh.h" />
     <ClInclude Include="src\modules\rendering\model\rendermodel.h" />
+    <ClInclude Include="src\modules\rendering\model\renderskeleton.h" />
     <ClInclude Include="src\modules\rendering\model\rendertexture.h" />
     <ClInclude Include="src\modules\rendering\rendercamera.h" />
     <ClInclude Include="src\modules\rendering\renderer.h" />

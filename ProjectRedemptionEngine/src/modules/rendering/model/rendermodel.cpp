@@ -1,12 +1,19 @@
 #include <modules/rendering/model/rendermodel.h>
 
+#include <vector>
+
+#include <glm/glm.hpp>
+
 #include <modules/rendering/model/rendermesh.h>
+#include <modules/rendering/model/renderskeleton.h>
 #include <modules/rendering/model/rendermaterial.h>
 
 namespace PRE
 {
 	namespace RenderingModule
 	{
+		using std::vector;
+
 		RenderModel::Impl& RenderModel::Impl::MakeImpl()
 		{
 			return *(new Impl());
@@ -15,6 +22,7 @@ namespace PRE
 		RenderModel::Impl::Impl()
 			:
 			pMesh(nullptr),
+			pSkeleton(nullptr),
 			pMaterial(nullptr) {}
 
 		RenderModel::Impl::~Impl() {}
@@ -34,6 +42,11 @@ namespace PRE
 			_impl.pMesh = pMesh;
 		}
 
+		void RenderModel::SetSkeleton(RenderSkeleton* pSkeleton)
+		{
+			_impl.pSkeleton = pSkeleton;
+		}
+
 		void RenderModel::SetMaterial(RenderMaterial* pMaterial)
 		{
 			_impl.pMaterial = pMaterial;
@@ -43,7 +56,23 @@ namespace PRE
 		{
 			if (_impl.pMesh != nullptr && _impl.pMaterial != nullptr)
 			{
-				_impl.pMaterial->Bind(viewProjectionMatrix * modelMatrix);
+				if (_impl.pSkeleton != nullptr)
+				{
+					// TODO: Cache allocated result memory?
+					vector<glm::mat4> result;
+					_impl.pSkeleton->GetCurrentState(result);
+					_impl.pMaterial->Bind(
+						viewProjectionMatrix * modelMatrix,
+						&result
+					);
+				}
+				else
+				{
+					_impl.pMaterial->Bind(
+						viewProjectionMatrix * modelMatrix,
+						nullptr
+					);
+				}
 				_impl.pMesh->Render();
 			}
 		}
