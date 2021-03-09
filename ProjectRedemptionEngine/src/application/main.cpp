@@ -53,16 +53,9 @@ protected:
     void OnDestroy() override
     {
         std::cout << "Destroy!" << std::endl;
-        GetAssetManager().FreeShader(
-            GetAssetManager().rootAssetPath + vertexShaderPath,
-            GetAssetManager().rootAssetPath + fragmentShaderPath
-        );
-        GetAssetManager().FreeMesh(
-            GetAssetManager().rootAssetPath + meshPath
-        );
-        GetAssetManager().FreeTexture(
-            GetAssetManager().rootAssetPath + albedoPath
-        );
+        GetRendering().DestroyShader(*_pShader);
+        GetRendering().DestroyMesh(*_pMesh);
+        GetRendering().DestroyTexture(*_pTexture);
         GetRendering().DestroyMaterial(*_pMaterial);
     }
 

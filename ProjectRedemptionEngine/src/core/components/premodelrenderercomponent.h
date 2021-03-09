@@ -19,6 +19,7 @@ namespace PRE
 		class PRERendering;
 		class PREMaterial;
 		class PREMesh;
+		class PRESkeleton;
 
 		using PRE::RenderingModule::RenderModel;
 
@@ -36,6 +37,9 @@ namespace PRE
 			void SetMesh(PREMesh* pMesh);
 			PREMesh* GetMesh() const;
 
+			void SetSkeleton(PRESkeleton* pSkeleton);
+			PRESkeleton* GetSkeleton() const;
+
 		protected:
 			void OnStart() override;
 			void OnUpdate() override;
@@ -52,6 +56,7 @@ namespace PRE
 
 			PREMaterial* _pMaterial = nullptr;
 			PREMesh* _pMesh = nullptr;
+			PRESkeleton* _pSkeleton = nullptr;
 		};
 	} // namespace Core
 } // namespace PRE

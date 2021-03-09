@@ -18,8 +18,10 @@ namespace PRE
 		class PRERenderTexture;
 		class PREShader;
 		class PREMesh;
+		class PRESkeleton;
 		class PRETexture;
 		class PREMaterial;
+		class PREAnimation;
 
 		using std::string;
 		using PRE::RenderingModule::Renderer;
@@ -58,18 +60,39 @@ namespace PRE
 
 			PRERenderTexture& CreateRenderTexture(unsigned int width, unsigned int height);
 			void DestroyRenderTexture(PRERenderTexture& renderTexture);
-			
+
 			PREShader& CreateShader(const string& vertex, const string& fragment);
 			void DestroyShader(PREShader& shader);
 
-			PRETexture& CreateTexture();
+			PRETexture& CreateTexture(
+				unsigned int width,
+				unsigned int height,
+				const unsigned char* data
+			);
 			void DestroyTexture(PRETexture& texture);
 
 			PREMaterial& CreateMaterial();
 			void DestroyMaterial(PREMaterial& material);
 
-			PREMesh& CreateMesh();
+			PREMesh& CreateMesh(
+				unsigned int nVertices,
+				const glm::vec3* vertices,
+				const glm::vec3* normals,
+				const glm::vec3* tangents,
+				const glm::vec3* biTangents,
+				const glm::vec2* uvs,
+				const glm::ivec4* vertexBoneIds,
+				const glm::vec4* vertexBoneWeights,
+				unsigned int nTriangleElements,
+				const unsigned int* const triangleElements
+			);
 			void DestroyMesh(PREMesh& mesh);
+
+			PRESkeleton& CreateSkeleton();
+			void DestroySkeleton(PRESkeleton& skeleton);
+
+			PREAnimation& CreateAnimation();
+			void DestroyAnimation(PREAnimation& animation);
 
 		private:
 			static PRERendering& MakePRERendering(

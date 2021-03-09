@@ -43,6 +43,17 @@ namespace PRE
 			return _pMesh;
 		}
 
+		void PREModelRendererComponent::SetSkeleton(PRESkeleton* pSkeleton)
+		{
+			_pSkeleton = pSkeleton;
+			_hasChanged = true;
+		}
+
+		PRESkeleton* PREModelRendererComponent::GetSkeleton() const
+		{
+			return _pSkeleton;
+		}
+
 		void PREModelRendererComponent::OnStart()
 		{
 			_pTransformComponent = gameObject().GetComponent<PRETransformComponent>();
@@ -51,7 +62,7 @@ namespace PRE
 
 		void PREModelRendererComponent::OnUpdate()
 		{
-			GetRendering().UpdateModel(*this);
+			GetRendering().UpdateModel(*this); // probably inject animator here
 		}
 
 		void PREModelRendererComponent::OnDestroy()

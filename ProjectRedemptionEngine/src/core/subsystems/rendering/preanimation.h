@@ -8,7 +8,6 @@ namespace PRE
 		class PREAnimatorComponent;
 
 		class PRERendering;
-		class PREAnimator;
 
 		using PRE::AnimationModule::Animation;
 

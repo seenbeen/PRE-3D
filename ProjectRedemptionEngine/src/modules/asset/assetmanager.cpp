@@ -35,13 +35,20 @@ namespace PRE
 
 		AssetManager::~AssetManager()
 		{
-			for (auto it = _entriesAccess.begin(); it != _entriesAccess.end(); ++it)
+			for (auto it = _evictionLRU.begin(); it != _evictionLRU.end(); ++it)
 			{
-				auto pEntry = it->second;
+				auto pEntry = *it;
+
+#ifdef __PRE_DEBUG__
+				if (pEntry->refCount != 0)
+				{
+					throw "Leaking resources";
+				}
+#endif
+
 				pEntry->unloader(pEntry->unloaderArg, pEntry->payload);
 				delete pEntry;
 			}
-			// no need to clear LRU or access
 		}
 
 		void AssetManager::Store(

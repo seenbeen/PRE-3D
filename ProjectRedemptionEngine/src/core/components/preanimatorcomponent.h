@@ -21,7 +21,7 @@ namespace PRE
 				Controller& operator=(const Controller&) = delete;
 				Controller(const Controller&) = delete;
 
-				friend class PREAnimatorControllerComponent;
+				friend class PREAnimatorComponent;
 
 			public:
 				void TransitionTo(string state, float blendDuration);

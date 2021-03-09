@@ -338,6 +338,9 @@
     <ClInclude Include="src\include\modules\animation.h">
       <Filter>Header Files\Include\Modules</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\subsystems\rendering\preskeleton.h">
+      <Filter>Header Files\Core\Subsystems\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\modules\gameobject\gameobject.cpp">
@@ -495,6 +498,12 @@
     </ClCompile>
     <ClCompile Include="src\modules\animation\animationconfig.cpp">
       <Filter>Source Files\Modules\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\rendering\preskeleton.cpp">
+      <Filter>Source Files\Core\Subsystems\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\rendering\preanimation.cpp">
+      <Filter>Source Files\Core\Subsystems\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

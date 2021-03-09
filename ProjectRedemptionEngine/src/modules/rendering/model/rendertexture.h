@@ -28,10 +28,12 @@ namespace PRE
 
 			private:
 				const GLuint textureId;
-				unsigned int width;
-				unsigned int height;
-				unsigned char* data;
-				bool hasChanged;
+
+				static Impl& MakeImpl(
+					unsigned int width,
+					unsigned int height,
+					const unsigned char* data
+				);
 
 				static Impl& MakeImpl();
 
@@ -39,17 +41,16 @@ namespace PRE
 				~Impl();
 			};
 
-		public:
-			void SetData(
-				unsigned int width,
-				unsigned int height,
-				const unsigned char* const data
-			);
-
 		private:
 			Impl& _impl;
 
 			RenderTexture();
+
+			RenderTexture(
+				unsigned int width,
+				unsigned int height,
+				const unsigned char* data
+			);
 			~RenderTexture();
 
 			void Bind();

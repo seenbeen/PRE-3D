@@ -28,46 +28,39 @@ namespace PRE
 			private:
 				const GLuint vertexArrayObject;
 
+				// TODO: Optimize into array -> single call to glBuffers
 				const GLuint vertexVerticesBuffer;
 				const GLuint vertexNormalsBuffer;
+				const GLuint vertexTangentsBuffer;
+				const GLuint vertexBiTangentsBuffer;
 				const GLuint vertexUVsBuffer;
 				const GLuint vertexBoneIdsBuffer;
 				const GLuint vertexBoneWeightsBuffer;
 
 				const GLuint elementsTrianglesBuffer;
 
-				unsigned int nVertices;
-				glm::vec3* vertices;
+				unsigned int elementsDrawStartIndex;
+				unsigned int elementsDrawCount;
 
-				unsigned int nNormals;
-				glm::vec3* normals;
+				static Impl& MakeImpl(
+					unsigned int nVertices,
+					const glm::vec3* vertices,
+					const glm::vec3* normals,
+					const glm::vec3* tangents,
+					const glm::vec3* biTangents,
+					const glm::vec2* uvs,
+					const glm::ivec4* vertexBoneIds,
+					const glm::vec4* vertexBoneWeights,
+					unsigned int nTriangleElements,
+					const unsigned int* const triangleElements
+				);
 
-				unsigned int nUvs;
-				glm::vec2* uvs;
-
-				unsigned int nVertexBoneIds;
-				glm::ivec4* vertexBoneIds;
-
-				unsigned int nVertexBoneWeights;
-				glm::vec4* vertexBoneWeights;
-
-				unsigned int nTriangleIndices;
-				unsigned int* triangleIndices;
-
-				bool verticesHaveChanged;
-				bool normalsHaveChanged;
-				bool uvsHaveChanged;
-
-				bool boneIdsHaveChanged;
-				bool boneWeightsHaveChanged;
-
-				bool triangleIndicesHaveChanged;
-
-				static Impl& MakeImpl();
 				Impl(
 					GLuint vertexArrayObject,
 					GLuint vertexVerticesBuffer,
 					GLuint vertexNormalsBuffer,
+					GLuint vertexTangentsBuffer,
+					GLuint vertexBiTangentsBuffer,
 					GLuint vertexUVsBuffer,
 					GLuint vertexBoneIdsBuffer,
 					GLuint vertexWeightsBuffer,
@@ -77,28 +70,28 @@ namespace PRE
 			};
 
 		public:
-			void SetVertices(const glm::vec3* vertices, unsigned int nVertices);
-			const glm::vec3* const GetVertices(unsigned int& nVertices) const;
-
-			void SetNormals(const glm::vec3* normals, unsigned int nNormals);
-			const glm::vec3* const GetNormals(unsigned int& nNormals) const;
-
-			void SetUvs(const glm::vec2* uvs, unsigned int nUvs);
-			const glm::vec2* const GetUvs(unsigned int& nUvs) const;
-
-			void SetVertexBoneIds(const glm::ivec4* vertexBoneIds, unsigned int nVertexBoneIds);
-			const glm::ivec4* const GetVertexBoneIds(unsigned int& nVertexBoneIds) const;
-
-			void SetVertexBoneWeights(const glm::vec4* vertexBoneWeights, unsigned int nVertexBoneWeights);
-			const glm::vec4* const GetVertexBoneWeights(unsigned int& nVertexBoneWeights) const;
-
-			void SetTriangles(const unsigned int* const triangles, unsigned int nTriangles);
-			const unsigned int* const GetTriangles(unsigned int& nTriangles) const;
+			// used for spriting
+			void SetRenderedTriangles(unsigned int startTriangleIndex, unsigned int endTriangleIndex);
 
 		private:
 			Impl& _impl;
 
-			RenderMesh();
+			// TODO: instead of passing pointers, pass ref to gl buffer?
+			// basically an asset management overhaul
+
+			RenderMesh(
+				unsigned int nVertices,
+				const glm::vec3* vertices,
+				const glm::vec3* normals,
+				const glm::vec3* tangents,
+				const glm::vec3* biTangents,
+				const glm::vec2* uvs,
+				const glm::ivec4* vertexBoneIds,
+				const glm::vec4* vertexBoneWeights,
+				unsigned int nTriangleElements,
+				const unsigned int* const triangleElements
+			);
+
 			~RenderMesh();
 
 			void Render();

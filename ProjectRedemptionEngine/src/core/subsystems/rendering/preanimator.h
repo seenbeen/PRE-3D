@@ -9,7 +9,6 @@ namespace PRE
 {
 	namespace Core
 	{
-		class PRERendering;
 		class PREAnimation;
 
 		using std::pair;
@@ -21,7 +20,6 @@ namespace PRE
 			PREAnimator& operator=(const PREAnimator&) = delete;
 			PREAnimator(const PREAnimator&) = delete;
 
-			friend class PRERendering;
 			friend class PREAnimatorComponent;
 
 		public:

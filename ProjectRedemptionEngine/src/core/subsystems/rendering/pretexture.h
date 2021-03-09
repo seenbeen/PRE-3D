@@ -18,13 +18,6 @@ namespace PRE
 			friend class PRERendering;
 			friend class PREMaterial;
 
-		public:
-			void SetData(
-				unsigned int width,
-				unsigned int height,
-				const unsigned char* const data
-			);
-
 		private:
 			RenderTexture& _texture;
 

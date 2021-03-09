@@ -102,7 +102,18 @@ namespace PRE
 			);
 			void DeallocateShaderProgram(const RenderShaderProgram& shaderProgram);
 
-			RenderMesh& AllocateMesh();
+			RenderMesh& AllocateMesh(
+				unsigned int nVertices,
+				const glm::vec3* vertices,
+				const glm::vec3* normals,
+				const glm::vec3* tangents,
+				const glm::vec3* biTangents,
+				const glm::vec2* uvs,
+				const glm::ivec4* vertexBoneIds,
+				const glm::vec4* vertexBoneWeights,
+				unsigned int nTriangleElements,
+				const unsigned int* const triangleElements
+			);
 			void DeallocateMesh(RenderMesh& mesh);
 
 			RenderSkeleton& AllocateSkeleton(
@@ -111,7 +122,11 @@ namespace PRE
 			);
 			void DeallocateSkeleton(RenderSkeleton& skeleton);
 
-			RenderTexture& AllocateTexture();
+			RenderTexture& AllocateTexture(
+				unsigned int width,
+				unsigned int height,
+				const unsigned char* data
+			);
 			void DeallocateTexture(RenderTexture& texture);
 
 			RenderMaterial& AllocateMaterial();
@@ -119,6 +134,7 @@ namespace PRE
 
 			RenderModel& AllocateModel();
 			void SetModelMesh(RenderModel& model, RenderMesh* pMesh);
+			void SetModelSkeleton(RenderModel& model, RenderSkeleton* pSkeleton);
 			void SetModelMaterial(RenderModel& model, RenderMaterial* pMaterial);
 			void DeallocateModel(RenderModel& model);
 

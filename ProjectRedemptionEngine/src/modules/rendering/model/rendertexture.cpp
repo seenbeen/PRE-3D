@@ -8,11 +8,39 @@ namespace PRE
 {
 	namespace RenderingModule
 	{
+		RenderTexture::Impl& RenderTexture::Impl::MakeImpl(
+			unsigned int width,
+			unsigned int height,
+			const unsigned char* const data
+		)
+		{
+			GLuint textureId;
+			glGenTextures(1, &textureId);
+
+			glBindTexture(GL_TEXTURE_2D, textureId);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexImage2D(
+				GL_TEXTURE_2D,
+				0,
+				GL_RGBA,
+				width,
+				height,
+				0,
+				GL_RGBA,
+				GL_UNSIGNED_BYTE,
+				data
+			);
+			glBindTexture(GL_TEXTURE_2D, GL_NONE);
+
+			return *(new RenderTexture::Impl(textureId));
+		}
+
 		RenderTexture::Impl& RenderTexture::Impl::MakeImpl()
 		{
 			GLuint textureId;
-
 			glGenTextures(1, &textureId);
+
 			glBindTexture(GL_TEXTURE_2D, textureId);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -23,41 +51,24 @@ namespace PRE
 
 		RenderTexture::Impl::Impl(GLuint textureId)
 			:
-			textureId(textureId),
-			width(0),
-			height(0),
-			data(nullptr),
-			hasChanged(false) {}
+			textureId(textureId) {}
 
 		RenderTexture::Impl::~Impl()
 		{
 			glDeleteTextures(1, &textureId);
 		}
 
-		void RenderTexture::SetData(
+		RenderTexture::RenderTexture()
+			:
+			_impl(Impl::MakeImpl()) {}
+
+		RenderTexture::RenderTexture(
 			unsigned int width,
 			unsigned int height,
-			const unsigned char* const data
+			const unsigned char* data
 		)
-		{
-			auto total = (int)(width * height) * 4; // 4-channels
-
-#ifdef __PRE_DEBUG__
-			if (total < 0) {
-				throw "texture data overflow";
-			}
-#endif
-
-			delete[] _impl.data;
-			_impl.data = new unsigned char[total];
-			std::memcpy(_impl.data, data, total * sizeof(unsigned char));
-			_impl.width = width;
-			_impl.height = height;
-			_impl.hasChanged = true;
-		}
-
-		RenderTexture::RenderTexture()
-			: _impl(Impl::MakeImpl()) {}
+			:
+			_impl(Impl::MakeImpl(width, height, data)) {}
 
 		RenderTexture::~RenderTexture()
 		{
@@ -67,21 +78,6 @@ namespace PRE
 		void RenderTexture::Bind()
 		{
 			glBindTexture(GL_TEXTURE_2D, _impl.textureId);
-			if (_impl.hasChanged)
-			{
-				_impl.hasChanged = false;
-				glTexImage2D(
-					GL_TEXTURE_2D,
-					0,
-					GL_RGBA,
-					_impl.width,
-					_impl.height,
-					0,
-					GL_RGBA,
-					GL_UNSIGNED_BYTE,
-					_impl.data
-				);
-			}
 		}
 
 		void RenderTexture::BindTarget(GLenum attachment)

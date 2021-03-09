@@ -26,12 +26,14 @@
     <ClCompile Include="src\core\subsystems\input\preinput.cpp" />
     <ClCompile Include="src\core\subsystems\input\preinputconfig.cpp" />
     <ClCompile Include="src\core\subsystems\physics\prephysics.cpp" />
+    <ClCompile Include="src\core\subsystems\rendering\preanimation.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\prematerial.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\premesh.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\prerendering.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\prerenderingconfig.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\prerendertexture.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\preshader.cpp" />
+    <ClCompile Include="src\core\subsystems\rendering\preskeleton.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\pretexture.cpp" />
     <ClCompile Include="src\core\subsystems\time\pretime.cpp" />
     <ClCompile Include="src\core\subsystems\time\pretimeconfig.cpp" />
@@ -86,6 +88,7 @@
     <ClInclude Include="src\core\subsystems\rendering\prerenderingconfig.h" />
     <ClInclude Include="src\core\subsystems\rendering\prerendertexture.h" />
     <ClInclude Include="src\core\subsystems\rendering\preshader.h" />
+    <ClInclude Include="src\core\subsystems\rendering\preskeleton.h" />
     <ClInclude Include="src\core\subsystems\rendering\pretexture.h" />
     <ClInclude Include="src\core\subsystems\time\pretime.h" />
     <ClInclude Include="src\core\subsystems\time\pretimeconfig.h" />

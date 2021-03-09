@@ -400,9 +400,31 @@ namespace PRE
 			delete pShaderProgram;
 		}
 
-		RenderMesh& Renderer::AllocateMesh()
+		RenderMesh& Renderer::AllocateMesh(
+			unsigned int nVertices,
+			const glm::vec3* vertices,
+			const glm::vec3* normals,
+			const glm::vec3* tangents,
+			const glm::vec3* biTangents,
+			const glm::vec2* uvs,
+			const glm::ivec4* vertexBoneIds,
+			const glm::vec4* vertexBoneWeights,
+			unsigned int nTriangleElements,
+			const unsigned int* const triangleElements
+		)
 		{
-			auto mesh = new RenderMesh();
+			auto mesh = new RenderMesh(
+				nVertices,
+				vertices,
+				normals,
+				tangents,
+				biTangents,
+				uvs,
+				vertexBoneIds,
+				vertexBoneWeights,
+				nTriangleElements,
+				triangleElements
+			);
 
 #ifdef __PRE_DEBUG__
 			_meshes.insert(mesh);
@@ -457,9 +479,17 @@ namespace PRE
 			delete pSkeleton;
 		}
 
-		RenderTexture& Renderer::AllocateTexture()
+		RenderTexture& Renderer::AllocateTexture(
+			unsigned int width,
+			unsigned int height,
+			const unsigned char* data
+		)
 		{
-			auto texture = new RenderTexture();
+			auto texture = new RenderTexture(
+				width,
+				height,
+				data
+			);
 
 #ifdef __PRE_DEBUG__
 			_textures.insert(texture);
@@ -530,13 +560,32 @@ namespace PRE
 			{
 				throw "Cannot operate on unknown Model";
 			}
-			if (_meshes.find(pMesh) == _meshes.end())
+			if (pMesh != nullptr && _meshes.find(pMesh) == _meshes.end())
 			{
 				throw "Cannot set unknown Mesh to Model";
 			}
 #endif
 
 			model.SetMesh(pMesh);
+		}
+
+		void Renderer::SetModelSkeleton(
+			RenderModel& model,
+			RenderSkeleton* pSkeleton
+		)
+		{
+#ifdef __PRE_DEBUG__
+			if (_models.find(&model) == _models.end())
+			{
+				throw "Cannot operate on unknown Model";
+			}
+			if (pSkeleton != nullptr && _skeletons.find(pSkeleton) == _skeletons.end())
+			{
+				throw "Cannot set unknown Skeleton to Model";
+			}
+#endif
+
+			model.SetSkeleton(pSkeleton);
 		}
 
 		void Renderer::SetModelMaterial(RenderModel& model, RenderMaterial* pMaterial)
@@ -546,7 +595,7 @@ namespace PRE
 			{
 				throw "Cannot operate on unknown Model";
 			}
-			if (_materials.find(pMaterial) == _materials.end())
+			if (pMaterial != nullptr && _materials.find(pMaterial) == _materials.end())
 			{
 				throw "Cannot set unknown Material to Model";
 			}

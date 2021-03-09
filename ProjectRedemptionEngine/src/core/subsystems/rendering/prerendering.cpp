@@ -1,18 +1,25 @@
 #include <core/subsystems/rendering/prerendering.h>
 
 #include <include/modules/rendering.h>
+#include <include/modules/animation.h>
+
+#include <core/preapplicationcontext.h>
 
 #include <core/components/precameracomponent.h>
 #include <core/components/premodelrenderercomponent.h>
 #include <core/components/pretransformcomponent.h>
+
+#include <core/subsystems/asset/preassetmanager.h>
 
 #include <core/subsystems/rendering/prerenderingconfig.h>
 
 #include <core/subsystems/rendering/prerendertexture.h>
 #include <core/subsystems/rendering/preshader.h>
 #include <core/subsystems/rendering/premesh.h>
+#include <core/subsystems/rendering/preskeleton.h>
 #include <core/subsystems/rendering/pretexture.h>
 #include <core/subsystems/rendering/prematerial.h>
+#include <core/subsystems/rendering/preanimation.h>
 
 namespace PRE
 {
@@ -21,6 +28,8 @@ namespace PRE
 		using PRE::RenderingModule::Renderer;
 		using PRE::RenderingModule::RenderCamera;
 		using PRE::RenderingModule::RenderModel;
+
+		using PRE::AnimationModule::Animation;
 
 		PRERendering::Impl& PRERendering::Impl::MakeImpl(
 			PREApplicationContext& applicationContext,
@@ -81,17 +90,31 @@ namespace PRE
 
 		void PRERendering::DestroyShader(PREShader& shader)
 		{
+			_impl.applicationContext.assetManager.TryFreeShader(shader);
 			_impl.renderer.DeallocateShaderProgram(shader._shaderProgram);
 			delete &shader;
 		}
 
-		PRETexture& PRERendering::CreateTexture()
+		PRETexture& PRERendering::CreateTexture(
+			unsigned int width,
+			unsigned int height,
+			const unsigned char* data
+		)
 		{
-			return *(new PRETexture(_impl.renderer.AllocateTexture()));
+			return *(
+				new PRETexture(
+					_impl.renderer.AllocateTexture(
+						width,
+						height,
+						data
+					)
+				)
+			);
 		}
 
 		void PRERendering::DestroyTexture(PRETexture& texture)
 		{
+			_impl.applicationContext.assetManager.TryFreeTexture(texture);
 			_impl.renderer.DeallocateTexture(texture._texture);
 			delete &texture;
 		}
@@ -107,15 +130,62 @@ namespace PRE
 			delete &material;
 		}
 
-		PREMesh& PRERendering::CreateMesh()
+		PREMesh& PRERendering::CreateMesh(
+			unsigned int nVertices,
+			const glm::vec3* vertices,
+			const glm::vec3* normals,
+			const glm::vec3* tangents,
+			const glm::vec3* biTangents,
+			const glm::vec2* uvs,
+			const glm::ivec4* vertexBoneIds,
+			const glm::vec4* vertexBoneWeights,
+			unsigned int nTriangleElements,
+			const unsigned int* const triangleElements
+		)
 		{
-			return *(new PREMesh(_impl.renderer.AllocateMesh()));
+			return *(new PREMesh(_impl.renderer.AllocateMesh(
+				nVertices,
+				vertices,
+				normals,
+				tangents,
+				biTangents,
+				uvs,
+				vertexBoneIds,
+				vertexBoneWeights,
+				nTriangleElements,
+				triangleElements
+			)));
 		}
 
 		void PRERendering::DestroyMesh(PREMesh& mesh)
 		{
+			_impl.applicationContext.assetManager.TryFreeMesh(mesh);
 			_impl.renderer.DeallocateMesh(mesh._mesh);
 			delete &mesh;
+		}
+
+		PRESkeleton& PRERendering::CreateSkeleton()
+		{
+			//return *(new PRESkeleton(_impl.renderer.AllocateSkeleton()));
+		}
+
+		void PRERendering::DestroySkeleton(PRESkeleton& skeleton)
+		{
+			_impl.applicationContext.assetManager.TryFreeSkeleton(skeleton);
+			_impl.renderer.DeallocateSkeleton(skeleton._skeleton);
+			delete &skeleton;
+		}
+
+		PREAnimation& PRERendering::CreateAnimation()
+		{
+			//return *(new PREAnimation(new Animation()));
+		}
+
+		void PRERendering::DestroyAnimation(PREAnimation& animation)
+		{
+			_impl.applicationContext.assetManager.TryFreeAnimation(animation);
+			delete &animation._animation;
+			delete &animation;
 		}
 
 		PRERendering& PRERendering::MakePRERendering(
@@ -284,17 +354,26 @@ namespace PRE
 			if (modelRendererComponent._hasChanged)
 			{
 				modelRendererComponent._hasChanged = false;
+
 				_impl.renderer.SetModelMesh(
 					*modelRendererComponent._pModel,
 					modelRendererComponent._pMesh != nullptr ?
-					&modelRendererComponent._pMesh->_mesh :
-					nullptr
+						&modelRendererComponent._pMesh->_mesh :
+						nullptr
 				);
+
+				_impl.renderer.SetModelSkeleton(
+					*modelRendererComponent._pModel,
+					modelRendererComponent._pSkeleton != nullptr ?
+						&modelRendererComponent._pSkeleton->_skeleton :
+						nullptr
+				);
+
 				_impl.renderer.SetModelMaterial(
 					*modelRendererComponent._pModel,
 					modelRendererComponent._pMaterial != nullptr ?
-					&modelRendererComponent._pMaterial->_material :
-					nullptr
+						&modelRendererComponent._pMaterial->_material :
+						nullptr
 				);
 			}
 

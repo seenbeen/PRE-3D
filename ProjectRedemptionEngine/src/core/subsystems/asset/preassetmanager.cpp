@@ -1,8 +1,10 @@
 #include <core/subsystems/asset/preassetmanager.h>
 
+#include <cstring>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -22,6 +24,8 @@
 #include <core/subsystems/rendering/prerendering.h>
 #include <core/subsystems/rendering/pretexture.h>
 #include <core/subsystems/rendering/premesh.h>
+#include <core/subsystems/rendering/preskeleton.h>
+#include <core/subsystems/rendering/preanimation.h>
 
 namespace PRE
 {
@@ -30,9 +34,313 @@ namespace PRE
 		using std::ifstream;
 		using std::string;
 		using std::stringstream;
+		using std::unordered_map;
 		using std::vector;
 
 		using PRE::AssetModule::AssetManager;
+
+#pragma region Entries
+		PREAssetManager::ShaderEntry::ShaderEntry(
+			const string& vertexShaderStringResource,
+			const string& fragmentShaderStringResource
+		)
+			:
+			vertexShaderStringResource(vertexShaderStringResource),
+			fragmentShaderStringResource(fragmentShaderStringResource) {}
+
+		PREAssetManager::TextureEntry::TextureEntry(
+			const string& contentsImageResource
+		)
+			:
+			contentsImageResource(contentsImageResource) {}
+
+		PREAssetManager::MeshEntry::MeshEntry(const string& assimpResource)
+			:
+			assimpResource(assimpResource) {}
+
+		PREAssetManager::SkeletonEntry::SkeletonEntry(const string& assimpResource)
+			:
+			assimpResource(assimpResource) {}
+
+		PREAssetManager::AnimationEntry::AnimationEntry(const string& assimpResource)
+			:
+			assimpResource(assimpResource) {}
+
+#pragma endregion
+		
+#pragma region StringResource
+		PREAssetManager::StringResource* PREAssetManager::StringResource::Load(
+			const string& filepath
+		)
+		{
+			ifstream ifs;
+			ifs.open(filepath);
+
+#ifdef __PRE_DEBUG__
+			if (!ifs.is_open())
+			{
+				throw "Failed to open file";
+			}
+#endif
+
+			stringstream ss;
+			ss << ifs.rdbuf();
+			ifs.close();
+			return new StringResource(std::move(ss.str()));
+		}
+
+		PREAssetManager::StringResource::~StringResource() {}
+
+		size_t PREAssetManager::StringResource::GetSize()
+		{
+			return payload.length() * sizeof(char);
+		}
+
+		PREAssetManager::StringResource::StringResource(
+			string&& payload
+		)
+			: payload(std::move(payload)) {}
+#pragma endregion
+
+#pragma region ImageResource
+		PREAssetManager::ImageResource* PREAssetManager::ImageResource::Load(
+			const string& filepath
+		)
+		{
+			stbi_set_flip_vertically_on_load(true);
+
+			int width, height, nrComponents;
+			auto pDataStbi = stbi_load(
+				filepath.c_str(),
+				&width,
+				&height,
+				&nrComponents,
+				4
+			);
+
+			auto imageSize = width * height * 4;
+			auto pData = new unsigned char[imageSize];
+			std::memcpy(pData, pDataStbi, imageSize);
+			stbi_image_free(pDataStbi);
+
+			return new ImageResource(width, height, pData);
+		}
+
+		PREAssetManager::ImageResource::~ImageResource()
+		{
+			delete[] data;
+		}
+
+		size_t PREAssetManager::ImageResource::GetSize()
+		{
+			return
+				sizeof(unsigned int) +
+				sizeof(unsigned int) +
+				((size_t)width) * ((size_t)height) * 4 * sizeof(unsigned char);
+		}
+
+		PREAssetManager::ImageResource::ImageResource(
+			unsigned int width,
+			unsigned int height,
+			const unsigned char* data
+		)
+			:
+			width(width),
+			height(height),
+			data(data) {}
+#pragma endregion
+
+#pragma region AssimpResource
+		PREAssetManager::AssimpResource* PREAssetManager::AssimpResource::Load(
+			Assimp::Importer& assimp,
+			const string& filepath
+		)
+		{
+			auto aiScene = assimp.ReadFile(
+				filepath,
+				aiProcess_Triangulate |
+				aiProcess_GenSmoothNormals |
+				aiProcess_CalcTangentSpace |
+				aiProcess_OptimizeMeshes
+			);
+
+#ifdef __PRE_DEBUG__
+			if (aiScene == nullptr)
+			{
+				throw "Failed to load AssimpResource";
+			}
+#endif
+
+			vector<glm::vec3> vVertices;
+			vector<glm::vec3> vNormals;
+			vector<glm::vec3> vTangents;
+			vector<glm::vec3> vBiTangents;
+			vector<glm::vec2> vUvs;
+			vector<glm::ivec4> vVertexBoneInfluenceIndices;
+			vector<glm::vec4> vVertexBoneInfluenceWeights;
+			vector<unsigned int> vTriangleElements;
+
+			AssimpResource::RecurseMesh(
+				aiScene->mMeshes,
+				aiScene->mRootNode,
+				aiMatrix4x4(),
+				vVertices,
+				vNormals,
+				vTangents,
+				vBiTangents,
+				vUvs,
+				vVertexBoneInfluenceIndices,
+				vVertexBoneInfluenceWeights,
+				vTriangleElements
+			);
+
+			auto nVertices = vVertices.size();
+			auto nTriangleElements = vTriangleElements.size();
+
+			auto vertices = new glm::vec3[nVertices];
+			std::memcpy(vertices, &vVertices[0], nVertices * sizeof(glm::vec3));
+			
+			auto normals = new glm::vec3[nVertices];
+			std::memcpy(normals, &vNormals[0], nVertices * sizeof(glm::vec3));
+			
+			auto tangents = new glm::vec3[nVertices];
+			std::memcpy(tangents, &vTangents[0], nVertices * sizeof(glm::vec3));
+			
+			auto biTangents = new glm::vec3[nVertices];
+			std::memcpy(biTangents, &vBiTangents[0], nVertices * sizeof(glm::vec3));
+			
+			auto uvs = new glm::vec2[nVertices];
+			std::memcpy(uvs, &vUvs[0], nVertices * sizeof(glm::vec2));
+			
+			auto triangleElements = new unsigned int[nTriangleElements];
+			std::memcpy(triangleElements, &vTriangleElements[0], nTriangleElements * sizeof(unsigned int));
+
+			return new AssimpResource(
+				nVertices,
+				vertices,
+				normals,
+				tangents,
+				biTangents,
+				uvs,
+				nullptr,
+				nullptr,
+				nTriangleElements,
+				triangleElements
+			);
+		}
+
+		PREAssetManager::AssimpResource::~AssimpResource()
+		{
+			delete[] vertices;
+			delete[] normals;
+			delete[] tangents;
+			delete[] biTangents;
+			delete[] uvs;
+			delete[] vertexBoneInfluenceIndices;
+			delete[] vertexBoneInfluenceWeights;
+			delete[] triangleElements;
+		}
+
+		size_t PREAssetManager::AssimpResource::GetSize()
+		{
+			return
+				((size_t)nVertices) *
+				(
+					4 * sizeof(glm::vec3) +
+					sizeof(glm::vec2) +
+					sizeof(glm::ivec4) +
+					sizeof(glm::vec4)
+				);
+		}
+
+		void PREAssetManager::AssimpResource::RecurseMesh(
+			aiMesh** pMeshes,
+			aiNode* pCurrentNode,
+			const aiMatrix4x4& localSpace,
+			vector<glm::vec3>& vertices,
+			vector<glm::vec3>& normals,
+			vector<glm::vec3>& tangents,
+			vector<glm::vec3>& biTangents,
+			vector<glm::vec2>& uvs,
+			vector<glm::ivec4>& vertexBoneInfluenceIndices,
+			vector<glm::vec4>& vertexBoneInfluenceWeights,
+			vector<unsigned int>& triangleElements
+		)
+		{
+			auto currentTransform = pCurrentNode->mTransformation * localSpace;
+			auto currentTransformRotation = aiMatrix3x3(currentTransform);
+
+			for (auto i = 0u; i < pCurrentNode->mNumMeshes; ++i)
+			{
+				auto vertexOffset = (unsigned int)vertices.size();
+				auto pMesh = pMeshes[pCurrentNode->mMeshes[i]];
+				for (auto j = 0u; j < pMesh->mNumVertices; ++j)
+				{
+					auto vertex = currentTransform * pMesh->mVertices[j];
+					auto tangent = currentTransformRotation * pMesh->mTangents[j];
+					auto biTangent = currentTransformRotation * pMesh->mBitangents[j];
+					auto normal = currentTransformRotation * pMesh->mNormals[j];
+					auto& uv = pMesh->mTextureCoords[0][j];
+
+					vertices.push_back(glm::vec3(vertex.x, vertex.y, vertex.z));
+					normals.push_back(glm::vec3(normal.x, normal.y, normal.z));
+					tangents.push_back(glm::vec3(tangent.x, tangent.y, tangent.z));
+					biTangents.push_back(glm::vec3(biTangent.x, biTangent.y, biTangent.z));
+					uvs.push_back(glm::vec2(uv.x, uv.y));
+				}
+
+				for (auto j = 0u; j < pMesh->mNumFaces; ++j)
+				{
+					auto& face = pMesh->mFaces[j];
+					for (auto k = 0u; k < face.mNumIndices; ++k)
+					{
+						triangleElements.push_back(vertexOffset + face.mIndices[k]);
+					}
+				}
+			}
+
+			for (auto i = 0u; i < pCurrentNode->mNumChildren; ++i)
+			{
+				RecurseMesh(
+					pMeshes,
+					pCurrentNode->mChildren[i],
+					currentTransform,
+					vertices,
+					normals,
+					tangents,
+					biTangents,
+					uvs,
+					vertexBoneInfluenceIndices,
+					vertexBoneInfluenceWeights,
+					triangleElements
+				);
+			}
+		}
+
+		PREAssetManager::AssimpResource::AssimpResource(
+			const unsigned int nVertices,
+			const glm::vec3* vertices,
+			const glm::vec3* normals,
+			const glm::vec3* tangents,
+			const glm::vec3* biTangents,
+			const glm::vec2* uvs,
+			const glm::ivec4* vertexBoneInfluenceIndices,
+			const glm::vec4* vertexBoneInfluenceWeights,
+			unsigned int nTriangleElements,
+			const unsigned int* triangleElements
+		)
+			:
+			nVertices(nVertices),
+			vertices(vertices),
+			normals(normals),
+			tangents(tangents),
+			biTangents(biTangents),
+			uvs(uvs),
+			vertexBoneInfluenceIndices(vertexBoneInfluenceIndices),
+			vertexBoneInfluenceWeights(vertexBoneInfluenceWeights),
+			nTriangleElements(nTriangleElements),
+			triangleElements(triangleElements) {}
+#pragma endregion
 
 		PREAssetManager::Impl& PREAssetManager::Impl::MakeImpl(
 			PREApplicationContext& applicationContext,
@@ -55,233 +363,145 @@ namespace PRE
 			delete &assetManager;
 		}
 
-		PREShader& PREAssetManager::LoadShader(const string& vertexShaderPath, const string& fragmentShaderPath)
+		PREShader& PREAssetManager::LoadShader(
+			const string& vertexShaderPath,
+			const string& fragmentShaderPath
+		)
 		{
-			auto combinedPath = vertexShaderPath + "?" + fragmentShaderPath;
-			auto vShader = _impl.assetManager.Get(combinedPath);
-			if (vShader != nullptr)
+			auto vShader = _impl.assetManager.Get(vertexShaderPath);
+			if (vShader == nullptr)
 			{
-				return *static_cast<PREShader*>(vShader);
+				auto pVertexShaderResource = StringResource::Load(
+					vertexShaderPath
+				);
+				_impl.assetManager.Store(
+					vertexShaderPath,
+					pVertexShaderResource->GetSize(),
+					pVertexShaderResource,
+					UnloadResourceData,
+					nullptr
+				);
+
+				return LoadShader(vertexShaderPath, fragmentShaderPath);
 			}
 
-			ifstream ifsVertex;
-			ifsVertex.open(vertexShaderPath);
-
-#ifdef __PRE_DEBUG__
-			if (!ifsVertex.is_open())
+			auto fShader = _impl.assetManager.Get(fragmentShaderPath);
+			if (fShader == nullptr)
 			{
-				throw "Failed to open Vertex Shader";
+				auto pFragmentShaderResource = StringResource::Load(
+					fragmentShaderPath
+				);
+				_impl.assetManager.Store(
+					fragmentShaderPath,
+					pFragmentShaderResource->GetSize(),
+					pFragmentShaderResource,
+					UnloadResourceData,
+					nullptr
+				);
+
+				return LoadShader(vertexShaderPath, fragmentShaderPath);
 			}
-#endif
 
-			stringstream ssVertex;
-			ssVertex << ifsVertex.rdbuf();
-			ifsVertex.close();
-			
-			auto vertexSource = ssVertex.str();
-
-			ifstream ifsFragment;
-			ifsFragment.open(fragmentShaderPath);
-
-#ifdef __PRE_DEBUG__
-			if (!ifsFragment.is_open())
-			{
-				throw "Failed to open Vertex Shader";
-			}
-#endif	
-
-			stringstream ssFragment;
-			ssFragment << ifsFragment.rdbuf();
-			ifsFragment.close();
-
-			auto fragmentSource = ssFragment.str();
+			auto vertexSource = static_cast<StringResource*>(vShader)->payload.c_str();
+			auto fragmentSource = static_cast<StringResource*>(fShader)->payload.c_str();
 
 			auto& shader = _impl.applicationContext.rendering.CreateShader(
 				vertexSource,
 				fragmentSource
 			);
-
-			_impl.assetManager.Store(
-				combinedPath,
-				1,
-				&shader,
-				UnloadShader,
-				&_impl.applicationContext.rendering
+			
+			_impl.shaders[&shader] = new ShaderEntry(
+				vertexShaderPath,
+				fragmentShaderPath
 			);
 
-			// load once more, this time guaranteed hit
-			return LoadShader(vertexShaderPath, fragmentShaderPath);
+			return shader;
 		}
 
 		PRETexture& PREAssetManager::LoadTexture(const string& texturePath)
 		{
-			auto vTexture = _impl.assetManager.Get(texturePath);
-			if (vTexture != nullptr)
+			auto vImageResource = _impl.assetManager.Get(texturePath);
+			if (vImageResource == nullptr)
 			{
-				return *static_cast<PRETexture*>(vTexture);
+				auto pImageResource = ImageResource::Load(texturePath);
+				_impl.assetManager.Store(
+					texturePath,
+					pImageResource->GetSize(),
+					pImageResource,
+					UnloadResourceData,
+					nullptr
+				);
+
+				return LoadTexture(texturePath);
 			}
 
-			stbi_set_flip_vertically_on_load(true);
-			int width, height, nrComponents;
-			auto pData = stbi_load(
-				texturePath.c_str(),
-				&width,
-				&height,
-				&nrComponents,
-				4
-			);
-			
-			auto& texture = _impl.applicationContext.rendering.CreateTexture();
-			texture.SetData(width, height, pData);
+			auto& imageResource = *static_cast<ImageResource*>(vImageResource);
 
-			stbi_image_free(pData);
-
-			_impl.assetManager.Store(
-				texturePath,
-				1,
-				&texture,
-				UnloadTexture,
-				&_impl.applicationContext.rendering
+			auto& texture = _impl.applicationContext.rendering.CreateTexture(
+				imageResource.width,
+				imageResource.height,
+				imageResource.data
 			);
 
-			// load once more, this time guaranteed hit
-			return LoadTexture(texturePath);
+			_impl.textures[&texture] = new TextureEntry(texturePath);
+
+			return texture;
 		}
 
 		PREMesh& PREAssetManager::LoadMesh(const string& meshPath)
 		{
-			auto vMesh = _impl.assetManager.Get(meshPath);
-			if (vMesh != nullptr)
+			auto vAssimpResource = _impl.assetManager.Get(meshPath);
+			if (vAssimpResource == nullptr)
 			{
-				return *static_cast<PREMesh*>(vMesh);
-			}
-
-			auto aiScene = _impl.assimp.ReadFile(
-				meshPath,
-				aiProcess_Triangulate |
-				aiProcess_GenSmoothNormals |
-				aiProcess_CalcTangentSpace |
-				aiProcess_OptimizeMeshes
-			);
-
-#ifdef __PRE_DEBUG__
-			if (aiScene == nullptr)
-			{
-				throw "Failed to load Mesh";
-			}
-#endif
-
-			vector<glm::vec3> vertices;
-			vector<glm::vec3> normals;
-			vector<glm::vec2> uvs;
-			vector<unsigned int> triangles;
-
-			RecurseMesh(aiScene->mMeshes, aiScene->mRootNode, aiMatrix4x4(), vertices, normals, uvs, triangles);
-
-			auto& mesh = _impl.applicationContext.rendering.CreateMesh();
-			mesh.SetVertices(&vertices[0], (unsigned int)vertices.size());
-			mesh.SetNormals(&normals[0], (unsigned int)normals.size());
-			mesh.SetUvs(&uvs[0], (unsigned int)uvs.size());
-			mesh.SetTriangles(&triangles[0], (unsigned int)triangles.size());
-
-			_impl.assetManager.Store(
-				meshPath,
-				1,
-				&mesh,
-				UnloadMesh,
-				&_impl.applicationContext.rendering
-			);
-
-			// load once more, this time guaranteed hit
-			return LoadMesh(meshPath);
-		}
-
-		void PREAssetManager::FreeShader(const string& vertexShaderPath, const string& fragmentShaderPath)
-		{
-			auto combinedPath = vertexShaderPath + "?" + fragmentShaderPath;
-			_impl.assetManager.Release(combinedPath);
-		}
-
-		void PREAssetManager::FreeTexture(const string& texturePath)
-		{
-			_impl.assetManager.Release(texturePath);
-		}
-
-		void PREAssetManager::FreeMesh(const string& meshPath)
-		{
-			_impl.assetManager.Release(meshPath);
-		}
-
-		void PREAssetManager::UnloadShader(void* vRendering, void* vShader)
-		{
-			auto pRendering = static_cast<PRERendering*>(vRendering);
-			auto pShader = static_cast<PREShader*>(vShader);
-			pRendering->DestroyShader(*pShader);
-		}
-
-		void PREAssetManager::UnloadTexture(void* vRendering, void* vTexture)
-		{
-			auto pRendering = static_cast<PRERendering*>(vRendering);
-			auto pTexture = static_cast<PRETexture*>(vTexture);
-			pRendering->DestroyTexture(*pTexture);
-		}
-
-		void PREAssetManager::UnloadMesh(void* vRendering, void* vMesh)
-		{
-			auto pRendering = static_cast<PRERendering*>(vRendering);
-			auto pMesh = static_cast<PREMesh*>(vMesh);
-			pRendering->DestroyMesh(*pMesh);
-		}
-
-		void PREAssetManager::RecurseMesh(
-			aiMesh** pMeshes,
-			aiNode* pCurrentNode,
-			const aiMatrix4x4& localSpace,
-			vector<glm::vec3>& vertices,
-			vector<glm::vec3>& normals,
-			vector<glm::vec2>& uvs,
-			vector<unsigned int>& triangles
-		)
-		{
-			auto currentTransform = pCurrentNode->mTransformation * localSpace;
-
-			for (auto i = 0u; i < pCurrentNode->mNumMeshes; ++i)
-			{
-				auto vertexOffset = (unsigned int)vertices.size();
-				auto pMesh = pMeshes[pCurrentNode->mMeshes[i]];
-				for (auto j = 0u; j < pMesh->mNumVertices; ++j)
-				{
-					auto vertex = currentTransform * pMesh->mVertices[j];
-					auto& normal = pMesh->mNormals[j];
-					auto& uv = pMesh->mTextureCoords[0][j];
-
-					vertices.push_back(glm::vec3(vertex.x, vertex.y, vertex.z));
-					normals.push_back(glm::vec3(normal.x, normal.y, normal.z));
-					uvs.push_back(glm::vec2(uv.x, uv.y));
-				}
-
-				for (auto j = 0u; j < pMesh->mNumFaces; ++j)
-				{
-					auto& face = pMesh->mFaces[j];
-					for (auto k = 0u; k < face.mNumIndices; ++k)
-					{
-						triangles.push_back(vertexOffset + face.mIndices[k]);
-					}
-				}
-			}
-
-			for (auto i = 0u; i < pCurrentNode->mNumChildren; ++i)
-			{
-				RecurseMesh(
-					pMeshes,
-					pCurrentNode->mChildren[i],
-					currentTransform,
-					vertices,
-					normals,
-					uvs,
-					triangles
+				auto pAssimpResource = AssimpResource::Load(
+					_impl.assimp,
+					meshPath
 				);
+
+				_impl.assetManager.Store(
+					meshPath,
+					pAssimpResource->GetSize(),
+					pAssimpResource,
+					UnloadResourceData,
+					nullptr
+				);
+
+				return LoadMesh(meshPath);
 			}
+
+			auto& assimpResource = *static_cast<AssimpResource*>(vAssimpResource);
+
+			auto& mesh = _impl.applicationContext.rendering.CreateMesh(
+				assimpResource.nVertices,
+				assimpResource.vertices,
+				assimpResource.normals,
+				assimpResource.tangents,
+				assimpResource.biTangents,
+				assimpResource.uvs,
+				assimpResource.vertexBoneInfluenceIndices,
+				assimpResource.vertexBoneInfluenceWeights,
+				assimpResource.nTriangleElements,
+				assimpResource.triangleElements
+			);
+
+			_impl.meshes[&mesh] = new MeshEntry(meshPath);
+
+			return mesh;
+		}
+
+		PRESkeleton& PREAssetManager::LoadSkeleton(const string& skeletonPath)
+		{
+
+		}
+
+		PREAnimation& PREAssetManager::LoadAnimation(const string& animationPath)
+		{
+
+		}
+
+		void PREAssetManager::UnloadResourceData(void* vNil, void* vResource)
+		{
+			delete static_cast<ResourceBase*>(vResource);
 		}
 
 		PREAssetManager& PREAssetManager::MakePREAssetManager(
@@ -295,6 +515,87 @@ namespace PRE
 				applicationContext,
 				assetManager
 			));
+		}
+
+		void PREAssetManager::TryFreeShader(const PREShader& shader)
+		{
+			auto it = _impl.shaders.find(&shader);
+			if (it == _impl.shaders.end())
+			{
+				return;
+			}
+			auto pShaderEntry = it->second;
+
+			_impl.assetManager.Release(pShaderEntry->vertexShaderStringResource);
+			_impl.assetManager.Release(pShaderEntry->fragmentShaderStringResource);
+
+			delete pShaderEntry;
+
+			_impl.shaders.erase(it);
+		}
+
+		void PREAssetManager::TryFreeTexture(const PRETexture& texture)
+		{
+			auto it = _impl.textures.find(&texture);
+			if (it == _impl.textures.end())
+			{
+				return;
+			}
+			auto pTextureEntry = it->second;
+
+			_impl.assetManager.Release(pTextureEntry->contentsImageResource);
+
+			delete pTextureEntry;
+
+			_impl.textures.erase(it);
+		}
+
+		void PREAssetManager::TryFreeMesh(const PREMesh& mesh)
+		{
+			auto it = _impl.meshes.find(&mesh);
+			if (it == _impl.meshes.end())
+			{
+				return;
+			}
+			auto pMeshEntry = it->second;
+
+			_impl.assetManager.Release(pMeshEntry->assimpResource);
+
+			delete pMeshEntry;
+
+			_impl.meshes.erase(it);
+		}
+
+		void PREAssetManager::TryFreeSkeleton(const PRESkeleton& skeleton)
+		{
+			auto it = _impl.skeletons.find(&skeleton);
+			if (it == _impl.skeletons.end())
+			{
+				return;
+			}
+			auto pSkeletonEntry = it->second;
+
+			_impl.assetManager.Release(pSkeletonEntry->assimpResource);
+
+			delete pSkeletonEntry;
+
+			_impl.skeletons.erase(it);
+		}
+
+		void PREAssetManager::TryFreeAnimation(const PREAnimation& animation)
+		{
+			auto it = _impl.animations.find(&animation);
+			if (it == _impl.animations.end())
+			{
+				return;
+			}
+			auto pAnimationEntry = it->second;
+
+			_impl.assetManager.Release(pAnimationEntry->assimpResource);
+
+			delete pAnimationEntry;
+
+			_impl.animations.erase(it);
 		}
 
 		PREAssetManager::PREAssetManager(
