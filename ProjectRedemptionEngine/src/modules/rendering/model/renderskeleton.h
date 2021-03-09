@@ -65,6 +65,9 @@ namespace PRE
 
 			struct Bone
 			{
+				Bone& operator=(const Bone&) = delete;
+				Bone(const Bone&) = delete;
+
 				const int id;
 				const vector<string> children;
 				const glm::mat4 bindPos;
