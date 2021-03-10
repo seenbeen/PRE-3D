@@ -36,7 +36,12 @@ namespace PRE
 				children.push_back(&MakeImplRecurse(**it, bones));
 			}
 			
-			auto pBone = new Bone(config._id, children, config._bindPos);
+			auto pBone = new Bone(
+				config._id,
+				children,
+				config._bindPos,
+				config._startingTransform
+			);
 
 			bones[config._name] = pBone;
 
@@ -86,23 +91,26 @@ namespace PRE
 		RenderSkeleton::Bone::Bone(
 			int id,
 			const vector<Bone*>& children,
-			const glm::mat4& bindPos
+			const glm::mat4& bindPos,
+			const glm::mat4& startingTransform
 		)
 			:
 			id(id),
 			children(children),
 			bindPos(bindPos),
-			localMatrix() {}
+			localMatrix(startingTransform) {}
 
 		RenderSkeleton::BoneConfig::BoneConfig(
 			unsigned int it,
 			const string& name,
-			const glm::mat4& bindPos
+			const glm::mat4& bindPos,
+			const glm::mat4& startingTransform
 		)
 			:
 			_id(it),
 			_name(name),
-			_bindPos(bindPos) {}
+			_bindPos(bindPos),
+			_startingTransform(startingTransform) {}
 
 		void RenderSkeleton::BoneConfig::AddChild(const BoneConfig& child)
 		{

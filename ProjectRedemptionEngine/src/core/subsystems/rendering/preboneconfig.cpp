@@ -13,10 +13,11 @@ namespace PRE
 		PREBoneConfig::PREBoneConfig(
 			unsigned int id,
 			const string& name,
-			const glm::mat4& bindPos
+			const glm::mat4& bindPos,
+			const glm::mat4& startingTransform
 		)
 			:
-			_boneConfig(id, name, bindPos) {}
+			_boneConfig(id, name, bindPos, startingTransform) {}
 
 		void PREBoneConfig::AddChild(const PREBoneConfig& child)
 		{

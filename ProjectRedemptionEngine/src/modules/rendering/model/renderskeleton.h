@@ -79,7 +79,8 @@ namespace PRE
 				Bone(
 					int id,
 					const vector<Bone*>& children,
-					const glm::mat4& bindPos
+					const glm::mat4& bindPos,
+					const glm::mat4& startingTransform
 				);
 			};
 
@@ -91,10 +92,17 @@ namespace PRE
 				const unsigned int _id;
 				const string _name;
 				const glm::mat4 _bindPos;
+				const glm::mat4 _startingTransform;
+
 				vector<const BoneConfig*> _children;
 
 			public:
-				BoneConfig(unsigned int id, const string& name, const glm::mat4& bindPos);
+				BoneConfig(
+					unsigned int id,
+					const string& name,
+					const glm::mat4& bindPos,
+					const glm::mat4& startingTransform
+				);
 
 				void AddChild(const BoneConfig& child);
 			};

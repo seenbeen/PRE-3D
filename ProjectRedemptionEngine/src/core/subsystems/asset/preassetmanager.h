@@ -151,7 +151,6 @@ namespace PRE
 				static void RecurseMesh(
 					aiMesh** pMeshes,
 					aiNode* pCurrentNode,
-					const aiMatrix4x4& localSpace,
 					vector<glm::vec3>& vertices,
 					vector<glm::vec3>& normals,
 					vector<glm::vec3>& tangents,

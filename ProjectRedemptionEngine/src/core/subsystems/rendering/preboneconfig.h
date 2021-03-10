@@ -23,7 +23,12 @@ namespace PRE
 			friend class PRERendering;
 
 		public:
-			PREBoneConfig(unsigned int id, const string& name, const glm::mat4& bindPos);
+			PREBoneConfig(
+				unsigned int id,
+				const string& name,
+				const glm::mat4& bindPos,
+				const glm::mat4& startingTransform
+			);
 
 			void AddChild(const PREBoneConfig& child);
 

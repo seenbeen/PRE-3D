@@ -201,7 +201,6 @@ namespace PRE
 			AssimpResource::RecurseMesh(
 				aiScene->mMeshes,
 				aiScene->mRootNode,
-				aiMatrix4x4(),
 				vVertices,
 				vNormals,
 				vTangents,
@@ -293,7 +292,6 @@ namespace PRE
 		void PREAssetManager::AssimpResource::RecurseMesh(
 			aiMesh** pMeshes,
 			aiNode* pCurrentNode,
-			const aiMatrix4x4& localSpace,
 			vector<glm::vec3>& vertices,
 			vector<glm::vec3>& normals,
 			vector<glm::vec3>& tangents,
@@ -308,15 +306,14 @@ namespace PRE
 		)
 		{
 			string currentNodeName(pCurrentNode->mName.C_Str());
-			auto currentTransform = localSpace * pCurrentNode->mTransformation;
-			auto currentTransformRotation = aiMatrix3x3(currentTransform);
 
 			auto itPBone = boneMap.find(currentNodeName);
 			auto bindPos = aiMatrix4x4();
 			if (itPBone != boneMap.end())
 			{
 				auto pBone = itPBone->second.first;
-				bindPos = currentTransform.Inverse() * pBone->mOffsetMatrix;
+				bindPos = pBone->mOffsetMatrix;
+
 				auto vertexOffset = itPBone->second.second;
 				for (auto k = 0u; k < pBone->mNumWeights; ++k)
 				{
@@ -347,7 +344,8 @@ namespace PRE
 			generatedBoneConfig = new PREBoneConfig(
 				boneCount++,
 				currentNodeName,
-				glm::transpose(glm::make_mat4(&bindPos.a1))
+				glm::transpose(glm::make_mat4(&bindPos.a1)),
+				glm::transpose(glm::make_mat4(&pCurrentNode->mTransformation.a1))
 			);
 
 			for (auto i = 0u; i < pCurrentNode->mNumMeshes; ++i)
@@ -356,10 +354,10 @@ namespace PRE
 				auto pMesh = pMeshes[pCurrentNode->mMeshes[i]];
 				for (auto j = 0u; j < pMesh->mNumVertices; ++j)
 				{
-					auto vertex = currentTransform * pMesh->mVertices[j];
-					auto tangent = currentTransformRotation * pMesh->mTangents[j];
-					auto biTangent = currentTransformRotation * pMesh->mBitangents[j];
-					auto normal = currentTransformRotation * pMesh->mNormals[j];
+					auto vertex = pMesh->mVertices[j];
+					auto normal = pMesh->mNormals[j];
+					auto tangent = pMesh->mTangents[j];
+					auto biTangent = pMesh->mBitangents[j];
 					auto& uv = pMesh->mTextureCoords[0][j];
 
 					vertices.push_back(glm::vec3(vertex.x, vertex.y, vertex.z));
@@ -385,7 +383,6 @@ namespace PRE
 				RecurseMesh(
 					pMeshes,
 					pCurrentNode->mChildren[i],
-					currentTransform,
 					vertices,
 					normals,
 					tangents,

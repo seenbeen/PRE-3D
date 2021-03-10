@@ -12,6 +12,7 @@ public:
     string vertexShaderPath;
     string fragmentShaderPath;
     string meshPath;
+    string skeletonPath;
     string diffusePath;
     string emissionPath;
     string normalPath;
@@ -32,9 +33,12 @@ protected:
             GetAssetManager().rootAssetPath + meshPath
         );
 
-        _pSkeleton = &GetAssetManager().LoadSkeleton(
-            GetAssetManager().rootAssetPath + meshPath
-        );
+        if (!skeletonPath.empty())
+        {
+            _pSkeleton = &GetAssetManager().LoadSkeleton(
+                GetAssetManager().rootAssetPath + skeletonPath
+            );
+        }
 
         _pDiffuseTexture = &GetAssetManager().LoadTexture(
             GetAssetManager().rootAssetPath + diffusePath
@@ -81,7 +85,10 @@ protected:
         std::cout << "Destroy!" << std::endl;
         GetRendering().DestroyShader(*_pShader);
         GetRendering().DestroyMesh(*_pMesh);
-        GetRendering().DestroySkeleton(*_pSkeleton);
+        if (_pSkeleton != nullptr)
+        {
+            GetRendering().DestroySkeleton(*_pSkeleton);
+        }
         GetRendering().DestroyTexture(*_pDiffuseTexture);
         GetRendering().DestroyTexture(*_pEmissionTexture);
         GetRendering().DestroyTexture(*_pNormalTexture);
@@ -153,18 +160,19 @@ void OnInitialize(PREApplicationContext& applicationContext)
         {
             AddPREComponent<PREModelRendererComponent>();
             auto &modelComponent = *AddPREComponent<SimpleModelComponent>();
-            modelComponent.vertexShaderPath = "/shaders/simplevertex.vs";
+            modelComponent.vertexShaderPath = "/shaders/skinnedvertex.vs";
             modelComponent.fragmentShaderPath = "/shaders/simplefragment.fs";
             modelComponent.meshPath = "/models/vampire_a_lusth/vampire_a_lusth.dae";
+            modelComponent.skeletonPath = "/models/vampire_a_lusth/vampire_a_lusth.dae";
             modelComponent.diffusePath = "/models/vampire_a_lusth/textures/Vampire_diffuse.png";
             modelComponent.emissionPath = "/models/vampire_a_lusth/textures/Vampire_emission.png";
             modelComponent.normalPath = "/models/vampire_a_lusth/textures/Vampire_normal.png";
             modelComponent.specularPath = "/models/vampire_a_lusth/textures/Vampire_specular.png";
             auto pTransform = GetPREComponent<PRETransformComponent>();
-            pTransform->SetLocalScale(glm::vec3(4.0f));
+            pTransform->SetLocalScale(glm::vec3(4.0));
             pTransform->SetPosition(glm::vec3(0, -5, 0));
         }
-    } linkTemplate;
+    } vampireTemplate;
 
     class : public PREGameObjectTemplate
     {
@@ -196,28 +204,28 @@ void OnInitialize(PREApplicationContext& applicationContext)
     auto& camera = applicationContext.world.Instantiate(cameraTemplate);
     auto pCameraComponent = camera.GetComponent<PRECameraComponent>();
     
-    //auto& backpack = applicationContext.world.Instantiate(backpackTemplate);
-    //backpack.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
-    //auto pBackpackTransform = backpack.GetComponent<PRETransformComponent>();
+    auto& backpack = applicationContext.world.Instantiate(backpackTemplate);
+    backpack.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
+    auto pBackpackTransform = backpack.GetComponent<PRETransformComponent>();
 
     {
-        auto& linkA = applicationContext.world.Instantiate(linkTemplate);
-        auto pLinkATransform = linkA.GetComponent<PRETransformComponent>();
-        pLinkATransform->SetPosition(
-            pLinkATransform->GetPosition() + glm::vec3(-4, 0, 0)
+        auto& vampireA = applicationContext.world.Instantiate(vampireTemplate);
+        auto pvampireATransform = vampireA.GetComponent<PRETransformComponent>();
+        pvampireATransform->SetPosition(
+            pvampireATransform->GetPosition() + glm::vec3(-4, 0, 0)
         );
         //pLinkATransform->SetParent(pBackpackTransform, true);
-        linkA.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
+        vampireA.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
     }
 
     {
-        auto& linkB = applicationContext.world.Instantiate(linkTemplate);
-        auto pLinkBTransform = linkB.GetComponent<PRETransformComponent>();
-        pLinkBTransform->SetPosition(
-            pLinkBTransform->GetPosition() + glm::vec3(4, 0, 0)
+        auto& vampireB = applicationContext.world.Instantiate(vampireTemplate);
+        auto pvampireBTransform = vampireB.GetComponent<PRETransformComponent>();
+        pvampireBTransform->SetPosition(
+            pvampireBTransform->GetPosition() + glm::vec3(4, 0, 0)
         );
         //pLinkBTransform->SetParent(pBackpackTransform, true);
-        linkB.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
+        vampireB.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
     }
 }
 
