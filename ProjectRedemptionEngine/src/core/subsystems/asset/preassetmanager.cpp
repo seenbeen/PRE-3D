@@ -92,7 +92,6 @@ namespace PRE
 				throw std::exception((string("Failed to open ") + filepath).c_str());
 			}
 
-
 			stringstream ss;
 			ss << ifs.rdbuf();
 			ifs.close();
@@ -107,7 +106,7 @@ namespace PRE
 		}
 
 		PREAssetManager::StringResource::StringResource(
-			const string& payload
+			const string&& payload
 		)
 			: payload(payload) {}
 #pragma endregion

@@ -37,7 +37,7 @@ namespace PRE
 		{
 			// incase objects are mutated during frame, a container swap is done
 			// to defer to following frame and prevent mutation-during-iteration
-			unordered_set<GameObject*> tempStartingObjects = _startingObjects;
+			auto tempStartingObjects(std::move(_startingObjects));
 			_startingObjects.clear();
 
 			// first, all objects starting before this frame are started
@@ -57,7 +57,7 @@ namespace PRE
 
 			// finally, all objects destroyed this frame are blown-up
 			// if Destroy is called within Destroy, it is treated in the following frame
-			unordered_set<GameObject*> tempDestroyedObjects = _destroyedObjects;
+			auto tempDestroyedObjects(std::move(_destroyedObjects));
 			_destroyedObjects.clear();
 
 			for (auto it = tempDestroyedObjects.begin(); it != tempDestroyedObjects.end(); ++it)

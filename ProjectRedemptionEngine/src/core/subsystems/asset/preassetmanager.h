@@ -100,7 +100,7 @@ namespace PRE
 				size_t GetSize() override;
 
 			private:
-				StringResource(const string& payload);
+				StringResource(const string&& payload);
 			};
 
 			struct ImageResource : public ResourceBase
