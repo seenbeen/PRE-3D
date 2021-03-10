@@ -210,9 +210,9 @@ void OnInitialize(PREApplicationContext& applicationContext)
     auto& camera = applicationContext.world.Instantiate(cameraTemplate);
     auto pCameraComponent = camera.GetComponent<PRECameraComponent>();
     
-    auto& backpack = applicationContext.world.Instantiate(backpackTemplate);
-    backpack.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
-    auto pBackpackTransform = backpack.GetComponent<PRETransformComponent>();
+    //auto& backpack = applicationContext.world.Instantiate(backpackTemplate);
+    //backpack.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
+    //auto pBackpackTransform = backpack.GetComponent<PRETransformComponent>();
 
     {
         auto& vampireA = applicationContext.world.Instantiate(vampireTemplate);
@@ -223,12 +223,12 @@ void OnInitialize(PREApplicationContext& applicationContext)
         //pLinkATransform->SetParent(pBackpackTransform, true);
         vampireA.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
     }
-
+    for (int i = 0; i < 1; ++i)
     {
         auto& vampireB = applicationContext.world.Instantiate(vampireTemplate);
         auto pvampireBTransform = vampireB.GetComponent<PRETransformComponent>();
         pvampireBTransform->SetPosition(
-            pvampireBTransform->GetPosition() + glm::vec3(4, 0, 0)
+            pvampireBTransform->GetPosition() + glm::vec3(4 + i, 0, 0)
         );
         //pLinkBTransform->SetParent(pBackpackTransform, true);
         vampireB.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);

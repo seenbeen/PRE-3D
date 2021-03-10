@@ -219,8 +219,8 @@ namespace PRE
 				vAllBoneConfigs
 			);
 
-			auto nVertices = vVertices.size();
-			auto nTriangleElements = vTriangleElements.size();
+			auto nVertices = (unsigned int)vVertices.size();
+			auto nTriangleElements = (unsigned int)vTriangleElements.size();
 
 			auto vertices = new glm::vec3[nVertices];
 			std::memcpy(vertices, &vVertices[0], nVertices * sizeof(glm::vec3));
@@ -254,7 +254,7 @@ namespace PRE
 			auto triangleElements = new unsigned int[nTriangleElements];
 			std::memcpy(triangleElements, &vTriangleElements[0], nTriangleElements * sizeof(unsigned int));
 
-			auto nBoneConfigs = vAllBoneConfigs.size();
+			auto nBoneConfigs = (unsigned int)vAllBoneConfigs.size();
 			auto allBoneConfigs = new PREBoneConfig* [nBoneConfigs];
 			std::memcpy(allBoneConfigs, &vAllBoneConfigs[0], nBoneConfigs * sizeof(PREBoneConfig*));
 

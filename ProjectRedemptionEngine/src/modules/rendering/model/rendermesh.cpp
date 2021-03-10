@@ -229,7 +229,7 @@ namespace PRE
 				GL_TRIANGLES,
 				_impl.elementsDrawCount,
 				GL_UNSIGNED_INT,
-				(void*)_impl.elementsDrawStartIndex
+				(void*)(size_t)_impl.elementsDrawStartIndex
 			);
 
 			glBindVertexArray(GL_NONE);
