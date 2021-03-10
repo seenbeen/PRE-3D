@@ -308,7 +308,7 @@ namespace PRE
 		)
 		{
 			string currentNodeName(pCurrentNode->mName.C_Str());
-			auto currentTransform = pCurrentNode->mTransformation * localSpace;
+			auto currentTransform = localSpace * pCurrentNode->mTransformation;
 			auto currentTransformRotation = aiMatrix3x3(currentTransform);
 
 			auto itPBone = boneMap.find(currentNodeName);
@@ -316,7 +316,7 @@ namespace PRE
 			if (itPBone != boneMap.end())
 			{
 				auto pBone = itPBone->second.first;
-				bindPos = pCurrentNode->mTransformation.Inverse() * pBone->mOffsetMatrix;
+				bindPos = currentTransform.Inverse() * pBone->mOffsetMatrix;
 				auto vertexOffset = itPBone->second.second;
 				for (auto k = 0u; k < pBone->mNumWeights; ++k)
 				{
@@ -328,16 +328,17 @@ namespace PRE
 #ifdef __PRE_DEBUG__
 					if (indices[3] != -1)
 					{
-						throw "More than 4 vertex influences unsupported";
+						// throw "More than 4 vertex influences unsupported";
 					}
 #endif
 
-					for (auto i = 3; i > -1; --i)
+					for (auto i = 0; i < 4; ++i)
 					{
-						if (indices[i] != -1)
+						if (indices[i] == -1)
 						{
 							indices[i] = boneCount;
 							weights[i] = weight.mWeight;
+							break;
 						}
 					}
 				}

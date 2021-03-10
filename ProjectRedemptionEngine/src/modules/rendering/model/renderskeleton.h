@@ -46,7 +46,7 @@ namespace PRE
 
 				static Bone& MakeImplRecurse(
 					const BoneConfig& config,
-					unordered_map<string, Bone*> bones
+					unordered_map<string, Bone*>& bones
 				);
 				static void DestroyImplRecurse(const Bone& bone);
 

@@ -27,7 +27,7 @@ namespace PRE
 
 		RenderSkeleton::Bone& RenderSkeleton::Impl::MakeImplRecurse(
 			const BoneConfig& config,
-			unordered_map<string, Bone*> bones
+			unordered_map<string, Bone*>& bones
 		)
 		{
 			vector<Bone*> children;

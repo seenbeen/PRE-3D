@@ -18,6 +18,26 @@ out vec2 TexCoord;
 
 void main()
 {
-    gl_Position = PRE_MVP * vec4(iPos, 1.0);
-    TexCoord = iUV;
+    vec4 composedPos = vec4(iPos, 1.0f);//vec4(0.0f);
+    vec3 composedNorm = vec3(0.0f);
+    /*
+    for (int i = 0; i < MAX_BONE_INFLUENCE; ++i)
+    {
+        if (iBoneIndices[i] == -1)
+        {
+            break;
+        }
+        if (iBoneIndices[i] >= MAX_BONES) 
+        {
+            composedPos = vec4(iPos, 1.0f);
+            composedNorm = iNorm;
+            break;
+        }
+        mat4 boneInfluence = PRE_BONETRANSFORMS[iBoneIndices[i]] * iBoneWeights[i];
+        composedPos += boneInfluence * vec4(iPos, 1.0f);
+	    composedNorm += mat3(boneInfluence) * iNorm;
+   	}
+   	*/
+   	gl_Position = PRE_MVP * composedPos;
+   	TexCoord = iUV;
 }

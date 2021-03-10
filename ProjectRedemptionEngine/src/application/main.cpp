@@ -66,6 +66,7 @@ protected:
 
         auto& modelRendererComponent = *gameObject().GetComponent<PREModelRendererComponent>();
         modelRendererComponent.SetMesh(_pMesh);
+        modelRendererComponent.SetSkeleton(_pSkeleton);
         modelRendererComponent.SetMaterial(_pMaterial);
     }
 

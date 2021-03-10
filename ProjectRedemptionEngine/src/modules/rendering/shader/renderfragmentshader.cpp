@@ -24,7 +24,7 @@ namespace PRE
 			if (!success)
 			{
 				GLchar infoLog[1024];
-				glGetProgramInfoLog(shaderId, 1024, NULL, infoLog);
+				glGetShaderInfoLog(shaderId, 1024, NULL, infoLog);
 				throw string(infoLog);
 			}
 #endif

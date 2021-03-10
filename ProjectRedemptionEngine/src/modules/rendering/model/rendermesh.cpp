@@ -101,12 +101,12 @@ namespace PRE
 			glBindBuffer(GL_ARRAY_BUFFER, vertexTangentsBuffer);
 			glBufferData(GL_ARRAY_BUFFER, CAPACITY_VEC3, tangents, GL_STATIC_DRAW);
 			glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-			glEnableVertexAttribArray(1);
+			glEnableVertexAttribArray(2);
 
 			glBindBuffer(GL_ARRAY_BUFFER, vertexBiTangentsBuffer);
 			glBufferData(GL_ARRAY_BUFFER, CAPACITY_VEC3, biTangents, GL_STATIC_DRAW);
 			glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-			glEnableVertexAttribArray(1);
+			glEnableVertexAttribArray(3);
 
 			glBindBuffer(GL_ARRAY_BUFFER, vertexUVsBuffer);
 			glBufferData(GL_ARRAY_BUFFER, CAPACITY_VEC2, uvs, GL_STATIC_DRAW);
