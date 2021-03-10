@@ -1,8 +1,4 @@
 #pragma once
-#include <string>
-
-#include <glm/glm.hpp>
-
 #include <include/modules/rendering.h>
 
 namespace PRE
@@ -22,9 +18,6 @@ namespace PRE
 
 			friend class PRERendering;
 		
-		public:
-			void SetBoneLocalMatrix(const string bone, const glm::mat4& localMatrix);
-
 		private:
 			RenderSkeleton& _skeleton;
 
