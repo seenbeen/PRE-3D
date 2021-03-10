@@ -5,6 +5,10 @@
 #include <modules/gameobject/gameobjecttemplate.h>
 #include <modules/gameobject/gameobject.h>
 
+#ifdef __PRE_DEBUG__
+#include <assert.h>
+#endif
+
 namespace PRE
 {
 	namespace GameObjectModule
@@ -78,9 +82,7 @@ namespace PRE
 #ifdef __PRE_DEBUG__
 			// Only allow destruction of what exists
 			it = _runningObjects.find(pGameObject);
-			if (it == _runningObjects.end()) {
-				throw "GameObject does not belong to GameObjectWorld.";
-			}
+			assert(it != _runningObjects.end());
 #endif
 
 			_destroyedObjects.insert(pGameObject);

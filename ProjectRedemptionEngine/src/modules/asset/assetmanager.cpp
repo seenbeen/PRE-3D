@@ -4,6 +4,10 @@
 #include <string>
 #include <unordered_map>
 
+#ifdef __PRE_DEBUG__
+#include <assert.h>
+#endif
+
 namespace PRE
 {
 	namespace AssetModule
@@ -40,10 +44,7 @@ namespace PRE
 				auto pEntry = it->second;
 
 #ifdef __PRE_DEBUG__
-				if (pEntry->refCount != 0)
-				{
-					throw "Leaking resources";
-				}
+				assert(pEntry->refCount == 0);
 #endif
 
 				pEntry->unloader(pEntry->unloaderArg, pEntry->payload);
@@ -62,20 +63,9 @@ namespace PRE
 			auto itEntry = _entriesAccess.find(key);
 
 #ifdef __PRE_DEBUG__
-			if (itEntry != _entriesAccess.end())
-			{
-				throw "Duplicate key detected";
-			}
-
-			if (payloadSize == 0)
-			{
-				throw "Cannot store payload of size 0";
-			}
-
-			if (payload == nullptr)
-			{
-				throw "Payload is nullptr";
-			}
+			assert(itEntry == _entriesAccess.end());
+			assert(payloadSize != 0);
+			assert(payload != nullptr);
 #endif
 
 			if (_capacity != 0)
@@ -84,10 +74,7 @@ namespace PRE
 				{
 
 #ifdef __PRE_DEBUG__
-					if (_evictionLRU.size() == 0)
-					{
-						throw "Not enough memory";
-					}
+					assert(_evictionLRU.size() != 0);
 #endif
 
 					auto pEntry = _evictionLRU.front();
@@ -136,10 +123,7 @@ namespace PRE
 			auto itEntry = _entriesAccess.find(key);
 
 #ifdef __PRE_DEBUG__
-			if (itEntry == _entriesAccess.end())
-			{
-				throw "Releasing unknown resource";
-			}
+			assert(itEntry != _entriesAccess.end());
 #endif
 
 			auto pEntry = itEntry->second;

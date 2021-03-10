@@ -4,6 +4,10 @@
 
 #include <glad/glad.h>
 
+#ifdef __PRE_DEBUG__
+#include <assert.h>
+#endif
+
 namespace PRE
 {
 	namespace RenderingModule
@@ -18,14 +22,14 @@ namespace PRE
 			glCompileShader(shaderId);
 
 #ifdef __PRE_DEBUG__
-			// check compile errors, throw on failure
+			// check compile errors
 			GLint success;
 			glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success);
 			if (!success)
 			{
 				GLchar infoLog[1024];
 				glGetShaderInfoLog(shaderId, 1024, NULL, infoLog);
-				throw string(infoLog);
+				assert(false);
 			}
 #endif
 

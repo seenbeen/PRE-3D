@@ -4,6 +4,10 @@
 
 #include <modules/gameobject/gameobjectcomponent.h>
 
+#ifdef __PRE_DEBUG__
+#include <assert.h>
+#endif
+
 namespace PRE
 {
 	namespace GameObjectModule
@@ -52,10 +56,7 @@ namespace PRE
 				auto& typeId = typeid(TGameObjectComponent);
 
 #ifdef __PRE_DEBUG__
-				if (_gameObjectComponents.find(typeId) != _gameObjectComponents.end())
-				{
-					throw "GameObjectComponent already exists.";
-				}
+				assert(_gameObjectComponents.find(typeId) == _gameObjectComponents.end());
 #endif
 
 				auto pNewComponent = new TGameObjectComponent();

@@ -9,6 +9,10 @@
 #include <modules/rendering/shader/rendervertexshader.h>
 #include <modules/rendering/shader/renderfragmentshader.h>
 
+#ifdef __PRE_DEBUG__
+#include <assert.h>
+#endif
+
 namespace PRE
 {
 	namespace RenderingModule
@@ -24,14 +28,14 @@ namespace PRE
 			glLinkProgram(programId);
 
 #ifdef __PRE_DEBUG__
-			// validate link status; just throw on failure
+			// validate link status
 			GLint success;
 			glGetProgramiv(programId, GL_LINK_STATUS, &success);
 			if (!success)
 			{
 				GLchar infoLog[1024];
 				glGetProgramInfoLog(programId, 1024, NULL, infoLog);
-				throw string(infoLog);
+				assert(false);
 			}
 #endif
 

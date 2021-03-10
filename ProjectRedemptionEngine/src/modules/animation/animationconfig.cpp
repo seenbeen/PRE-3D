@@ -39,10 +39,7 @@ namespace PRE
 					return config->channelName == channelName;
 				}
 			);
-			if (it != _animationChannelConfigs.end())
-			{
-				throw "Duplicate channel id detected";
-			}
+			assert(it == _animationChannelConfigs.end());
 #endif
 
 			auto pAnimationChannelConfig = new AnimationChannelConfig(

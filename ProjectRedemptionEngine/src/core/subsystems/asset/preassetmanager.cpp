@@ -30,6 +30,10 @@
 #include <core/subsystems/rendering/preboneconfig.h>
 #include <core/subsystems/rendering/preanimation.h>
 
+#ifdef __PRE_DEBUG__
+#include <assert.h>
+#endif
+
 namespace PRE
 {
 	namespace Core
@@ -82,12 +86,12 @@ namespace PRE
 			ifstream ifs;
 			ifs.open(filepath);
 
-#ifdef __PRE_DEBUG__
+
 			if (!ifs.is_open())
 			{
-				throw "Failed to open file";
+				throw std::exception((string("Failed to open ") + filepath).c_str());
 			}
-#endif
+
 
 			stringstream ss;
 			ss << ifs.rdbuf();
@@ -170,12 +174,10 @@ namespace PRE
 				aiProcess_OptimizeMeshes
 			);
 
-#ifdef __PRE_DEBUG__
 			if (aiScene == nullptr)
 			{
-				throw "Failed to load AssimpResource";
+				throw std::exception((string("Failed to load resource ") + filepath).c_str());
 			}
-#endif
 
 			vector<glm::ivec4> vVertexBoneInfluenceIndices;
 			vector<glm::vec4> vVertexBoneInfluenceWeights;
@@ -443,10 +445,7 @@ namespace PRE
 					string boneName(pBone->mName.C_Str());
 
 #ifdef __PRE_DEBUG__
-					if (boneMap.find(boneName) != boneMap.end())
-					{
-						throw "Duplicate bones";
-					}
+					assert(boneMap.find(boneName) == boneMap.end());
 #endif
 
 					boneMap.insert(
@@ -526,26 +525,11 @@ namespace PRE
 		PREAssetManager::Impl::~Impl()
 		{
 #ifdef __PRE_DEBUG__
-			if (shaders.size() > 0)
-			{
-				throw "Leak";
-			}
-			if (textures.size() > 0)
-			{
-				throw "Leak";
-			}
-			if (meshes.size() > 0)
-			{
-				throw "Leak";
-			}
-			if (skeletons.size() > 0)
-			{
-				throw "Leak";
-			}
-			if (animations.size() > 0)
-			{
-				throw "Leak";
-			}
+			assert(shaders.size() == 0);
+			assert(textures.size() == 0);
+			assert(meshes.size() == 0);
+			assert(skeletons.size() == 0);
+			assert(animations.size() == 0);
 #endif
 			delete &assetManager;
 		}

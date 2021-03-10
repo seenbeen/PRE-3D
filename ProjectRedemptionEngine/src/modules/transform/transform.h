@@ -7,6 +7,10 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
+#ifdef __PRE_DEBUG__
+#include <assert.h>
+#endif
+
 namespace PRE
 {
 	namespace TransformModule
@@ -59,12 +63,9 @@ namespace PRE
 			void SetParent(Transform* transform, bool worldPositionStays)
 			{
 #ifdef __PRE_DEBUG__
-				if (transform == this)
-				{
-					throw "Cannot set Parent to self.";
-				}
-				else
+				assert(transform != this);
 #endif
+
 				if (transform == _parentTransform)
 				{
 					return;

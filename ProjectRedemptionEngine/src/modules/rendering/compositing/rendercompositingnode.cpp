@@ -5,6 +5,10 @@
 #include <modules/rendering/compositing/rendercompositingtarget.h>
 #include <modules/rendering/model/rendertexture.h>
 
+#ifdef __PRE_DEBUG__
+#include <assert.h>
+#endif
+
 namespace PRE
 {
 	namespace RenderingModule
@@ -52,10 +56,7 @@ namespace PRE
 
 #ifdef __PRE_DEBUG__
 			auto it = _impl.compositingNodeDependencies.find(pCompositingNode);
-			if (it != _impl.compositingNodeDependencies.end())
-			{
-				throw "duplicate CompositingNode dependency detected";
-			}
+			assert(it == _impl.compositingNodeDependencies.end());
 #endif
 
 			_impl.compositingNodeDependencies.insert(pCompositingNode);
@@ -67,10 +68,7 @@ namespace PRE
 			auto it = _impl.compositingNodeDependencies.find(pCompositingNode);
 
 #ifdef __PRE_DEBUG__
-			if (it == _impl.compositingNodeDependencies.end())
-			{
-				throw "cannot remove unknown CompositingNode dependency";
-			}
+			assert(it != _impl.compositingNodeDependencies.end());
 #endif
 
 			_impl.compositingNodeDependencies.erase(it);

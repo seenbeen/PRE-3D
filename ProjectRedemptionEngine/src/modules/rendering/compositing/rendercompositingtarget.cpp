@@ -4,6 +4,10 @@
 
 #include <modules/rendering/model/rendertexture.h>
 
+#ifdef __PRE_DEBUG__
+#include <assert.h>
+#endif
+
 namespace PRE
 {
 	namespace RenderingModule
@@ -46,10 +50,7 @@ namespace PRE
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
 
 #ifdef __PRE_DEBUG__
-			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-			{
-				throw "Failed to make framebuffer :<";
-			}
+			assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 #endif
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
