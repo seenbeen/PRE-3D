@@ -450,11 +450,10 @@ namespace PRE
 		}
 
 		RenderSkeleton& Renderer::AllocateSkeleton(
-			const string& rootBone,
-			const vector<RenderSkeleton::BoneConfig>& bones
+			const RenderSkeleton::BoneConfig& rootBone
 		)
 		{
-			auto pSkeleton = new RenderSkeleton(rootBone, bones);
+			auto pSkeleton = new RenderSkeleton(rootBone);
 
 #ifdef __PRE_DEBUG__
 			_skeletons.insert(pSkeleton);

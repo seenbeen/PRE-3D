@@ -32,6 +32,10 @@ protected:
             GetAssetManager().rootAssetPath + meshPath
         );
 
+        _pSkeleton = &GetAssetManager().LoadSkeleton(
+            GetAssetManager().rootAssetPath + meshPath
+        );
+
         _pDiffuseTexture = &GetAssetManager().LoadTexture(
             GetAssetManager().rootAssetPath + diffusePath
         );
@@ -76,6 +80,7 @@ protected:
         std::cout << "Destroy!" << std::endl;
         GetRendering().DestroyShader(*_pShader);
         GetRendering().DestroyMesh(*_pMesh);
+        GetRendering().DestroySkeleton(*_pSkeleton);
         GetRendering().DestroyTexture(*_pDiffuseTexture);
         GetRendering().DestroyTexture(*_pEmissionTexture);
         GetRendering().DestroyTexture(*_pNormalTexture);
@@ -87,6 +92,7 @@ private:
     PRETransformComponent* _transform = nullptr;
     PREShader* _pShader = nullptr;
     PREMesh* _pMesh = nullptr;
+    PRESkeleton* _pSkeleton = nullptr;
     PRETexture* _pDiffuseTexture = nullptr;
     PRETexture* _pEmissionTexture = nullptr;
     PRETexture* _pNormalTexture = nullptr;

@@ -117,8 +117,7 @@ namespace PRE
 			void DeallocateMesh(RenderMesh& mesh);
 
 			RenderSkeleton& AllocateSkeleton(
-				const string& rootBone,
-				const vector<RenderSkeleton::BoneConfig>& bones
+				const RenderSkeleton::BoneConfig& rootBone
 			);
 			void DeallocateSkeleton(RenderSkeleton& skeleton);
 

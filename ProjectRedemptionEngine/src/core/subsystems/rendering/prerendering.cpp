@@ -1,5 +1,7 @@
 #include <core/subsystems/rendering/prerendering.h>
 
+#include <vector>
+
 #include <include/modules/rendering.h>
 #include <include/modules/animation.h>
 
@@ -17,6 +19,7 @@
 #include <core/subsystems/rendering/preshader.h>
 #include <core/subsystems/rendering/premesh.h>
 #include <core/subsystems/rendering/preskeleton.h>
+#include <core/subsystems/rendering/preboneconfig.h>
 #include <core/subsystems/rendering/pretexture.h>
 #include <core/subsystems/rendering/prematerial.h>
 #include <core/subsystems/rendering/preanimation.h>
@@ -30,6 +33,8 @@ namespace PRE
 		using PRE::RenderingModule::RenderModel;
 
 		using PRE::AnimationModule::Animation;
+
+		using std::vector;
 
 		PRERendering::Impl& PRERendering::Impl::MakeImpl(
 			PREApplicationContext& applicationContext,
@@ -164,9 +169,17 @@ namespace PRE
 			delete &mesh;
 		}
 
-		PRESkeleton& PRERendering::CreateSkeleton()
+		PRESkeleton& PRERendering::CreateSkeleton(
+			const PREBoneConfig& rootBoneConfig
+		)
 		{
-			//return *(new PRESkeleton(_impl.renderer.AllocateSkeleton()));
+			return *(
+				new PRESkeleton(
+					_impl.renderer.AllocateSkeleton(
+						rootBoneConfig._boneConfig
+					)
+				)
+			);
 		}
 
 		void PRERendering::DestroySkeleton(PRESkeleton& skeleton)

@@ -1,6 +1,5 @@
 #include <modules/rendering/model/renderskeleton.h>
 
-#include <algorithm>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -18,128 +17,75 @@ namespace PRE
 		using std::vector;
 
 		RenderSkeleton::Impl& RenderSkeleton::Impl::MakeImpl(
-			const string& rootBone,
-			const vector<BoneConfig>& boneConfigs
+			const BoneConfig& rootBoneConfig
 		)
 		{
-			int boneCounter = 0;
-			int maxVertexIndex = -1;
-
 			unordered_map<string, Bone*> bones;
-			for (auto it = boneConfigs.begin(); it != boneConfigs.end(); ++it)
+			auto& rootBone = MakeImplRecurse(rootBoneConfig, bones);
+			return *(new Impl(rootBone, bones));
+		}
+
+		RenderSkeleton::Bone& RenderSkeleton::Impl::MakeImplRecurse(
+			const BoneConfig& config,
+			unordered_map<string, Bone*> bones
+		)
+		{
+			vector<Bone*> children;
+			for (auto it = config._children.begin(); it != config._children.end(); ++it)
 			{
-				bones[it->_name] = new Bone(
-					boneCounter++,
-					it->_children,
-					it->_bindPos
-				);
-				maxVertexIndex = std::max(
-					maxVertexIndex,
-					std::max_element(
-						it->_vertexInfluences.begin(),
-						it->_vertexInfluences.end(),
-						[](const pair<int, float>& a, const pair<int, float>& b)
-						{
-							return a.first < b.first;
-						}
-					)->first
-				);
+				children.push_back(&MakeImplRecurse(**it, bones));
 			}
+			
+			auto pBone = new Bone(config._id, children, config._bindPos);
 
-			auto nVertices = maxVertexIndex + 1;
+			bones[config._name] = pBone;
 
-			vector<glm::ivec4> vertexBoneInfluenceIndices(
-				nVertices,
-				glm::ivec4(-1, -1, -1, -1)
-			);
-			vector<glm::vec4> vertexBoneInfluenceWeights(
-				nVertices,
-				glm::vec4(0, 0, 0, 0)
-			);
+			return *pBone;
+		}
 
-			for (
-				auto itBone = boneConfigs.begin();
-				itBone != boneConfigs.end();
-				++itBone
-			)
+		void RenderSkeleton::Impl::DestroyImplRecurse(const Bone& bone)
+		{
+			for (auto it = bone.children.begin(); it != bone.children.end(); ++it)
 			{
-				for (
-					auto itInfluence = itBone->_vertexInfluences.begin();
-					itInfluence != itBone->_vertexInfluences.end();
-					++itInfluence
-				)
-				{
-					auto &indices = vertexBoneInfluenceIndices[itInfluence->first];
-					auto &weights = vertexBoneInfluenceWeights[itInfluence->first];
-
-#ifdef __PRE_DEBUG__
-					if (indices[3] != -1)
-					{
-						throw "More than 4 vertex influences unsupported";
-					}
-#endif
-
-					for (auto i = 3; i > -1; --i)
-					{
-						if (indices[i] != -1)
-						{
-							indices[i] = bones[itBone->_name]->id;
-							weights[i] = itInfluence->second;
-						}
-					}
-				}
+				DestroyImplRecurse(**it);
 			}
-
-			return *(new Impl(
-				rootBone,
-				bones,
-				vertexBoneInfluenceIndices,
-				vertexBoneInfluenceWeights
-			));
+			delete &bone;
 		}
 
 		RenderSkeleton::Impl::Impl(
-			const string& rootBone,
-			unordered_map<string, Bone*>& bones,
-			vector<glm::ivec4>& vertexBoneInfluenceIndices,
-			vector<glm::vec4>& vertexBoneInfluenceWeights
+			const Bone& rootBone,
+			unordered_map<string, Bone*>& bones
 		)
 			:
 			rootBone(rootBone),
-			bones(std::move(bones)),
-			vertexBoneInfluenceIndices(std::move(vertexBoneInfluenceIndices)),
-			vertexBoneInfluenceWeights(std::move(vertexBoneInfluenceWeights)) {}
+			bones(std::move(bones)) {}
 
 		RenderSkeleton::Impl::~Impl()
 		{
-			for (auto it = bones.begin(); it != bones.end(); ++it)
-			{
-				delete it->second;
-			}
+			DestroyImplRecurse(rootBone);
 		}
 
 		void RenderSkeleton::Impl::GetCurrentStateRecurse(
-			const string currentBoneName,
+			const Bone& currentBone,
 			const glm::mat4& parentTransform,
 			vector<glm::mat4>& result
 		)
 		{
-			auto pCurrentBone = bones.find(currentBoneName)->second;
-			auto currentTransform = parentTransform * pCurrentBone->localMatrix;
-			result[pCurrentBone->id] = currentTransform * pCurrentBone->bindPos;
+			auto currentTransform = parentTransform * currentBone.localMatrix;
+			result[currentBone.id] = currentTransform * currentBone.bindPos;
 			for (
-				auto it = pCurrentBone->children.begin();
-				it != pCurrentBone->children.end();
+				auto it = currentBone.children.begin();
+				it != currentBone.children.end();
 				++it
 			)
 			{
-				GetCurrentStateRecurse(*it, currentTransform, result);
+				GetCurrentStateRecurse(**it, currentTransform, result);
 			}
 		}
 
 		RenderSkeleton::Bone::Bone(
 			int id,
-			const vector<string>& children,
+			const vector<Bone*>& children,
 			const glm::mat4& bindPos
 		)
 			:
@@ -149,24 +95,18 @@ namespace PRE
 			localMatrix() {}
 
 		RenderSkeleton::BoneConfig::BoneConfig(
+			unsigned int it,
 			const string& name,
 			const glm::mat4& bindPos
 		)
 			:
+			_id(it),
 			_name(name),
 			_bindPos(bindPos) {}
 
-		void RenderSkeleton::BoneConfig::AddChild(const string& child)
+		void RenderSkeleton::BoneConfig::AddChild(const BoneConfig& child)
 		{
-			_children.push_back(child);
-		}
-
-		void RenderSkeleton::BoneConfig::AddVertexInfluence(
-			int vertexId,
-			float weight
-		)
-		{
-			_vertexInfluences.push_back(std::make_pair(vertexId, weight));
+			_children.push_back(&child);
 		}
 
 		void RenderSkeleton::SetBoneLocalMatrix(
@@ -181,22 +121,9 @@ namespace PRE
 			}
 		}
 
-		const vector<glm::ivec4>& RenderSkeleton::GetVertexBoneInfluenceIndices()
-		{
-			return _impl.vertexBoneInfluenceIndices;
-		}
-
-		const vector<glm::vec4>& RenderSkeleton::GetVertexBoneInfluenceWeights()
-		{
-			return _impl.vertexBoneInfluenceWeights;
-		}
-
-		RenderSkeleton::RenderSkeleton(
-			const string& rootBone,
-			const vector<BoneConfig>& bones
-		)
+		RenderSkeleton::RenderSkeleton(const BoneConfig& rootBoneConfig)
 			:
-			_impl(Impl::MakeImpl(rootBone, bones)) {}
+			_impl(Impl::MakeImpl(rootBoneConfig)) {}
 
 		RenderSkeleton::~RenderSkeleton()
 		{

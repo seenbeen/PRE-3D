@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -22,10 +23,12 @@ namespace PRE
 
 		class PREShader;
 		class PREMesh;
+		class PREBoneConfig;
 		class PRESkeleton;
 		class PRETexture;
 		class PREAnimation;
 
+		using std::pair;
 		using std::string;
 		using std::unordered_map;
 		using std::vector;
@@ -106,7 +109,7 @@ namespace PRE
 
 				const unsigned int width;
 				const unsigned int height;
-				const unsigned char* data;
+				const unsigned char *const data;
 
 				~ImageResource() override;
 
@@ -130,15 +133,17 @@ namespace PRE
 				~AssimpResource() override;
 
 				const unsigned int nVertices;
-				const glm::vec3* vertices;
-				const glm::vec3* normals;
-				const glm::vec3* tangents;
-				const glm::vec3* biTangents;
-				const glm::vec2* uvs;
-				const glm::ivec4* vertexBoneInfluenceIndices;
-				const glm::vec4* vertexBoneInfluenceWeights;
+				const glm::vec3* const vertices;
+				const glm::vec3* const normals;
+				const glm::vec3* const tangents;
+				const glm::vec3* const biTangents;
+				const glm::vec2* const uvs;
+				const glm::ivec4* const vertexBoneInfluenceIndices;
+				const glm::vec4* const vertexBoneInfluenceWeights;
 				const unsigned int nTriangleElements;
 				const unsigned int* triangleElements;
+
+				const PREBoneConfig& rootBoneConfig;
 
 				size_t GetSize() override;
 
@@ -154,7 +159,19 @@ namespace PRE
 					vector<glm::vec2>& uvs,
 					vector<glm::ivec4>& vertexBoneInfluenceIndices,
 					vector<glm::vec4>& vertexBoneInfluenceWeights,
-					vector<unsigned int>& triangleElements
+					vector<unsigned int>& triangleElements,
+					unsigned int& boneCount,
+					unordered_map<string, pair<aiBone*, unsigned int>>& boneMap,
+					PREBoneConfig*& generatedBoneConfig
+				);
+
+				static void GenerateBoneMap(
+					aiMesh** pMeshes,
+					aiNode* pCurrentNode,
+					vector<glm::ivec4>& vertexBoneInfluenceIndices,
+					vector<glm::vec4>& vertexBoneInfluenceWeights,
+					unsigned int& vertexOffset,
+					unordered_map<string, pair<aiBone*, unsigned int>>& boneMap
 				);
 
 				AssimpResource(
@@ -167,7 +184,8 @@ namespace PRE
 					const glm::ivec4* vertexBoneInfluenceIndices,
 					const glm::vec4* vertexBoneInfluenceWeights,
 					unsigned int nTriangleElements,
-					const unsigned int* triangleElements
+					const unsigned int* triangleElements,
+					const PREBoneConfig& rootBoneConfig
 				);
 			};
 #pragma endregion

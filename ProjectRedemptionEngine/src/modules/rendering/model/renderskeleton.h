@@ -41,25 +41,26 @@ namespace PRE
 
 			private:
 				static Impl& MakeImpl(
-					const string& rootBone,
-					const vector<BoneConfig>& boneConfigs
+					const BoneConfig& rootBoneConfig
 				);
 
-				const string rootBone;
+				static Bone& MakeImplRecurse(
+					const BoneConfig& config,
+					unordered_map<string, Bone*> bones
+				);
+				static void DestroyImplRecurse(const Bone& bone);
+
+				const Bone& rootBone;
 				const unordered_map<string, Bone*> bones;
-				const vector<glm::ivec4> vertexBoneInfluenceIndices;
-				const vector<glm::vec4> vertexBoneInfluenceWeights;
 
 				Impl(
-					const string& rootBone,
-					unordered_map<string, Bone*>& bones,
-					vector<glm::ivec4>& vertexBoneInfluenceIndices,
-					vector<glm::vec4>& vertexBoneInfluenceWeights
+					const Bone& rootBone,
+					unordered_map<string, Bone*>& bones
 				);
 				~Impl();
 
 				void GetCurrentStateRecurse(
-					const string currentBoneName,
+					const Bone& currentBone,
 					const glm::mat4& parentTransform,
 					vector<glm::mat4>& result
 				);
@@ -71,13 +72,13 @@ namespace PRE
 				Bone(const Bone&) = delete;
 
 				const int id;
-				const vector<string> children;
+				const vector<Bone*> children;
 				const glm::mat4 bindPos;
 				glm::mat4 localMatrix;
 
 				Bone(
 					int id,
-					const vector<string>& children,
+					const vector<Bone*>& children,
 					const glm::mat4& bindPos
 				);
 			};
@@ -87,27 +88,23 @@ namespace PRE
 			{
 				friend class Impl;
 
+				const unsigned int _id;
 				const string _name;
 				const glm::mat4 _bindPos;
-				vector<string> _children;
-				vector<pair<int, float>> _vertexInfluences;
+				vector<const BoneConfig*> _children;
 
 			public:
-				BoneConfig(const string& name, const glm::mat4& bindPos);
+				BoneConfig(unsigned int id, const string& name, const glm::mat4& bindPos);
 
-				void AddChild(const string& child);
-				void AddVertexInfluence(int vertexId, float weight);
+				void AddChild(const BoneConfig& child);
 			};
 
 			void SetBoneLocalMatrix(const string bone, const glm::mat4& localMatrix);
 
-			const vector<glm::ivec4>& GetVertexBoneInfluenceIndices();
-			const vector<glm::vec4>& GetVertexBoneInfluenceWeights();
-
 		private:
 			Impl& _impl;
 
-			RenderSkeleton(const string& rootBone, const vector<BoneConfig>& bones);
+			RenderSkeleton(const BoneConfig& rootBoneConfig);
 			~RenderSkeleton();
 
 			void GetCurrentState(vector<glm::mat4>& result);

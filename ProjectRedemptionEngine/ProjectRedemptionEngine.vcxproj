@@ -27,6 +27,7 @@
     <ClCompile Include="src\core\subsystems\input\preinputconfig.cpp" />
     <ClCompile Include="src\core\subsystems\physics\prephysics.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\preanimation.cpp" />
+    <ClCompile Include="src\core\subsystems\rendering\preboneconfig.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\prematerial.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\premesh.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\prerendering.cpp" />
@@ -82,6 +83,7 @@
     <ClInclude Include="src\core\subsystems\physics\prephysics.h" />
     <ClInclude Include="src\core\subsystems\rendering\preanimation.h" />
     <ClInclude Include="src\core\subsystems\rendering\preanimator.h" />
+    <ClInclude Include="src\core\subsystems\rendering\preboneconfig.h" />
     <ClInclude Include="src\core\subsystems\rendering\prematerial.h" />
     <ClInclude Include="src\core\subsystems\rendering\premesh.h" />
     <ClInclude Include="src\core\subsystems\rendering\prerendering.h" />

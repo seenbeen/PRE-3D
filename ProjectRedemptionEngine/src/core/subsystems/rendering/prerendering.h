@@ -19,6 +19,7 @@ namespace PRE
 		class PREShader;
 		class PREMesh;
 		class PRESkeleton;
+		class PREBoneConfig;
 		class PRETexture;
 		class PREMaterial;
 		class PREAnimation;
@@ -88,7 +89,9 @@ namespace PRE
 			);
 			void DestroyMesh(PREMesh& mesh);
 
-			PRESkeleton& CreateSkeleton();
+			PRESkeleton& CreateSkeleton(
+				const PREBoneConfig& rootBoneConfig
+			);
 			void DestroySkeleton(PRESkeleton& skeleton);
 
 			PREAnimation& CreateAnimation();

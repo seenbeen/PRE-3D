@@ -5,9 +5,11 @@
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -25,6 +27,7 @@
 #include <core/subsystems/rendering/pretexture.h>
 #include <core/subsystems/rendering/premesh.h>
 #include <core/subsystems/rendering/preskeleton.h>
+#include <core/subsystems/rendering/preboneconfig.h>
 #include <core/subsystems/rendering/preanimation.h>
 
 namespace PRE
@@ -32,6 +35,7 @@ namespace PRE
 	namespace Core
 	{
 		using std::ifstream;
+		using std::pair;
 		using std::string;
 		using std::stringstream;
 		using std::unordered_map;
@@ -171,14 +175,28 @@ namespace PRE
 			}
 #endif
 
+			vector<glm::ivec4> vVertexBoneInfluenceIndices;
+			vector<glm::vec4> vVertexBoneInfluenceWeights;
+			unsigned int vertexOffset = 0;
+			unordered_map<string, pair<aiBone*, unsigned int>> boneMap;
+
+			AssimpResource::GenerateBoneMap(
+				aiScene->mMeshes,
+				aiScene->mRootNode,
+				vVertexBoneInfluenceIndices,
+				vVertexBoneInfluenceWeights,
+				vertexOffset,
+				boneMap
+			);
+
 			vector<glm::vec3> vVertices;
 			vector<glm::vec3> vNormals;
 			vector<glm::vec3> vTangents;
 			vector<glm::vec3> vBiTangents;
 			vector<glm::vec2> vUvs;
-			vector<glm::ivec4> vVertexBoneInfluenceIndices;
-			vector<glm::vec4> vVertexBoneInfluenceWeights;
 			vector<unsigned int> vTriangleElements;
+			unsigned int boneCount = 0;
+			PREBoneConfig* pRootBoneConfig;
 
 			AssimpResource::RecurseMesh(
 				aiScene->mMeshes,
@@ -191,7 +209,10 @@ namespace PRE
 				vUvs,
 				vVertexBoneInfluenceIndices,
 				vVertexBoneInfluenceWeights,
-				vTriangleElements
+				vTriangleElements,
+				boneCount,
+				boneMap,
+				pRootBoneConfig
 			);
 
 			auto nVertices = vVertices.size();
@@ -212,6 +233,20 @@ namespace PRE
 			auto uvs = new glm::vec2[nVertices];
 			std::memcpy(uvs, &vUvs[0], nVertices * sizeof(glm::vec2));
 			
+			auto vertexBoneInfluenceIndices = new glm::ivec4[nVertices];
+			std::memcpy(
+				vertexBoneInfluenceIndices,
+				&vVertexBoneInfluenceIndices[0],
+				nVertices * sizeof(glm::ivec4)
+			);
+
+			auto vertexBoneInfluenceWeights = new glm::vec4[nVertices];
+			std::memcpy(
+				vertexBoneInfluenceWeights,
+				&vVertexBoneInfluenceWeights[0],
+				nVertices * sizeof(glm::vec4)
+			);
+
 			auto triangleElements = new unsigned int[nTriangleElements];
 			std::memcpy(triangleElements, &vTriangleElements[0], nTriangleElements * sizeof(unsigned int));
 
@@ -222,10 +257,11 @@ namespace PRE
 				tangents,
 				biTangents,
 				uvs,
-				nullptr,
-				nullptr,
+				vertexBoneInfluenceIndices,
+				vertexBoneInfluenceWeights,
 				nTriangleElements,
-				triangleElements
+				triangleElements,
+				*pRootBoneConfig
 			);
 		}
 
@@ -239,6 +275,7 @@ namespace PRE
 			delete[] vertexBoneInfluenceIndices;
 			delete[] vertexBoneInfluenceWeights;
 			delete[] triangleElements;
+			delete &rootBoneConfig;
 		}
 
 		size_t PREAssetManager::AssimpResource::GetSize()
@@ -250,7 +287,7 @@ namespace PRE
 					sizeof(glm::vec2) +
 					sizeof(glm::ivec4) +
 					sizeof(glm::vec4)
-				);
+				); // + sizeof preboneconfigs... whatever for now...
 		}
 
 		void PREAssetManager::AssimpResource::RecurseMesh(
@@ -264,15 +301,57 @@ namespace PRE
 			vector<glm::vec2>& uvs,
 			vector<glm::ivec4>& vertexBoneInfluenceIndices,
 			vector<glm::vec4>& vertexBoneInfluenceWeights,
-			vector<unsigned int>& triangleElements
+			vector<unsigned int>& triangleElements,
+			unsigned int& boneCount,
+			unordered_map<string, pair<aiBone*, unsigned int>>& boneMap,
+			PREBoneConfig* & generatedBoneConfig
 		)
 		{
+			string currentNodeName(pCurrentNode->mName.C_Str());
 			auto currentTransform = pCurrentNode->mTransformation * localSpace;
 			auto currentTransformRotation = aiMatrix3x3(currentTransform);
 
+			auto itPBone = boneMap.find(currentNodeName);
+			auto bindPos = aiMatrix4x4();
+			if (itPBone != boneMap.end())
+			{
+				auto pBone = itPBone->second.first;
+				bindPos = pCurrentNode->mTransformation.Inverse() * pBone->mOffsetMatrix;
+				auto vertexOffset = itPBone->second.second;
+				for (auto k = 0u; k < pBone->mNumWeights; ++k)
+				{
+					auto& weight = pBone->mWeights[k];
+					auto vertexIndex = vertexOffset + weight.mVertexId;
+					auto& indices = vertexBoneInfluenceIndices[vertexIndex];
+					auto& weights = vertexBoneInfluenceWeights[vertexIndex];
+
+#ifdef __PRE_DEBUG__
+					if (indices[3] != -1)
+					{
+						throw "More than 4 vertex influences unsupported";
+					}
+#endif
+
+					for (auto i = 3; i > -1; --i)
+					{
+						if (indices[i] != -1)
+						{
+							indices[i] = boneCount;
+							weights[i] = weight.mWeight;
+						}
+					}
+				}
+			}
+
+			generatedBoneConfig = new PREBoneConfig(
+				boneCount++,
+				currentNodeName,
+				glm::transpose(glm::make_mat4(&bindPos.a1))
+			);
+
 			for (auto i = 0u; i < pCurrentNode->mNumMeshes; ++i)
 			{
-				auto vertexOffset = (unsigned int)vertices.size();
+				size_t vertexOffset = vertices.size();
 				auto pMesh = pMeshes[pCurrentNode->mMeshes[i]];
 				for (auto j = 0u; j < pMesh->mNumVertices; ++j)
 				{
@@ -294,13 +373,14 @@ namespace PRE
 					auto& face = pMesh->mFaces[j];
 					for (auto k = 0u; k < face.mNumIndices; ++k)
 					{
-						triangleElements.push_back(vertexOffset + face.mIndices[k]);
+						triangleElements.push_back((unsigned int)vertexOffset + face.mIndices[k]);
 					}
 				}
 			}
 
 			for (auto i = 0u; i < pCurrentNode->mNumChildren; ++i)
 			{
+				PREBoneConfig* generatedChildConfig = nullptr;
 				RecurseMesh(
 					pMeshes,
 					pCurrentNode->mChildren[i],
@@ -312,7 +392,69 @@ namespace PRE
 					uvs,
 					vertexBoneInfluenceIndices,
 					vertexBoneInfluenceWeights,
-					triangleElements
+					triangleElements,
+					boneCount,
+					boneMap,
+					generatedChildConfig
+				);
+				generatedBoneConfig->AddChild(*generatedChildConfig);
+			}
+		}
+
+		void PREAssetManager::AssimpResource::GenerateBoneMap(
+			aiMesh** pMeshes,
+			aiNode* pCurrentNode,
+			vector<glm::ivec4>& vertexBoneInfluenceIndices,
+			vector<glm::vec4>& vertexBoneInfluenceWeights,
+			unsigned int& vertexOffset,
+			unordered_map<string, pair<aiBone*, unsigned int>>& boneMap
+		)
+		{
+			for (auto i = 0u; i < pCurrentNode->mNumMeshes; ++i)
+			{
+				auto pMesh = pMeshes[pCurrentNode->mMeshes[i]];
+
+				for (auto j = 0u; j < pMesh->mNumVertices; ++j)
+				{
+					vertexBoneInfluenceIndices.push_back(glm::ivec4(-1, -1, -1, -1));
+					vertexBoneInfluenceWeights.push_back(glm::vec4(0, 0, 0, 0));
+				}
+
+				for (auto j = 0u; j < pMesh->mNumBones; ++j)
+				{
+					auto& pBone = pMesh->mBones[j];
+					string boneName(pBone->mName.C_Str());
+
+#ifdef __PRE_DEBUG__
+					if (boneMap.find(boneName) != boneMap.end())
+					{
+						throw "Duplicate bones";
+					}
+#endif
+
+					boneMap.insert(
+						std::make_pair(
+							boneName,
+							std::make_pair(
+								pBone,
+								vertexOffset
+							)
+						)
+					);
+				}
+
+				vertexOffset += pMesh->mNumVertices;
+			}
+
+			for (auto i = 0u; i < pCurrentNode->mNumChildren; ++i)
+			{
+				GenerateBoneMap(
+					pMeshes,
+					pCurrentNode->mChildren[i],
+					vertexBoneInfluenceIndices,
+					vertexBoneInfluenceWeights,
+					vertexOffset,
+					boneMap
 				);
 			}
 		}
@@ -327,7 +469,8 @@ namespace PRE
 			const glm::ivec4* vertexBoneInfluenceIndices,
 			const glm::vec4* vertexBoneInfluenceWeights,
 			unsigned int nTriangleElements,
-			const unsigned int* triangleElements
+			const unsigned int* triangleElements,
+			const PREBoneConfig& rootBoneConfig
 		)
 			:
 			nVertices(nVertices),
@@ -339,7 +482,8 @@ namespace PRE
 			vertexBoneInfluenceIndices(vertexBoneInfluenceIndices),
 			vertexBoneInfluenceWeights(vertexBoneInfluenceWeights),
 			nTriangleElements(nTriangleElements),
-			triangleElements(triangleElements) {}
+			triangleElements(triangleElements),
+			rootBoneConfig(rootBoneConfig) {}
 #pragma endregion
 
 		PREAssetManager::Impl& PREAssetManager::Impl::MakeImpl(
@@ -491,7 +635,34 @@ namespace PRE
 
 		PRESkeleton& PREAssetManager::LoadSkeleton(const string& skeletonPath)
 		{
+			auto vAssimpResource = _impl.assetManager.Get(skeletonPath);
+			if (vAssimpResource == nullptr)
+			{
+				auto pAssimpResource = AssimpResource::Load(
+					_impl.assimp,
+					skeletonPath
+				);
 
+				_impl.assetManager.Store(
+					skeletonPath,
+					pAssimpResource->GetSize(),
+					pAssimpResource,
+					UnloadResourceData,
+					nullptr
+				);
+
+				return LoadSkeleton(skeletonPath);
+			}
+
+			auto& assimpResource = *static_cast<AssimpResource*>(vAssimpResource);
+
+			auto& skeleton = _impl.applicationContext.rendering.CreateSkeleton(
+				assimpResource.rootBoneConfig
+			);
+
+			_impl.skeletons[&skeleton] = new SkeletonEntry(skeletonPath);
+
+			return skeleton;
 		}
 
 		PREAnimation& PREAssetManager::LoadAnimation(const string& animationPath)
