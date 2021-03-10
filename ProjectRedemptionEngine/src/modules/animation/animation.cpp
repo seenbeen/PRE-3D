@@ -43,7 +43,7 @@ namespace PRE
 			:
 			ticksPerSecond(ticksPerSecond),
 			duration(duration),
-			channels(std::move(channels)) {}
+			channels(channels) {}
 
 		Animation::Impl::~Impl()
 		{

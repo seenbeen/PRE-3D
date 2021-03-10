@@ -63,7 +63,7 @@ namespace PRE
 		)
 			:
 			rootBone(rootBone),
-			bones(std::move(bones)) {}
+			bones(bones) {}
 
 		RenderSkeleton::Impl::~Impl()
 		{

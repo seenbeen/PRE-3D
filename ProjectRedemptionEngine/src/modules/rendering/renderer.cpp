@@ -546,7 +546,7 @@ namespace PRE
 
 #ifdef __PRE_DEBUG__
 			_models.insert(pModel);
-			_modelTagGroups[pModel] = std::move(unordered_set<unsigned int>());
+			_modelTagGroups[pModel];
 #endif
 
 			return *pModel;
@@ -631,7 +631,7 @@ namespace PRE
 				throw "Tag group already exists";
 			}
 #endif
-			_tagGroups[tagGroup] = std::move(unordered_set<RenderModel*>());
+			_tagGroups[tagGroup];
 		}
 
 		void Renderer::AddModelToTagGroup(RenderModel& model, unsigned int tagGroup)
@@ -699,7 +699,7 @@ namespace PRE
 			_window(window),
 			_glContext(glContext)
 		{
-			_tagGroups[ROOT_TAG_GROUP] = std::move(unordered_set<RenderModel*>());
+			_tagGroups[ROOT_TAG_GROUP];
 		}
 
 		Renderer::~Renderer()

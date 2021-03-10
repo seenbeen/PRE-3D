@@ -213,6 +213,7 @@ copy /Y "$(SolutionDir)Deps\assimp\lib\x64\assimp-vc142-mt.dll" "$(SolutionDir)B
       <PreprocessorDefinitions>__PRE_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>Default</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

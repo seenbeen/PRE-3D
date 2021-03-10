@@ -85,7 +85,7 @@ namespace PRE
 #pragma region Resources
 			struct ResourceBase
 			{
-				virtual ~ResourceBase() {};
+				virtual ~ResourceBase() = 0;
 				virtual size_t GetSize() = 0;
 			};
 
@@ -100,7 +100,7 @@ namespace PRE
 				size_t GetSize() override;
 
 			private:
-				StringResource(string&& payload);
+				StringResource(const string& payload);
 			};
 
 			struct ImageResource : public ResourceBase
@@ -161,7 +161,8 @@ namespace PRE
 					vector<unsigned int>& triangleElements,
 					unsigned int& boneCount,
 					unordered_map<string, pair<aiBone*, unsigned int>>& boneMap,
-					PREBoneConfig*& generatedBoneConfig
+					PREBoneConfig*& generatedBoneConfig,
+					vector<PREBoneConfig*>& allBoneConfigs
 				);
 
 				static void GenerateBoneMap(
@@ -173,8 +174,11 @@ namespace PRE
 					unordered_map<string, pair<aiBone*, unsigned int>>& boneMap
 				);
 
+				const unsigned int _nBoneConfigs;
+				const PREBoneConfig* const * _allBoneConfigs;
+
 				AssimpResource(
-					const unsigned int nVertices,
+					unsigned int nVertices,
 					const glm::vec3* vertices,
 					const glm::vec3* normals,
 					const glm::vec3* tangents,
@@ -184,7 +188,9 @@ namespace PRE
 					const glm::vec4* vertexBoneInfluenceWeights,
 					unsigned int nTriangleElements,
 					const unsigned int* triangleElements,
-					const PREBoneConfig& rootBoneConfig
+					const PREBoneConfig& rootBoneConfig,
+					unsigned int nBoneConfigs,
+					const PREBoneConfig* const * allBoneConfigs
 				);
 			};
 #pragma endregion

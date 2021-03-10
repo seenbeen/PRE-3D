@@ -35,9 +35,9 @@ namespace PRE
 
 		AssetManager::~AssetManager()
 		{
-			for (auto it = _evictionLRU.begin(); it != _evictionLRU.end(); ++it)
+			for (auto it = _entriesAccess.begin(); it != _entriesAccess.end(); ++it)
 			{
-				auto pEntry = *it;
+				auto pEntry = it->second;
 
 #ifdef __PRE_DEBUG__
 				if (pEntry->refCount != 0)

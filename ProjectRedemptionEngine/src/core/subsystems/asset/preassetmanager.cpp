@@ -71,7 +71,9 @@ namespace PRE
 			assimpResource(assimpResource) {}
 
 #pragma endregion
-		
+
+		PREAssetManager::ResourceBase::~ResourceBase() {}
+
 #pragma region StringResource
 		PREAssetManager::StringResource* PREAssetManager::StringResource::Load(
 			const string& filepath
@@ -90,7 +92,7 @@ namespace PRE
 			stringstream ss;
 			ss << ifs.rdbuf();
 			ifs.close();
-			return new StringResource(std::move(ss.str()));
+			return new StringResource(ss.str());
 		}
 
 		PREAssetManager::StringResource::~StringResource() {}
@@ -101,9 +103,9 @@ namespace PRE
 		}
 
 		PREAssetManager::StringResource::StringResource(
-			string&& payload
+			const string& payload
 		)
-			: payload(std::move(payload)) {}
+			: payload(payload) {}
 #pragma endregion
 
 #pragma region ImageResource
@@ -198,6 +200,8 @@ namespace PRE
 			unsigned int boneCount = 0;
 			PREBoneConfig* pRootBoneConfig;
 
+			vector<PREBoneConfig*> vAllBoneConfigs;
+
 			AssimpResource::RecurseMesh(
 				aiScene->mMeshes,
 				aiScene->mRootNode,
@@ -211,7 +215,8 @@ namespace PRE
 				vTriangleElements,
 				boneCount,
 				boneMap,
-				pRootBoneConfig
+				pRootBoneConfig,
+				vAllBoneConfigs
 			);
 
 			auto nVertices = vVertices.size();
@@ -249,6 +254,10 @@ namespace PRE
 			auto triangleElements = new unsigned int[nTriangleElements];
 			std::memcpy(triangleElements, &vTriangleElements[0], nTriangleElements * sizeof(unsigned int));
 
+			auto nBoneConfigs = vAllBoneConfigs.size();
+			auto allBoneConfigs = new PREBoneConfig* [nBoneConfigs];
+			std::memcpy(allBoneConfigs, &vAllBoneConfigs[0], nBoneConfigs * sizeof(PREBoneConfig*));
+
 			return new AssimpResource(
 				nVertices,
 				vertices,
@@ -260,7 +269,9 @@ namespace PRE
 				vertexBoneInfluenceWeights,
 				nTriangleElements,
 				triangleElements,
-				*pRootBoneConfig
+				*pRootBoneConfig,
+				nBoneConfigs,
+				allBoneConfigs
 			);
 		}
 
@@ -274,7 +285,11 @@ namespace PRE
 			delete[] vertexBoneInfluenceIndices;
 			delete[] vertexBoneInfluenceWeights;
 			delete[] triangleElements;
-			delete &rootBoneConfig;
+			for (auto i = 0u; i < _nBoneConfigs; ++i)
+			{
+				delete _allBoneConfigs[i];
+			}
+			delete[] _allBoneConfigs;
 		}
 
 		size_t PREAssetManager::AssimpResource::GetSize()
@@ -302,7 +317,8 @@ namespace PRE
 			vector<unsigned int>& triangleElements,
 			unsigned int& boneCount,
 			unordered_map<string, pair<aiBone*, unsigned int>>& boneMap,
-			PREBoneConfig* & generatedBoneConfig
+			PREBoneConfig* & generatedBoneConfig,
+			vector<PREBoneConfig*>& allBoneConfigs
 		)
 		{
 			string currentNodeName(pCurrentNode->mName.C_Str());
@@ -347,6 +363,8 @@ namespace PRE
 				glm::transpose(glm::make_mat4(&bindPos.a1)),
 				glm::transpose(glm::make_mat4(&pCurrentNode->mTransformation.a1))
 			);
+
+			allBoneConfigs.push_back(generatedBoneConfig);
 
 			for (auto i = 0u; i < pCurrentNode->mNumMeshes; ++i)
 			{
@@ -393,7 +411,8 @@ namespace PRE
 					triangleElements,
 					boneCount,
 					boneMap,
-					generatedChildConfig
+					generatedChildConfig,
+					allBoneConfigs
 				);
 				generatedBoneConfig->AddChild(*generatedChildConfig);
 			}
@@ -458,7 +477,7 @@ namespace PRE
 		}
 
 		PREAssetManager::AssimpResource::AssimpResource(
-			const unsigned int nVertices,
+			unsigned int nVertices,
 			const glm::vec3* vertices,
 			const glm::vec3* normals,
 			const glm::vec3* tangents,
@@ -468,7 +487,9 @@ namespace PRE
 			const glm::vec4* vertexBoneInfluenceWeights,
 			unsigned int nTriangleElements,
 			const unsigned int* triangleElements,
-			const PREBoneConfig& rootBoneConfig
+			const PREBoneConfig& rootBoneConfig,
+			unsigned int nBoneConfigs,
+			const PREBoneConfig* const * allBoneConfigs
 		)
 			:
 			nVertices(nVertices),
@@ -481,7 +502,9 @@ namespace PRE
 			vertexBoneInfluenceWeights(vertexBoneInfluenceWeights),
 			nTriangleElements(nTriangleElements),
 			triangleElements(triangleElements),
-			rootBoneConfig(rootBoneConfig) {}
+			rootBoneConfig(rootBoneConfig),
+			_nBoneConfigs(nBoneConfigs),
+			_allBoneConfigs(allBoneConfigs) {}
 #pragma endregion
 
 		PREAssetManager::Impl& PREAssetManager::Impl::MakeImpl(
@@ -502,6 +525,28 @@ namespace PRE
 
 		PREAssetManager::Impl::~Impl()
 		{
+#ifdef __PRE_DEBUG__
+			if (shaders.size() > 0)
+			{
+				throw "Leak";
+			}
+			if (textures.size() > 0)
+			{
+				throw "Leak";
+			}
+			if (meshes.size() > 0)
+			{
+				throw "Leak";
+			}
+			if (skeletons.size() > 0)
+			{
+				throw "Leak";
+			}
+			if (animations.size() > 0)
+			{
+				throw "Leak";
+			}
+#endif
 			delete &assetManager;
 		}
 
@@ -530,6 +575,8 @@ namespace PRE
 			auto fShader = _impl.assetManager.Get(fragmentShaderPath);
 			if (fShader == nullptr)
 			{
+				_impl.assetManager.Release(vertexShaderPath);
+
 				auto pFragmentShaderResource = StringResource::Load(
 					fragmentShaderPath
 				);

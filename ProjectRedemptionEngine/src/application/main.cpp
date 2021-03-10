@@ -1,3 +1,9 @@
+#ifdef __PRE_DEBUG__
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
+
 #include <iostream>
 #include <string>
 
@@ -236,20 +242,28 @@ void OnShutdown(PREApplicationContext& applicationContext)
 
 int main(int argc, char *argv[])
 {
-    PREApplication::Run(
-        PREApplicationConfig(
-            PREInputConfig(),
-            PRERenderingConfig(
-                "Yes hi.",
-                1024,
-                768
-            ),
-            PRETimeConfig(),
-            PREWorldConfig(),
-            PREAssetManagerConfig("assets"),
-            OnInitialize,
-            OnShutdown
-        )
-    );
+#ifdef __PRE_DEBUG__
+    _CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
+    {
+        PREApplication::Run(
+            PREApplicationConfig(
+                PREInputConfig(),
+                PRERenderingConfig(
+                    "Yes hi.",
+                    1024,
+                    768
+                ),
+                PRETimeConfig(),
+                PREWorldConfig(),
+                PREAssetManagerConfig("assets"),
+                OnInitialize,
+                OnShutdown
+            )
+        );
+    }
+#ifdef __PRE_DEBUG__
+    _CrtDumpMemoryLeaks();
+#endif
     return 0;
 }

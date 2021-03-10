@@ -39,7 +39,7 @@ namespace PRE
 				const float ticksPerSecond;
 				const float duration;
 
-				unordered_map<string, AnimationChannel*> channels;
+				unordered_map<string, AnimationChannel*>& channels;
 
 				Impl(
 					float ticksPerSecond,
