@@ -1,8 +1,9 @@
 #include <core/components/preanimatorcomponent.h>
 
 #include <algorithm>
-#include <cmath>
 #include <string>
+
+#include <include/utility.h>
 
 #include <include/modules/rendering.h>
 
@@ -18,6 +19,8 @@ namespace PRE
 {
 	namespace Core
 	{
+		using namespace PRE::Utility;
+
 		void PREAnimatorComponent::Controller::TransitionTo(
 			string state,
 			float blendDuration
@@ -103,13 +106,8 @@ namespace PRE
 				}
 				else
 				{
-					// TODO: positive mod utility class
-					_currentStateTime = std::fmod(
+					_currentStateTime = Math::TrueMod(
 						_currentStateTime + deltaTime * _currentStateSpeed,
-						currentStateDuration
-					);
-					_currentStateTime = std::fmod(
-						_currentStateTime + currentStateDuration,
 						currentStateDuration
 					);
 				}
@@ -131,13 +129,8 @@ namespace PRE
 					}
 					else
 					{
-						// TODO: positive mod utility class
-						_previousStateTime = std::fmod(
+						_previousStateTime = Math::TrueMod(
 							_previousStateTime + deltaTime * _previousStateSpeed,
-							prevStateDuration
-						);
-						_previousStateTime = std::fmod(
-							_previousStateTime + prevStateDuration,
 							prevStateDuration
 						);
 					}

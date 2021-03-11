@@ -1,10 +1,11 @@
 #include <modules/animation/animation.h>
 
-#include <cmath>
 #include <string>
 #include <unordered_map>
 
 #include <glm/glm.hpp>
+
+#include <include/utility.h>
 
 #include <modules/animation/animationconfig.h>
 #include <modules/animation/animationchannelconfig.h>
@@ -14,6 +15,8 @@ namespace PRE
 {
 	namespace AnimationModule
 	{
+		using namespace PRE::Utility;
+
 		using std::string;
 		using std::unordered_map;
 
@@ -73,15 +76,11 @@ namespace PRE
 		{
 			result.clear();
 
-			// TODO: positive mod utility class
-			timeA = std::fmod(timeA * a._impl.ticksPerSecond, a._impl.duration);
-			timeA = std::fmod(timeA + a._impl.duration, a._impl.duration);
+			timeA = Math::TrueMod(timeA * a._impl.ticksPerSecond, a._impl.duration);
 
-			timeB = std::fmod(timeB * b._impl.ticksPerSecond, b._impl.duration);
-			timeB = std::fmod(timeB + b._impl.duration, b._impl.duration);
+			timeB = Math::TrueMod(timeB * b._impl.ticksPerSecond, b._impl.duration);
 
-			blendFactor = std::fmod(blendFactor, 1.0f);
-			blendFactor = std::fmod(blendFactor + 1.0f, 1.0f);
+			blendFactor = Math::TrueMod(blendFactor, 1.0f);
 
 			// arbitrarily use a as baseline
 			for (
@@ -136,9 +135,7 @@ namespace PRE
 		{
 			result.clear();
 
-			// TODO: positive mod utility class
-			time = std::fmod(time * _impl.ticksPerSecond, _impl.duration);
-			time = std::fmod(time + _impl.duration, _impl.duration);
+			time = Math::TrueMod(time * _impl.ticksPerSecond, _impl.duration);
 
 			for (auto it = _impl.channels.begin(); it != _impl.channels.end(); ++it)
 			{

@@ -153,6 +153,12 @@
     <Filter Include="Source Files\Modules\Animation">
       <UniqueIdentifier>{029dd0ff-ccb2-40ef-aa3f-5dab9efb6e8b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Utility">
+      <UniqueIdentifier>{0702c57c-e8a0-4aa7-b642-19482fb04faa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utility">
+      <UniqueIdentifier>{3415702a-b2d5-4575-970a-3b00039b1df6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\modules\gameobject\gameobject.h">
@@ -353,6 +359,12 @@
     <ClInclude Include="src\core\subsystems\rendering\preanimatorconfig.h">
       <Filter>Header Files\Core\Subsystems\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="src\utility\math.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="src\include\utility.h">
+      <Filter>Header Files\Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\modules\gameobject\gameobject.cpp">
@@ -531,6 +543,9 @@
     </ClCompile>
     <ClCompile Include="src\core\subsystems\rendering\preanimatorconfig.cpp">
       <Filter>Source Files\Core\Subsystems\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utility\math.cpp">
+      <Filter>Source Files\Utility</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

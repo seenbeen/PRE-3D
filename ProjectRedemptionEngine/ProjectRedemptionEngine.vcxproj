@@ -70,6 +70,7 @@
     <ClCompile Include="src\modules\rendering\shader\rendershaderprogram.cpp" />
     <ClCompile Include="src\modules\rendering\shader\rendervertexshader.cpp" />
     <ClCompile Include="src\modules\time\time.cpp" />
+    <ClCompile Include="src\utility\math.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\components\preanimatorcomponent.h" />
@@ -113,6 +114,7 @@
     <ClInclude Include="src\include\modules\rendering.h" />
     <ClInclude Include="src\include\modules\time.h" />
     <ClInclude Include="src\include\modules\transform.h" />
+    <ClInclude Include="src\include\utility.h" />
     <ClInclude Include="src\modules\animation\animation.h" />
     <ClInclude Include="src\modules\animation\animationchannel.h" />
     <ClInclude Include="src\modules\animation\animationchannelconfig.h" />
@@ -138,6 +140,7 @@
     <ClInclude Include="src\modules\rendering\shader\rendervertexshader.h" />
     <ClInclude Include="src\modules\time\time.h" />
     <ClInclude Include="src\modules\transform\transform.h" />
+    <ClInclude Include="src\utility\math.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
