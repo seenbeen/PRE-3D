@@ -2,7 +2,7 @@
 
 #include <glad/glad.h>
 
-#include <modules/rendering/model/rendertexture.h>
+#include <modules/rendering/texture/rendertexture.h>
 
 #ifdef __PRE_DEBUG__
 #include <assert.h>

@@ -9,7 +9,8 @@
 #include <modules/rendering/compositing/rendercompositingtarget.h>
 #include <modules/rendering/compositing/rendercompositingnode.h>
 #include <modules/rendering/shader/rendershaderprogram.h>
-#include <modules/rendering/model/rendertexture.h>
+
+#include <modules/rendering/texture/rendertexture.h>
 
 namespace PRE
 {

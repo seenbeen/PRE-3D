@@ -159,6 +159,12 @@
     <Filter Include="Source Files\Utility">
       <UniqueIdentifier>{3415702a-b2d5-4575-970a-3b00039b1df6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Modules\Rendering\Texture">
+      <UniqueIdentifier>{cfec811e-b248-4343-95ed-a3a506f55295}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Modules\Rendering\Texture">
+      <UniqueIdentifier>{149c9709-fc65-454c-bc95-e34121b41be7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\modules\gameobject\gameobject.h">
@@ -231,9 +237,6 @@
       <Filter>Header Files\Modules\Rendering\Model</Filter>
     </ClInclude>
     <ClInclude Include="src\modules\rendering\model\rendermesh.h">
-      <Filter>Header Files\Modules\Rendering\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="src\modules\rendering\model\rendertexture.h">
       <Filter>Header Files\Modules\Rendering\Model</Filter>
     </ClInclude>
     <ClInclude Include="src\include\modules\rendering.h">
@@ -365,6 +368,9 @@
     <ClInclude Include="src\include\utility.h">
       <Filter>Header Files\Include</Filter>
     </ClInclude>
+    <ClInclude Include="src\modules\rendering\texture\rendertexture.h">
+      <Filter>Header Files\Modules\Rendering\Texture</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\modules\gameobject\gameobject.cpp">
@@ -422,9 +428,6 @@
       <Filter>Source Files\Modules\Rendering\Model</Filter>
     </ClCompile>
     <ClCompile Include="src\modules\rendering\model\rendermesh.cpp">
-      <Filter>Source Files\Modules\Rendering\Model</Filter>
-    </ClCompile>
-    <ClCompile Include="src\modules\rendering\model\rendertexture.cpp">
       <Filter>Source Files\Modules\Rendering\Model</Filter>
     </ClCompile>
     <ClCompile Include="src\modules\rendering\model\rendermaterial.cpp">
@@ -546,6 +549,9 @@
     </ClCompile>
     <ClCompile Include="src\utility\math.cpp">
       <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\rendering\texture\rendertexture.cpp">
+      <Filter>Source Files\Modules\Rendering\Texture</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -20,9 +20,9 @@
 #include <modules/rendering/shader/rendershaderprogram.h>
 #include <modules/rendering/model/rendermesh.h>
 #include <modules/rendering/model/renderskeleton.h>
-#include <modules/rendering/model/rendertexture.h>
 #include <modules/rendering/model/rendermaterial.h>
 #include <modules/rendering/model/rendermodel.h>
+#include <modules/rendering/texture/rendertexture.h>
 
 #ifdef __PRE_DEBUG__
 #include <assert.h>

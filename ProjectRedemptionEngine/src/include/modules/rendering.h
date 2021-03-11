@@ -9,7 +9,8 @@
 #include <modules/rendering/compositing/rendercompositingnode.h>
 #include <modules/rendering/compositing/rendercompositingtarget.h>
 
-#include <modules/rendering/model/rendertexture.h>
+#include <modules/rendering/texture/rendertexture.h>
+
 #include <modules/rendering/model/rendermaterial.h>
 #include <modules/rendering/model/rendermesh.h>
 #include <modules/rendering/model/renderskeleton.h>

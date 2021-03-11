@@ -1,4 +1,4 @@
-#include <modules/rendering/model/rendertexture.h>
+#include <modules/rendering/texture/rendertexture.h>
 
 #include <cstring>
 

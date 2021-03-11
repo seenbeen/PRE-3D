@@ -63,12 +63,12 @@
     <ClCompile Include="src\modules\rendering\model\rendermesh.cpp" />
     <ClCompile Include="src\modules\rendering\model\rendermodel.cpp" />
     <ClCompile Include="src\modules\rendering\model\renderskeleton.cpp" />
-    <ClCompile Include="src\modules\rendering\model\rendertexture.cpp" />
     <ClCompile Include="src\modules\rendering\rendercamera.cpp" />
     <ClCompile Include="src\modules\rendering\renderer.cpp" />
     <ClCompile Include="src\modules\rendering\shader\renderfragmentshader.cpp" />
     <ClCompile Include="src\modules\rendering\shader\rendershaderprogram.cpp" />
     <ClCompile Include="src\modules\rendering\shader\rendervertexshader.cpp" />
+    <ClCompile Include="src\modules\rendering\texture\rendertexture.cpp" />
     <ClCompile Include="src\modules\time\time.cpp" />
     <ClCompile Include="src\utility\math.cpp" />
   </ItemGroup>
@@ -132,12 +132,12 @@
     <ClInclude Include="src\modules\rendering\model\rendermesh.h" />
     <ClInclude Include="src\modules\rendering\model\rendermodel.h" />
     <ClInclude Include="src\modules\rendering\model\renderskeleton.h" />
-    <ClInclude Include="src\modules\rendering\model\rendertexture.h" />
     <ClInclude Include="src\modules\rendering\rendercamera.h" />
     <ClInclude Include="src\modules\rendering\renderer.h" />
     <ClInclude Include="src\modules\rendering\shader\renderfragmentshader.h" />
     <ClInclude Include="src\modules\rendering\shader\rendershaderprogram.h" />
     <ClInclude Include="src\modules\rendering\shader\rendervertexshader.h" />
+    <ClInclude Include="src\modules\rendering\texture\rendertexture.h" />
     <ClInclude Include="src\modules\time\time.h" />
     <ClInclude Include="src\modules\transform\transform.h" />
     <ClInclude Include="src\utility\math.h" />
