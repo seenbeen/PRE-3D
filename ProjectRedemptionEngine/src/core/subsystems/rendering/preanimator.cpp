@@ -6,6 +6,8 @@
 
 #include <core/components/preanimatorcomponent.h>
 
+#include <core/subsystems/rendering/preanimatorconfig.h>
+
 #include <core/subsystems/rendering/preanimation.h>
 
 namespace PRE
@@ -16,24 +18,9 @@ namespace PRE
 		using std::string;
 		using std::unordered_map;
 
-		void PREAnimator::AddState(
-			const string& stateName,
-			OnStateUpdate onStateUpdate,
-			const PREAnimation& animation
-		)
-		{
-			_states.insert(
-				std::make_pair(
-					stateName,
-					std::make_pair(
-						onStateUpdate,
-						&animation
-					)
-				)
-			);
-		}
-
-		PREAnimator::PREAnimator() {}
+		PREAnimator::PREAnimator(const PREAnimatorConfig& animatorConfig)
+			:
+			_states(animatorConfig._states) {}
 
 		PREAnimator::~PREAnimator() {}
 	} // namespace Core

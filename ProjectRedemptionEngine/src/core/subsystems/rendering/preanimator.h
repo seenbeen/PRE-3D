@@ -3,12 +3,13 @@
 #include <unordered_map>
 #include <utility>
 
-#include <core/components/preanimatorcomponent.h>
+#include <core/subsystems/rendering/preanimatorconfig.h>
 
 namespace PRE
 {
 	namespace Core
 	{
+		class PRERendering;
 		class PREAnimation;
 
 		using std::pair;
@@ -20,24 +21,14 @@ namespace PRE
 			PREAnimator& operator=(const PREAnimator&) = delete;
 			PREAnimator(const PREAnimator&) = delete;
 
+			friend class PRERendering;
 			friend class PREAnimatorComponent;
 
-		public:
-			typedef void (*OnStateUpdate)(PREAnimatorComponent::Controller& animatorComponentController);
-
-			void AddState(
-				const string& stateName,
-				OnStateUpdate onStateUpdate,
-				const PREAnimation& animation
-			);
-
-
-			// TODO: RENDERING->MAKE ANIMATOR WITH CONFIGS
-			PREAnimator();
-			~PREAnimator();
-
 		private:
-			unordered_map<string, pair<OnStateUpdate, const PREAnimation*>> _states;
+			const unordered_map<string, pair<PREAnimatorConfig::OnStateUpdate, const PREAnimation*>> _states;
+
+			PREAnimator(const PREAnimatorConfig& animatorConfig);
+			~PREAnimator();
 		};
 	} // namespace Core
 } // namespace PRE

@@ -22,6 +22,8 @@
 #include <core/subsystems/rendering/preboneconfig.h>
 #include <core/subsystems/rendering/pretexture.h>
 #include <core/subsystems/rendering/prematerial.h>
+
+#include <core/subsystems/rendering/preanimator.h>
 #include <core/subsystems/rendering/preanimation.h>
 
 namespace PRE
@@ -200,6 +202,18 @@ namespace PRE
 		{
 			_impl.applicationContext.assetManager.TryFreeAnimation(animation);
 			delete &animation;
+		}
+
+		PREAnimator& PRERendering::CreateAnimator(
+			const PREAnimatorConfig& animatorConfig
+		)
+		{
+			return *(new PREAnimator(animatorConfig));
+		}
+
+		void PRERendering::DestroyAnimator(PREAnimator& animator)
+		{
+			delete &animator;
 		}
 
 		PRERendering& PRERendering::MakePRERendering(

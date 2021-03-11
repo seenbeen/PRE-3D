@@ -25,6 +25,7 @@
 #include <core/subsystems/rendering/preanimationchannelconfig.h>
 #include <core/subsystems/rendering/preanimationconfig.h>
 #include <core/subsystems/rendering/preanimation.h>
+#include <core/subsystems/rendering/preanimatorconfig.h>
 #include <core/subsystems/rendering/preanimator.h>
 
 // time

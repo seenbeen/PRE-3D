@@ -350,6 +350,9 @@
     <ClInclude Include="src\core\subsystems\rendering\preanimationconfig.h">
       <Filter>Header Files\Core\Subsystems\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\subsystems\rendering\preanimatorconfig.h">
+      <Filter>Header Files\Core\Subsystems\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\modules\gameobject\gameobject.cpp">
@@ -524,6 +527,9 @@
       <Filter>Source Files\Core\Subsystems\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="src\core\subsystems\rendering\preanimator.cpp">
+      <Filter>Source Files\Core\Subsystems\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\rendering\preanimatorconfig.cpp">
       <Filter>Source Files\Core\Subsystems\Rendering</Filter>
     </ClCompile>
   </ItemGroup>

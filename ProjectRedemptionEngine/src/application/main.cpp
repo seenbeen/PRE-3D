@@ -86,12 +86,14 @@ protected:
             animationKey
         );
 
-        _pAnimator = new PREAnimator();
-        _pAnimator->AddState(
+        PREAnimatorConfig animatorConfig;
+        animatorConfig.AddState(
             "default",
             [](PREAnimatorComponent::Controller& controller) {},
             *_pAnim
         );
+
+        _pAnimator = &GetRendering().CreateAnimator(animatorConfig);
 
         auto pAnimatorComponent = gameObject().GetComponent<PREAnimatorComponent>();
         pAnimatorComponent->SetAnimator(
@@ -99,7 +101,7 @@ protected:
             "default",
             nullptr,
             0,
-            0.8,
+            1,
             false
         );
         pAnimatorComponent->SetSkeleton(_pSkeleton);
@@ -126,7 +128,7 @@ protected:
         GetRendering().DestroyTexture(*_pSpecularTexture);
         GetRendering().DestroyMaterial(*_pMaterial);
         GetRendering().DestroyAnimation(*_pAnim);
-        delete _pAnimator;
+        GetRendering().DestroyAnimator(*_pAnimator);
     }
 
 private:
@@ -219,6 +221,30 @@ void OnInitialize(PREApplicationContext& applicationContext)
         {
             AddPREComponent<PREModelRendererComponent>();
             auto& modelComponent = *AddPREComponent<SimpleModelComponent>();
+            modelComponent.vertexShaderPath = "/shaders/skinnedvertex.vs";
+            modelComponent.fragmentShaderPath = "/shaders/simplefragment.fs";
+            modelComponent.meshPath = "/models/vampire_a_lusth/vampire_a_lusth.dae";
+            modelComponent.skeletonPath = "/models/vampire_a_lusth/vampire_a_lusth.dae";
+            modelComponent.animationPath = "/animations/mixamo/Breathing Idle.dae";
+            modelComponent.animationKey = "";
+            modelComponent.diffusePath = "/models/vampire_a_lusth/textures/Vampire_diffuse.png";
+            modelComponent.emissionPath = "/models/vampire_a_lusth/textures/Vampire_emission.png";
+            modelComponent.normalPath = "/models/vampire_a_lusth/textures/Vampire_normal.png";
+            modelComponent.specularPath = "/models/vampire_a_lusth/textures/Vampire_specular.png";
+            AddPREComponent<PREAnimatorComponent>();
+            auto pTransform = GetPREComponent<PRETransformComponent>();
+            pTransform->SetLocalScale(glm::vec3(4.0));
+            pTransform->SetPosition(glm::vec3(0, -5, 0));
+        }
+    } vampireTemplate2;
+
+    class : public PREGameObjectTemplate
+    {
+    protected:
+        void OnInstantiateTemplate() override
+        {
+            AddPREComponent<PREModelRendererComponent>();
+            auto& modelComponent = *AddPREComponent<SimpleModelComponent>();
             modelComponent.vertexShaderPath = "/shaders/simplevertex.vs";
             modelComponent.fragmentShaderPath = "/shaders/simplefragment.fs";
             modelComponent.meshPath = "/models/backpack/backpack.obj";
@@ -257,7 +283,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
     }
     for (int i = 0; i < 1; ++i)
     {
-        auto& vampireB = applicationContext.world.Instantiate(vampireTemplate);
+        auto& vampireB = applicationContext.world.Instantiate(vampireTemplate2);
         auto pvampireBTransform = vampireB.GetComponent<PRETransformComponent>();
         pvampireBTransform->SetPosition(
             pvampireBTransform->GetPosition() + glm::vec3(4 + i, 0, 0)

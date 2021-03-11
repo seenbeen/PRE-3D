@@ -22,8 +22,11 @@ namespace PRE
 		class PREBoneConfig;
 		class PRETexture;
 		class PREMaterial;
+
 		class PREAnimation;
 		class PREAnimationConfig;
+		class PREAnimator;
+		class PREAnimatorConfig;
 
 		using std::string;
 		using PRE::RenderingModule::Renderer;
@@ -99,6 +102,11 @@ namespace PRE
 				const PREAnimationConfig& animationConfig
 			);
 			void DestroyAnimation(PREAnimation& animation);
+
+			PREAnimator& CreateAnimator(
+				const PREAnimatorConfig& animatorConfig
+			);
+			void DestroyAnimator(PREAnimator& animator);
 
 		private:
 			static PRERendering& MakePRERendering(
