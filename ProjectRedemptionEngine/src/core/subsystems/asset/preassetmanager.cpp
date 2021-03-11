@@ -170,6 +170,7 @@ namespace PRE
 			auto aiScene = assimp.ReadFile(
 				filepath,
 				aiProcess_Triangulate |
+				aiProcess_LimitBoneWeights |
 				aiProcess_GenSmoothNormals |
 				aiProcess_CalcTangentSpace |
 				aiProcess_OptimizeMeshes
@@ -350,10 +351,7 @@ namespace PRE
 					auto& weights = vertexBoneInfluenceWeights[vertexIndex];
 
 #ifdef __PRE_DEBUG__
-					if (indices[3] != -1)
-					{
-						// throw "More than 4 vertex influences unsupported";
-					}
+					assert(indices[3] == -1);
 #endif
 
 					for (auto i = 0; i < 4; ++i)
