@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <unordered_map>
 
 #include <include/modules/rendering.h>
 
@@ -9,9 +10,11 @@ namespace PRE
 {
 	namespace Core
 	{
+		class PRESkeleton;
 		class PREAnimator;
 
 		using std::string;
+		using std::unordered_map;
 
 		class PREAnimatorComponent : public PREGameObjectComponent
 		{
@@ -30,21 +33,31 @@ namespace PRE
 				void SetClamp(bool clamp); // will stop the animation once it hits 0
 
 				template<class TAnimatorContext>
-				TAnimatorContext* GetPAnimatorContextAs()
+				TAnimatorContext& GetAnimatorContextAs()
 				{
-					return static_cast<TAnimatorContext*>(
-						parentComponent.pAnimatorContext
+					return *static_cast<TAnimatorContext*>(
+						_animatorComponent._vAnimatorContext
 					);
 				}
 
 			private:
-				PREAnimatorComponent& parentComponent;
+				PREAnimatorComponent& _animatorComponent;
 
 				Controller(PREAnimatorComponent& parentComponent);
 				~Controller();
 			};
 
-			void SetAnimator(PREAnimator* pAnimator, void* vAnimatorContext);
+			void SetAnimator(
+				PREAnimator* pAnimator,
+				const string& startState,
+				void* vAnimatorContext,
+				float startTime,
+				float startSpeed,
+				bool isClamped
+
+			);
+
+			void SetSkeleton(PRESkeleton* pSkeleton);
 
 		protected:
 			void OnStart() override;
@@ -52,23 +65,29 @@ namespace PRE
 			void OnDestroy() override;
 
 		private:
-			PREAnimator* pAnimator;
-			void* pAnimatorContext;
+			PRESkeleton* _pSkeleton = nullptr;
 
-			string previousState;
-			float previousStateTime;
+			Controller* _pController = nullptr;
 
-			string currentState;
-			float currentStateTime;
+			unordered_map<string, glm::mat4> _stateCache;
 
-			float blendTime;
-			float blendDuration;
+			PREAnimator* _pAnimator = nullptr;
+			void* _vAnimatorContext = nullptr;
 
-			float previousStateSpeed;
-			float currentStateSpeed;
+			string _previousState = "";
+			float _previousStateTime = 0;
 
-			bool isPreviousClamped;
-			bool isCurrentClamped;
+			string _currentState = "";
+			float _currentStateTime = 0;
+
+			float _blendTime = 0;
+			float _blendDuration = 0;
+
+			float _previousStateSpeed = 1.0f;
+			float _currentStateSpeed = 1.0f;
+
+			bool _isPreviousClamped = false;
+			bool _isCurrentClamped = false;
 		};
 	} // namespace Core
 } // namespace PRE

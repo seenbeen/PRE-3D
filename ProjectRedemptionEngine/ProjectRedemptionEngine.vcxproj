@@ -29,6 +29,7 @@
     <ClCompile Include="src\core\subsystems\rendering\preanimation.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\preanimationchannelconfig.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\preanimationconfig.cpp" />
+    <ClCompile Include="src\core\subsystems\rendering\preanimator.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\preboneconfig.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\prematerial.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\premesh.cpp" />

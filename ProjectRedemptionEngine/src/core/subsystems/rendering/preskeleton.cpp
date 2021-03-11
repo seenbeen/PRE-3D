@@ -13,5 +13,10 @@ namespace PRE
 			_skeleton(skeleton) {}
 
 		PRESkeleton::~PRESkeleton() {}
+
+		void PRESkeleton::SetBoneLocalMatrix(const string bone, const glm::mat4& localMatrix)
+		{
+			_skeleton.SetBoneLocalMatrix(bone, localMatrix);
+		}
 	} // namespace Core
 } // namespace PRE

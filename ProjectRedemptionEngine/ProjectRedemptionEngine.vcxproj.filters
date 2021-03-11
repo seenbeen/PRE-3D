@@ -523,5 +523,8 @@
     <ClCompile Include="src\core\subsystems\rendering\preanimationconfig.cpp">
       <Filter>Source Files\Core\Subsystems\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\subsystems\rendering\preanimator.cpp">
+      <Filter>Source Files\Core\Subsystems\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

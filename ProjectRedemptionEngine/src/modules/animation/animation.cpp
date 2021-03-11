@@ -73,9 +73,15 @@ namespace PRE
 		{
 			result.clear();
 
+			// TODO: positive mod utility class
 			timeA = std::fmod(timeA * a._impl.ticksPerSecond, a._impl.duration);
-			timeB = std::fmod(timeB * a._impl.ticksPerSecond, b._impl.duration);
+			timeA = std::fmod(timeA + a._impl.duration, a._impl.duration);
+
+			timeB = std::fmod(timeB * b._impl.ticksPerSecond, b._impl.duration);
+			timeB = std::fmod(timeB + b._impl.duration, b._impl.duration);
+
 			blendFactor = std::fmod(blendFactor, 1.0f);
+			blendFactor = std::fmod(blendFactor + 1.0f, 1.0f);
 
 			// arbitrarily use a as baseline
 			for (
@@ -129,7 +135,11 @@ namespace PRE
 		) const
 		{
 			result.clear();
+
+			// TODO: positive mod utility class
 			time = std::fmod(time * _impl.ticksPerSecond, _impl.duration);
+			time = std::fmod(time + _impl.duration, _impl.duration);
+
 			for (auto it = _impl.channels.begin(); it != _impl.channels.end(); ++it)
 			{
 				result[it->first] = it->second->GetStateAt(time);

@@ -23,7 +23,7 @@ namespace PRE
 			friend class PREAnimatorComponent;
 
 		public:
-			typedef bool (*OnStateUpdate)(PREAnimatorComponent::Controller& animatorComponentController);
+			typedef void (*OnStateUpdate)(PREAnimatorComponent::Controller& animatorComponentController);
 
 			void AddState(
 				const string& stateName,
@@ -31,11 +31,13 @@ namespace PRE
 				const PREAnimation& animation
 			);
 
-		private:
-			unordered_map<string, pair<OnStateUpdate, PREAnimation*>> _states;
 
+			// TODO: RENDERING->MAKE ANIMATOR WITH CONFIGS
 			PREAnimator();
 			~PREAnimator();
+
+		private:
+			unordered_map<string, pair<OnStateUpdate, const PREAnimation*>> _states;
 		};
 	} // namespace Core
 } // namespace PRE

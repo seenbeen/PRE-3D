@@ -1,4 +1,8 @@
 #pragma once
+#include <vector>
+
+#include <glm/glm.hpp>
+
 #include <include/modules/rendering.h>
 
 namespace PRE
@@ -8,6 +12,7 @@ namespace PRE
 		class PRERendering;
 
 		using std::string;
+		using std::vector;
 
 		using PRE::RenderingModule::RenderSkeleton;
 
@@ -17,12 +22,15 @@ namespace PRE
 			PRESkeleton(const PRESkeleton&) = delete;
 
 			friend class PRERendering;
-		
+			friend class PREAnimatorComponent;
+
 		private:
 			RenderSkeleton& _skeleton;
 
 			PRESkeleton(RenderSkeleton& skeleton);
 			~PRESkeleton();
+
+			void SetBoneLocalMatrix(const string bone, const glm::mat4& localMatrix);
 		};
 	} // namespace Core
 } // namespace PRE

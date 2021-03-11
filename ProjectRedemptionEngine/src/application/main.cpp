@@ -81,10 +81,28 @@ protected:
         modelRendererComponent.SetSkeleton(_pSkeleton);
         modelRendererComponent.SetMaterial(_pMaterial);
 
-        _pWalkAnim = &GetAssetManager().LoadAnimation(
+        _pAnim = &GetAssetManager().LoadAnimation(
             GetAssetManager().rootAssetPath + animationPath,
             animationKey
         );
+
+        _pAnimator = new PREAnimator();
+        _pAnimator->AddState(
+            "default",
+            [](PREAnimatorComponent::Controller& controller) {},
+            *_pAnim
+        );
+
+        auto pAnimatorComponent = gameObject().GetComponent<PREAnimatorComponent>();
+        pAnimatorComponent->SetAnimator(
+            _pAnimator,
+            "default",
+            nullptr,
+            0,
+            0.8,
+            false
+        );
+        pAnimatorComponent->SetSkeleton(_pSkeleton);
     }
 
     void OnUpdate() override
@@ -107,7 +125,8 @@ protected:
         GetRendering().DestroyTexture(*_pNormalTexture);
         GetRendering().DestroyTexture(*_pSpecularTexture);
         GetRendering().DestroyMaterial(*_pMaterial);
-        GetRendering().DestroyAnimation(*_pWalkAnim);
+        GetRendering().DestroyAnimation(*_pAnim);
+        delete _pAnimator;
     }
 
 private:
@@ -120,7 +139,8 @@ private:
     PRETexture* _pNormalTexture = nullptr;
     PRETexture* _pSpecularTexture = nullptr;
     PREMaterial* _pMaterial = nullptr;
-    PREAnimation* _pWalkAnim = nullptr;
+    PREAnimation* _pAnim = nullptr;
+    PREAnimator* _pAnimator = nullptr;
 };
 
 class CameraControllerComponent : public PREGameObjectComponent
@@ -185,6 +205,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
             modelComponent.emissionPath = "/models/vampire_a_lusth/textures/Vampire_emission.png";
             modelComponent.normalPath = "/models/vampire_a_lusth/textures/Vampire_normal.png";
             modelComponent.specularPath = "/models/vampire_a_lusth/textures/Vampire_specular.png";
+            AddPREComponent<PREAnimatorComponent>();
             auto pTransform = GetPREComponent<PRETransformComponent>();
             pTransform->SetLocalScale(glm::vec3(4.0));
             pTransform->SetPosition(glm::vec3(0, -5, 0));
