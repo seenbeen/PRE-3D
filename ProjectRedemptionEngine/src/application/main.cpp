@@ -19,6 +19,8 @@ public:
     string fragmentShaderPath;
     string meshPath;
     string skeletonPath;
+    string animationPath;
+    string animationKey;
     string diffusePath;
     string emissionPath;
     string normalPath;
@@ -78,6 +80,11 @@ protected:
         modelRendererComponent.SetMesh(_pMesh);
         modelRendererComponent.SetSkeleton(_pSkeleton);
         modelRendererComponent.SetMaterial(_pMaterial);
+
+        _pWalkAnim = &GetAssetManager().LoadAnimation(
+            GetAssetManager().rootAssetPath + animationPath,
+            animationKey
+        );
     }
 
     void OnUpdate() override
@@ -100,6 +107,7 @@ protected:
         GetRendering().DestroyTexture(*_pNormalTexture);
         GetRendering().DestroyTexture(*_pSpecularTexture);
         GetRendering().DestroyMaterial(*_pMaterial);
+        GetRendering().DestroyAnimation(*_pWalkAnim);
     }
 
 private:
@@ -112,6 +120,7 @@ private:
     PRETexture* _pNormalTexture = nullptr;
     PRETexture* _pSpecularTexture = nullptr;
     PREMaterial* _pMaterial = nullptr;
+    PREAnimation* _pWalkAnim = nullptr;
 };
 
 class CameraControllerComponent : public PREGameObjectComponent
@@ -170,6 +179,8 @@ void OnInitialize(PREApplicationContext& applicationContext)
             modelComponent.fragmentShaderPath = "/shaders/simplefragment.fs";
             modelComponent.meshPath = "/models/vampire_a_lusth/vampire_a_lusth.dae";
             modelComponent.skeletonPath = "/models/vampire_a_lusth/vampire_a_lusth.dae";
+            modelComponent.animationPath = "/animations/mixamo/Running.dae";
+            modelComponent.animationKey = "";
             modelComponent.diffusePath = "/models/vampire_a_lusth/textures/Vampire_diffuse.png";
             modelComponent.emissionPath = "/models/vampire_a_lusth/textures/Vampire_emission.png";
             modelComponent.normalPath = "/models/vampire_a_lusth/textures/Vampire_normal.png";

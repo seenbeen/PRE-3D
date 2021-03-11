@@ -30,31 +30,23 @@ namespace PRE
 				friend class Animation;
 
 			private:
-				static Impl& MakeImpl(
-					float ticksPerSecond,
-					float duration,
-					const AnimationConfig& animationConfig
-				);
+				static Impl& MakeImpl(const AnimationConfig& animationConfig);
 
 				const float ticksPerSecond;
 				const float duration;
 
-				unordered_map<string, AnimationChannel*>& channels;
+				const unordered_map<string, const AnimationChannel*> channels;
 
 				Impl(
 					float ticksPerSecond,
 					float duration,
-					unordered_map<string, AnimationChannel*>& channels
+					unordered_map<string, const AnimationChannel*>&& channels
 				);
 				~Impl();
 			};
 
 		public:
-			Animation(
-				float ticksPerSecond,
-				float duration,
-				AnimationConfig& animationConfig
-			);
+			Animation(const AnimationConfig& animationConfig);
 			~Animation();
 
 			static void GetBlendedStateAt(
@@ -67,6 +59,7 @@ namespace PRE
 			);
 
 			float GetDuration() const;
+
 			void GetStateAt(
 				float time,
 				unordered_map<string, glm::mat4>& result

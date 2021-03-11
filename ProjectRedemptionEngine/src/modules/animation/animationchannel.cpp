@@ -169,7 +169,6 @@ namespace PRE
 			const AnimationChannelConfig& animationChannelConfig
 		)
 			:
-			_channelName(animationChannelConfig.channelName),
 			_impl(Impl::MakeImpl(animationChannelConfig)) {}
 
 		AnimationChannel::~AnimationChannel()

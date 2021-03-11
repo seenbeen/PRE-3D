@@ -29,6 +29,8 @@
 #include <core/subsystems/rendering/preskeleton.h>
 #include <core/subsystems/rendering/preboneconfig.h>
 #include <core/subsystems/rendering/preanimation.h>
+#include <core/subsystems/rendering/preanimationconfig.h>
+#include <core/subsystems/rendering/preanimationchannelconfig.h>
 
 #ifdef __PRE_DEBUG__
 #include <assert.h>
@@ -95,7 +97,7 @@ namespace PRE
 			stringstream ss;
 			ss << ifs.rdbuf();
 			ifs.close();
-			return new StringResource(ss.str());
+			return new StringResource(std::move(ss.str()));
 		}
 
 		PREAssetManager::StringResource::~StringResource() {}
@@ -106,9 +108,9 @@ namespace PRE
 		}
 
 		PREAssetManager::StringResource::StringResource(
-			const string&& payload
+			string&& payload
 		)
-			: payload(payload) {}
+			: payload(std::move(payload)) {}
 #pragma endregion
 
 #pragma region ImageResource
@@ -259,6 +261,9 @@ namespace PRE
 			auto allBoneConfigs = new PREBoneConfig* [nBoneConfigs];
 			std::memcpy(allBoneConfigs, &vAllBoneConfigs[0], nBoneConfigs * sizeof(PREBoneConfig*));
 
+			unordered_map<string, const PREAnimationConfig*> animationConfigs;
+			GenerateAnimations(aiScene, animationConfigs);
+
 			return new AssimpResource(
 				nVertices,
 				vertices,
@@ -272,7 +277,8 @@ namespace PRE
 				triangleElements,
 				*pRootBoneConfig,
 				nBoneConfigs,
-				allBoneConfigs
+				allBoneConfigs,
+				std::move(animationConfigs)
 			);
 		}
 
@@ -291,6 +297,10 @@ namespace PRE
 				delete _allBoneConfigs[i];
 			}
 			delete[] _allBoneConfigs;
+			for (auto it = animationConfigs.begin(); it != animationConfigs.end(); ++it)
+			{
+				delete it->second;
+			}
 		}
 
 		size_t PREAssetManager::AssimpResource::GetSize()
@@ -374,10 +384,10 @@ namespace PRE
 				for (auto j = 0u; j < pMesh->mNumVertices; ++j)
 				{
 					auto vertex = pMesh->mVertices[j];
-					auto normal = pMesh->mNormals[j];
-					auto tangent = pMesh->mTangents[j];
-					auto biTangent = pMesh->mBitangents[j];
-					auto& uv = pMesh->mTextureCoords[0][j];
+					auto normal = pMesh->HasNormals() ? pMesh->mNormals[j] : aiVector3D();
+					auto tangent = pMesh->HasTangentsAndBitangents() ? pMesh->mTangents[j] : aiVector3D();
+					auto biTangent = pMesh->HasTangentsAndBitangents() ? pMesh->mBitangents[j] : aiVector3D();
+					auto uv = pMesh->HasTextureCoords(0) ? pMesh->mTextureCoords[0][j] : aiVector3D();
 
 					vertices.push_back(glm::vec3(vertex.x, vertex.y, vertex.z));
 					normals.push_back(glm::vec3(normal.x, normal.y, normal.z));
@@ -385,13 +395,15 @@ namespace PRE
 					biTangents.push_back(glm::vec3(biTangent.x, biTangent.y, biTangent.z));
 					uvs.push_back(glm::vec2(uv.x, uv.y));
 				}
-
-				for (auto j = 0u; j < pMesh->mNumFaces; ++j)
+				if (pMesh->HasFaces())
 				{
-					auto& face = pMesh->mFaces[j];
-					for (auto k = 0u; k < face.mNumIndices; ++k)
+					for (auto j = 0u; j < pMesh->mNumFaces; ++j)
 					{
-						triangleElements.push_back((unsigned int)vertexOffset + face.mIndices[k]);
+						auto& face = pMesh->mFaces[j];
+						for (auto k = 0u; k < face.mNumIndices; ++k)
+						{
+							triangleElements.push_back((unsigned int)vertexOffset + face.mIndices[k]);
+						}
 					}
 				}
 			}
@@ -474,6 +486,54 @@ namespace PRE
 			}
 		}
 
+		void PREAssetManager::AssimpResource::GenerateAnimations(
+			const aiScene* pScene,
+			unordered_map<string, const PREAnimationConfig*>& animationConfigs
+		)
+		{
+			for (auto i = 0u; i < pScene->mNumAnimations; ++i)
+			{
+				auto pAnimation = pScene->mAnimations[i];
+				auto pAnimConfig = new PREAnimationConfig(
+					(float)pAnimation->mTicksPerSecond,
+					(float)pAnimation->mDuration
+				);
+
+				for (auto j = 0u; j < pAnimation->mNumChannels; ++j)
+				{
+					auto pAnimChannel = pAnimation->mChannels[j];
+					auto& channelConfig = pAnimConfig->AddAnimationChannelConfig(
+						string(pAnimChannel->mNodeName.C_Str())
+					);
+					for (auto k = 0u; k < pAnimChannel->mNumPositionKeys; ++k)
+					{
+						auto& key = pAnimChannel->mPositionKeys[k];
+						channelConfig.AddPositionKeyFrame(
+							(float)key.mTime,
+							glm::vec3(key.mValue.x, key.mValue.y, key.mValue.z)
+						);
+					}
+					for (auto k = 0u; k < pAnimChannel->mNumRotationKeys; ++k)
+					{
+						auto& key = pAnimChannel->mRotationKeys[k];
+						channelConfig.AddRotationKeyFrame(
+							(float)key.mTime,
+							glm::fquat(key.mValue.w, key.mValue.x, key.mValue.y, key.mValue.z)
+						);
+					}
+					for (auto k = 0u; k < pAnimChannel->mNumScalingKeys; ++k)
+					{
+						auto& key = pAnimChannel->mScalingKeys[k];
+						channelConfig.AddScaleKeyFrame(
+							(float)key.mTime,
+							glm::vec3(key.mValue.x, key.mValue.y, key.mValue.z)
+						);
+					}
+				}
+				animationConfigs[string(pAnimation->mName.C_Str())] = pAnimConfig;
+			}
+		}
+
 		PREAssetManager::AssimpResource::AssimpResource(
 			unsigned int nVertices,
 			const glm::vec3* vertices,
@@ -487,7 +547,8 @@ namespace PRE
 			const unsigned int* triangleElements,
 			const PREBoneConfig& rootBoneConfig,
 			unsigned int nBoneConfigs,
-			const PREBoneConfig* const * allBoneConfigs
+			const PREBoneConfig* const * allBoneConfigs,
+			unordered_map<string, const PREAnimationConfig*>&& animationConfigs
 		)
 			:
 			nVertices(nVertices),
@@ -502,7 +563,8 @@ namespace PRE
 			triangleElements(triangleElements),
 			rootBoneConfig(rootBoneConfig),
 			_nBoneConfigs(nBoneConfigs),
-			_allBoneConfigs(allBoneConfigs) {}
+			_allBoneConfigs(allBoneConfigs),
+			animationConfigs(std::move(animationConfigs)) {}
 #pragma endregion
 
 		PREAssetManager::Impl& PREAssetManager::Impl::MakeImpl(
@@ -693,9 +755,43 @@ namespace PRE
 			return skeleton;
 		}
 
-		PREAnimation& PREAssetManager::LoadAnimation(const string& animationPath)
+		PREAnimation& PREAssetManager::LoadAnimation(
+			const string& animationPath,
+			const string& animationName
+		)
 		{
+			auto vAssimpResource = _impl.assetManager.Get(animationPath);
+			if (vAssimpResource == nullptr)
+			{
+				auto pAssimpResource = AssimpResource::Load(
+					_impl.assimp,
+					animationPath
+				);
 
+				_impl.assetManager.Store(
+					animationPath,
+					pAssimpResource->GetSize(),
+					pAssimpResource,
+					UnloadResourceData,
+					nullptr
+				);
+
+				return LoadAnimation(animationPath, animationName);
+			}
+
+			auto& assimpResource = *static_cast<AssimpResource*>(vAssimpResource);
+
+#ifdef __PRE_DEBUG__
+			assert(assimpResource.animationConfigs.find(animationName) != assimpResource.animationConfigs.end());
+#endif
+
+			auto& animation = _impl.applicationContext.rendering.CreateAnimation(
+				*assimpResource.animationConfigs.find(animationName)->second
+			);
+
+			_impl.animations[&animation] = new AnimationEntry(animationPath);
+
+			return animation;
 		}
 
 		void PREAssetManager::UnloadResourceData(void* vNil, void* vResource)

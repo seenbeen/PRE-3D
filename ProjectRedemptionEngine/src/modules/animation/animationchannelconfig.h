@@ -26,11 +26,6 @@ namespace PRE
 			friend class AnimationConfig;
 
 		public:
-			const string channelName;
-
-			AnimationChannelConfig(const string& channelName);
-			~AnimationChannelConfig();
-
 			void AddPositionKeyFrame(
 				float time,
 				const glm::vec3& position
@@ -50,6 +45,9 @@ namespace PRE
 			vector<pair<float, glm::vec3>> _positionKeyFrames;
 			vector<pair<float, glm::fquat>> _rotationKeyFrames;
 			vector<pair<float, glm::vec3>> _scaleKeyFrames;
+
+			AnimationChannelConfig();
+			~AnimationChannelConfig();
 		};
 	} // namespace AnimationModule
 } // namespace PRE

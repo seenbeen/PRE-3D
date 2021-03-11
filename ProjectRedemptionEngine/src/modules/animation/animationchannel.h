@@ -85,7 +85,6 @@ namespace PRE
 				float blendFactor
 			);
 
-			const string _channelName;
 			Impl& _impl;
 
 			AnimationChannel(const AnimationChannelConfig& animationChannelConfig);

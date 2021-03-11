@@ -344,6 +344,12 @@
     <ClInclude Include="src\core\subsystems\rendering\preboneconfig.h">
       <Filter>Header Files\Core\Subsystems\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\subsystems\rendering\preanimationchannelconfig.h">
+      <Filter>Header Files\Core\Subsystems\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\subsystems\rendering\preanimationconfig.h">
+      <Filter>Header Files\Core\Subsystems\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\modules\gameobject\gameobject.cpp">
@@ -509,6 +515,12 @@
       <Filter>Source Files\Core\Subsystems\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="src\core\subsystems\rendering\preboneconfig.cpp">
+      <Filter>Source Files\Core\Subsystems\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\rendering\preanimationchannelconfig.cpp">
+      <Filter>Source Files\Core\Subsystems\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\rendering\preanimationconfig.cpp">
       <Filter>Source Files\Core\Subsystems\Rendering</Filter>
     </ClCompile>
   </ItemGroup>

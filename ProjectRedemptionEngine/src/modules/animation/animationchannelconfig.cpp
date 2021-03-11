@@ -15,14 +15,6 @@ namespace PRE
 		using std::string;
 		using std::vector;
 
-		AnimationChannelConfig::AnimationChannelConfig(
-			const string& channelName
-		)
-			:
-			channelName(channelName) {}
-
-		AnimationChannelConfig::~AnimationChannelConfig() {}
-
 		void AnimationChannelConfig::AddPositionKeyFrame(
 			float time,
 			const glm::vec3& position
@@ -52,5 +44,9 @@ namespace PRE
 				std::make_pair(time, scale)
 			);
 		}
+
+		AnimationChannelConfig::AnimationChannelConfig() {}
+
+		AnimationChannelConfig::~AnimationChannelConfig() {}
 	} // namespace AnimationModule
 } // namespace PRE

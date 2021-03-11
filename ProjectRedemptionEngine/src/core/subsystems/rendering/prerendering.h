@@ -23,6 +23,7 @@ namespace PRE
 		class PRETexture;
 		class PREMaterial;
 		class PREAnimation;
+		class PREAnimationConfig;
 
 		using std::string;
 		using PRE::RenderingModule::Renderer;
@@ -94,7 +95,9 @@ namespace PRE
 			);
 			void DestroySkeleton(PRESkeleton& skeleton);
 
-			PREAnimation& CreateAnimation();
+			PREAnimation& CreateAnimation(
+				const PREAnimationConfig& animationConfig
+			);
 			void DestroyAnimation(PREAnimation& animation);
 
 		private:

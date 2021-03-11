@@ -189,15 +189,16 @@ namespace PRE
 			delete &skeleton;
 		}
 
-		PREAnimation& PRERendering::CreateAnimation()
+		PREAnimation& PRERendering::CreateAnimation(
+			const PREAnimationConfig& animationConfig
+		)
 		{
-			//return *(new PREAnimation(new Animation()));
+			return *(new PREAnimation(animationConfig));
 		}
 
 		void PRERendering::DestroyAnimation(PREAnimation& animation)
 		{
 			_impl.applicationContext.assetManager.TryFreeAnimation(animation);
-			delete &animation._animation;
 			delete &animation;
 		}
 

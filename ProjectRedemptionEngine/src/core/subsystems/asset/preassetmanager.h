@@ -27,6 +27,7 @@ namespace PRE
 		class PRESkeleton;
 		class PRETexture;
 		class PREAnimation;
+		class PREAnimationConfig;
 
 		using std::pair;
 		using std::string;
@@ -100,7 +101,7 @@ namespace PRE
 				size_t GetSize() override;
 
 			private:
-				StringResource(const string&& payload);
+				StringResource(string&& payload);
 			};
 
 			struct ImageResource : public ResourceBase
@@ -145,6 +146,8 @@ namespace PRE
 
 				const PREBoneConfig& rootBoneConfig;
 
+				const unordered_map<string, const PREAnimationConfig*> animationConfigs;
+
 				size_t GetSize() override;
 
 			private:
@@ -174,6 +177,11 @@ namespace PRE
 					unordered_map<string, pair<aiBone*, unsigned int>>& boneMap
 				);
 
+				static void GenerateAnimations(
+					const aiScene* pScene,
+					unordered_map<string, const PREAnimationConfig*>& animations
+				);
+
 				const unsigned int _nBoneConfigs;
 				const PREBoneConfig* const * _allBoneConfigs;
 
@@ -190,7 +198,8 @@ namespace PRE
 					const unsigned int* triangleElements,
 					const PREBoneConfig& rootBoneConfig,
 					unsigned int nBoneConfigs,
-					const PREBoneConfig* const * allBoneConfigs
+					const PREBoneConfig* const * allBoneConfigs,
+					unordered_map<string, const PREAnimationConfig*>&& animations
 				);
 			};
 #pragma endregion
@@ -233,7 +242,7 @@ namespace PRE
 			PRETexture& LoadTexture(const string& texturePath);
 			PREMesh& LoadMesh(const string& meshPath);
 			PRESkeleton& LoadSkeleton(const string& skeletonPath);
-			PREAnimation& LoadAnimation(const string& animationPath);
+			PREAnimation& LoadAnimation(const string& animationPath, const string& animationName);
 
 		private:
 			static void UnloadResourceData(void* vNil, void* vResource);

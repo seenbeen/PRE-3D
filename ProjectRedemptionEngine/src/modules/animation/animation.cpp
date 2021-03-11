@@ -17,33 +17,33 @@ namespace PRE
 		using std::string;
 		using std::unordered_map;
 
-		Animation::Impl& Animation::Impl::MakeImpl(
-			float ticksPerSecond,
-			float duration,
-			const AnimationConfig& animationConfig
-		)
+		Animation::Impl& Animation::Impl::MakeImpl(const AnimationConfig& animationConfig)
 		{
-			unordered_map<string, AnimationChannel*> channels;
+			unordered_map<string, const AnimationChannel*> channels;
 			for (
 				auto it = animationConfig._animationChannelConfigs.begin();
 				it != animationConfig._animationChannelConfigs.end();
 				++it
 			)
 			{
-				channels[(*it)->channelName] = new AnimationChannel(**it);
+				channels[it->first] = new AnimationChannel(*it->second);
 			}
-			return *(new Impl(ticksPerSecond, duration, channels));
+			return *(new Impl(
+				animationConfig._ticksPerSecond,
+				animationConfig._duration,
+				std::move(channels)
+			));
 		}
 
 		Animation::Impl::Impl(
 			float ticksPerSecond,
 			float duration,
-			unordered_map<string, AnimationChannel*>& channels
+			unordered_map<string, const AnimationChannel*>&& channels
 		)
 			:
 			ticksPerSecond(ticksPerSecond),
 			duration(duration),
-			channels(channels) {}
+			channels(std::move(channels)) {}
 
 		Animation::Impl::~Impl()
 		{
@@ -53,17 +53,13 @@ namespace PRE
 			}
 		}
 
-		Animation::Animation(
-			float ticksPerSecond,
-			float duration,
-			AnimationConfig& animationConfig
-		)
+		Animation::Animation(const AnimationConfig& animationConfig)
 			:
-			_impl(Impl::MakeImpl(ticksPerSecond, duration, animationConfig)) {}
+			_impl(Impl::MakeImpl(animationConfig)) {}
 
 		Animation::~Animation()
 		{
-			delete& _impl;
+			delete &_impl;
 		}
 
 		void Animation::GetBlendedStateAt(

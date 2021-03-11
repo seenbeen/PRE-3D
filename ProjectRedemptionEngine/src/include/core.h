@@ -18,6 +18,10 @@
 #include <core/subsystems/rendering/pretexture.h>
 #include <core/subsystems/rendering/prematerial.h>
 
+#include <core/subsystems/rendering/preanimationchannelconfig.h>
+#include <core/subsystems/rendering/preanimationconfig.h>
+#include <core/subsystems/rendering/preanimation.h>
+
 #include <core/subsystems/time/pretimeconfig.h>
 #include <core/subsystems/time/pretime.h>
 

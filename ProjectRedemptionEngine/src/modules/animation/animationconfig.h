@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <vector>
+#include <unordered_map>
 
 namespace PRE
 {
@@ -10,7 +10,7 @@ namespace PRE
 		class AnimationChannelConfig;
 
 		using std::string;
-		using std::vector;
+		using std::unordered_map;
 
 		class AnimationConfig
 		{
@@ -20,7 +20,7 @@ namespace PRE
 			friend class Animation;
 
 		public:
-			AnimationConfig();
+			AnimationConfig(float ticksPerSecond, float duration);
 			~AnimationConfig();
 
 			AnimationChannelConfig& AddAnimationChannelConfig(
@@ -28,7 +28,9 @@ namespace PRE
 			);
 
 		private:
-			vector<AnimationChannelConfig*> _animationChannelConfigs;
+			const float _ticksPerSecond;
+			const float _duration;
+			unordered_map<string, AnimationChannelConfig*> _animationChannelConfigs;
 		};
 	} // namespace AnimationModule
 } // namespace PRE
