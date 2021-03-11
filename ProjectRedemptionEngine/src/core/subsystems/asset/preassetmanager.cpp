@@ -1,5 +1,6 @@
 #include <core/subsystems/asset/preassetmanager.h>
 
+#include <algorithm>
 #include <cstring>
 #include <fstream>
 #include <sstream>
@@ -377,32 +378,101 @@ namespace PRE
 
 			for (auto i = 0u; i < pCurrentNode->mNumMeshes; ++i)
 			{
-				size_t vertexOffset = vertices.size();
+				auto vertexOffset = (unsigned int)vertices.size();
 				auto pMesh = pMeshes[pCurrentNode->mMeshes[i]];
-				for (auto j = 0u; j < pMesh->mNumVertices; ++j)
-				{
-					auto vertex = pMesh->mVertices[j];
-					auto normal = pMesh->HasNormals() ? pMesh->mNormals[j] : aiVector3D();
-					auto tangent = pMesh->HasTangentsAndBitangents() ? pMesh->mTangents[j] : aiVector3D();
-					auto biTangent = pMesh->HasTangentsAndBitangents() ? pMesh->mBitangents[j] : aiVector3D();
-					auto uv = pMesh->HasTextureCoords(0) ? pMesh->mTextureCoords[0][j] : aiVector3D();
 
-					vertices.push_back(glm::vec3(vertex.x, vertex.y, vertex.z));
-					normals.push_back(glm::vec3(normal.x, normal.y, normal.z));
-					tangents.push_back(glm::vec3(tangent.x, tangent.y, tangent.z));
-					biTangents.push_back(glm::vec3(biTangent.x, biTangent.y, biTangent.z));
-					uvs.push_back(glm::vec2(uv.x, uv.y));
+				std::for_each(
+					pMesh->mVertices,
+					pMesh->mVertices + pMesh->mNumVertices,
+					[&vertices](const auto& aiVertex) {
+						vertices.push_back(glm::vec3(aiVertex.x, aiVertex.y, aiVertex.z));
+					}
+				);
+
+				if (pMesh->HasNormals())
+				{
+					std::for_each(
+						pMesh->mNormals,
+						pMesh->mNormals + pMesh->mNumVertices,
+						[&normals](const auto& aiNormal) {
+							normals.push_back(glm::vec3(aiNormal.x, aiNormal.y, aiNormal.z));
+						}
+					);
 				}
+				else
+				{
+					std::for_each(
+						pMesh->mVertices,
+						pMesh->mVertices + pMesh->mNumVertices,
+						[&normals](const auto& _) { normals.push_back(glm::vec3()); }
+					);
+				}
+
+				if (pMesh->HasTangentsAndBitangents())
+				{
+					std::for_each(
+						pMesh->mTangents,
+						pMesh->mTangents + pMesh->mNumVertices,
+						[&tangents](const auto& aiTangent) {
+							tangents.push_back(glm::vec3(aiTangent.x, aiTangent.y, aiTangent.z));
+						}
+					);
+					std::for_each(
+						pMesh->mBitangents,
+						pMesh->mBitangents + pMesh->mNumVertices,
+						[&biTangents](const auto& aiBiTangent) {
+							biTangents.push_back(glm::vec3(aiBiTangent.x, aiBiTangent.y, aiBiTangent.z));
+						}
+					);
+				}
+				else
+				{
+					std::for_each(
+						pMesh->mVertices,
+						pMesh->mVertices + pMesh->mNumVertices,
+						[&tangents, &biTangents](const auto& _) {
+							tangents.push_back(glm::vec3());
+							biTangents.push_back(glm::vec3());
+						}
+					);
+				}
+
+				if (pMesh->HasTextureCoords(0))
+				{
+					std::for_each(
+						pMesh->mTextureCoords[0],
+						pMesh->mTextureCoords[0] + pMesh->mNumVertices,
+						[&uvs](const auto& aiUv) { uvs.push_back(glm::vec2(aiUv.x, aiUv.y)); }
+					);
+				}
+				else
+				{
+					std::for_each(
+						pMesh->mVertices,
+						pMesh->mVertices + pMesh->mNumVertices,
+						[&uvs](const auto& _) { uvs.push_back(glm::vec2()); }
+					);
+				}
+
 				if (pMesh->HasFaces())
 				{
-					for (auto j = 0u; j < pMesh->mNumFaces; ++j)
-					{
-						auto& face = pMesh->mFaces[j];
-						for (auto k = 0u; k < face.mNumIndices; ++k)
+					std::for_each(
+						pMesh->mFaces,
+						pMesh->mFaces + pMesh->mNumFaces,
+						[&triangleElements, &vertexOffset](const auto& aiFace)
 						{
-							triangleElements.push_back((unsigned int)vertexOffset + face.mIndices[k]);
+#if __PRE_DEBUG__
+							assert(aiFace.mNumIndices == 3);
+#endif
+
+							for (auto i = 0u; i < aiFace.mNumIndices; ++i)
+							{
+								triangleElements.push_back(
+									vertexOffset + aiFace.mIndices[i]
+								);
+							}
 						}
-					}
+					);
 				}
 			}
 
@@ -442,31 +512,38 @@ namespace PRE
 			{
 				auto pMesh = pMeshes[pCurrentNode->mMeshes[i]];
 
-				for (auto j = 0u; j < pMesh->mNumVertices; ++j)
-				{
-					vertexBoneInfluenceIndices.push_back(glm::ivec4(-1, -1, -1, -1));
-					vertexBoneInfluenceWeights.push_back(glm::vec4(0, 0, 0, 0));
-				}
+				std::for_each(
+					pMesh->mVertices,
+					pMesh->mVertices + pMesh->mNumVertices,
+					[&vertexBoneInfluenceIndices, &vertexBoneInfluenceWeights](const auto _)
+					{
+						vertexBoneInfluenceIndices.push_back(glm::ivec4(-1));
+						vertexBoneInfluenceWeights.push_back(glm::vec4());
+					}
+				);
 
-				for (auto j = 0u; j < pMesh->mNumBones; ++j)
-				{
-					auto& pBone = pMesh->mBones[j];
-					string boneName(pBone->mName.C_Str());
+				std::for_each(
+					pMesh->mBones,
+					pMesh->mBones + pMesh->mNumBones,
+					[&boneMap, &vertexOffset](const auto& pBone)
+					{
+						string boneName(pBone->mName.C_Str());
 
 #ifdef __PRE_DEBUG__
-					assert(boneMap.find(boneName) == boneMap.end());
+						assert(boneMap.find(boneName) == boneMap.end());
 #endif
 
-					boneMap.insert(
-						std::make_pair(
-							boneName,
+						boneMap.insert(
 							std::make_pair(
-								pBone,
-								vertexOffset
+								boneName,
+								std::make_pair(
+									pBone,
+									vertexOffset
+								)
 							)
-						)
-					);
-				}
+						);
+					}
+				);
 
 				vertexOffset += pMesh->mNumVertices;
 			}
@@ -489,47 +566,62 @@ namespace PRE
 			unordered_map<string, const PREAnimationConfig*>& animationConfigs
 		)
 		{
-			for (auto i = 0u; i < pScene->mNumAnimations; ++i)
-			{
-				auto pAnimation = pScene->mAnimations[i];
-				auto pAnimConfig = new PREAnimationConfig(
-					(float)pAnimation->mTicksPerSecond,
-					(float)pAnimation->mDuration
-				);
-
-				for (auto j = 0u; j < pAnimation->mNumChannels; ++j)
+			std::for_each(
+				pScene->mAnimations,
+				pScene->mAnimations + pScene->mNumAnimations,
+				[&animationConfigs](const auto& pAnimation)
 				{
-					auto pAnimChannel = pAnimation->mChannels[j];
-					auto& channelConfig = pAnimConfig->AddAnimationChannelConfig(
-						string(pAnimChannel->mNodeName.C_Str())
+					auto pAnimConfig = new PREAnimationConfig(
+						(float)pAnimation->mTicksPerSecond,
+						(float)pAnimation->mDuration
 					);
-					for (auto k = 0u; k < pAnimChannel->mNumPositionKeys; ++k)
-					{
-						auto& key = pAnimChannel->mPositionKeys[k];
-						channelConfig.AddPositionKeyFrame(
-							(float)key.mTime,
-							glm::vec3(key.mValue.x, key.mValue.y, key.mValue.z)
-						);
-					}
-					for (auto k = 0u; k < pAnimChannel->mNumRotationKeys; ++k)
-					{
-						auto& key = pAnimChannel->mRotationKeys[k];
-						channelConfig.AddRotationKeyFrame(
-							(float)key.mTime,
-							glm::fquat(key.mValue.w, key.mValue.x, key.mValue.y, key.mValue.z)
-						);
-					}
-					for (auto k = 0u; k < pAnimChannel->mNumScalingKeys; ++k)
-					{
-						auto& key = pAnimChannel->mScalingKeys[k];
-						channelConfig.AddScaleKeyFrame(
-							(float)key.mTime,
-							glm::vec3(key.mValue.x, key.mValue.y, key.mValue.z)
-						);
-					}
+
+					std::for_each(
+						pAnimation->mChannels,
+						pAnimation->mChannels + pAnimation->mNumChannels,
+						[&pAnimConfig](const auto& pAnimChannel)
+						{
+							auto& channelConfig = pAnimConfig->AddAnimationChannelConfig(
+								string(pAnimChannel->mNodeName.C_Str())
+							);
+							std::for_each(
+								pAnimChannel->mPositionKeys,
+								pAnimChannel->mPositionKeys + pAnimChannel->mNumPositionKeys,
+								[&channelConfig](const auto& key)
+								{
+									channelConfig.AddPositionKeyFrame(
+										(float)key.mTime,
+										glm::vec3(key.mValue.x, key.mValue.y, key.mValue.z)
+									);
+								}
+							);
+							std::for_each(
+								pAnimChannel->mRotationKeys,
+								pAnimChannel->mRotationKeys + pAnimChannel->mNumRotationKeys,
+								[&channelConfig](const auto& key)
+								{
+									channelConfig.AddRotationKeyFrame(
+										(float)key.mTime,
+										glm::fquat(key.mValue.w, key.mValue.x, key.mValue.y, key.mValue.z)
+									);
+								}
+							);
+							std::for_each(
+								pAnimChannel->mScalingKeys,
+								pAnimChannel->mScalingKeys + pAnimChannel->mNumScalingKeys,
+								[&channelConfig](const auto& key)
+								{
+									channelConfig.AddScaleKeyFrame(
+										(float)key.mTime,
+										glm::vec3(key.mValue.x, key.mValue.y, key.mValue.z)
+									);
+								}
+							);
+						}
+					);
+					animationConfigs[pAnimation->mName.C_Str()] = pAnimConfig;
 				}
-				animationConfigs[string(pAnimation->mName.C_Str())] = pAnimConfig;
-			}
+			);
 		}
 
 		PREAssetManager::AssimpResource::AssimpResource(
