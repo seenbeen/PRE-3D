@@ -1,22 +1,16 @@
 #pragma once
-#include <core/subsystems/world/pregameobjectcomponent.h>
+#include <include/modules/rendering.h>
 
-namespace PRE
-{
-	namespace RenderingModule
-	{
-		class RenderModel;
-	} // namespace RenderingModule
-} // namespace PRE
+#include <core/subsystems/world/pregameobjectcomponent.h>
 
 namespace PRE
 {
 	namespace Core
 	{
+		class PRERendering;
 		class PRECameraComponent;
 		class PRETransformComponent;
 
-		class PRERendering;
 		class PREMaterial;
 		class PREMesh;
 		class PRESkeleton;
@@ -51,8 +45,8 @@ namespace PRE
 			PRETransformComponent* _pTransformComponent = nullptr;
 			RenderModel* _pModel = nullptr;
 
-			PRECameraComponent* _pPreviousCameraComponent = nullptr;
-			PRECameraComponent* _pCameraComponent = nullptr;
+			PRECameraComponent* _pCurrentCameraComponent = nullptr;
+			PRECameraComponent* _pNextCameraComponent = nullptr;
 
 			PREMaterial* _pMaterial = nullptr;
 			PREMesh* _pMesh = nullptr;

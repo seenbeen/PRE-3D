@@ -392,258 +392,187 @@ namespace PRE
 
 		void PRERendering::Shutdown() {}
 
-		void PRERendering::AllocateCamera(PRECameraComponent& cameraComponent)
+		RenderCamera& PRERendering::AllocateCamera(
+			const CameraKind& kind,
+			float size,
+			float aspectRatio,
+			float nearClippingPlane,
+			float farClippingPlane
+		)
 		{
 			auto& camera = _impl.renderer.AllocateCamera(
-				cameraComponent._kind == PRECameraComponent::Kind::ORTHOGRAPHIC ?
+				kind == CameraKind::ORTHOGRAPHIC ?
 					Renderer::CameraKind::ORTHOGRAPHIC :
 					Renderer::CameraKind::PERSPECTIVE,
-				cameraComponent._size,
-				cameraComponent._aspectRatio,
-				cameraComponent._nearClippingPlane,
-				cameraComponent._farClippingPlane
+				size,
+				aspectRatio,
+				nearClippingPlane,
+				farClippingPlane
 			);
-			cameraComponent._pCamera = &camera;
+			return camera;
 		}
 
-		void PRERendering::UpdateCamera(PRECameraComponent& cameraComponent)
+		void PRERendering::DeallocateCamera(RenderCamera& camera)
 		{
-			cameraComponent._pCamera->SetViewMatrix(
-				cameraComponent._pTransformComponent->GetInverseMatrix()
+			_impl.renderer.DeallocateCamera(camera);
+		}
+
+		void PRERendering::LinkCameraComponentToRenderTexture(
+			PRECameraComponent& cameraComponent,
+			PRERenderTexture& renderTexture
+		)
+		{
+			for (
+				auto it = cameraComponent._associatedModelComponents.begin();
+				it != cameraComponent._associatedModelComponents.end();
+				++it
+				)
+			{
+				auto& modelRendererComponent = **it;
+				_impl.renderer.AddModelToTagGroup(
+					*modelRendererComponent._pModel,
+					renderTexture._tagGroup
+				);
+			}
+
+			if (cameraComponent._pCurrentSkyBox != nullptr)
+			{
+				_impl.renderer.AddModelToTagGroup(
+					cameraComponent._pCurrentSkyBox->_model,
+					renderTexture._tagGroup
+				);
+			}
+
+			_impl.renderer.BindCompositingPair(
+				*cameraComponent._pCamera,
+				renderTexture._compositingNode
 			);
-
-			if (cameraComponent._hasChanged)
-			{
-				cameraComponent._hasChanged = false;
-				cameraComponent._pCamera->SetKind(
-					cameraComponent._kind == PRECameraComponent::Kind::ORTHOGRAPHIC ?
-					RenderCamera::Kind::ORTHOGRAPHIC :
-					RenderCamera::Kind::PERSPECTIVE
-				);
-				cameraComponent._pCamera->SetSize(cameraComponent._size);
-				cameraComponent._pCamera->SetAspectRatio(cameraComponent._aspectRatio);
-				cameraComponent._pCamera->SetNearClippingPlane(cameraComponent._nearClippingPlane);
-				cameraComponent._pCamera->SetFarClippingPlane(cameraComponent._farClippingPlane);
-			}
-
-			auto pPreviousRenderTexture = cameraComponent._pPreviousRenderTexture;
-			auto pRenderTexture = cameraComponent._pRenderTexture;
-			auto pPreviousSkyBox = cameraComponent._pPreviousSkyBox;
-			auto pSkyBox = cameraComponent._pSkyBox;
-			auto& associatedModelComponents = cameraComponent._associatedModelComponents;
-
-			if (pPreviousRenderTexture != pRenderTexture)
-			{
-				if (pPreviousRenderTexture != nullptr)
-				{
-					for (auto it = associatedModelComponents.begin(); it != associatedModelComponents.end(); ++it)
-					{
-						auto& modelRendererComponent = **it;
-						_impl.renderer.RemoveModelFromTagGroup(
-							*modelRendererComponent._pModel,
-							pPreviousRenderTexture->_tagGroup
-						);
-					}
-
-					_impl.renderer.UnbindCompositingPair(
-						*cameraComponent._pCamera,
-						pPreviousRenderTexture->_compositingNode
-					);
-
-					if (pPreviousSkyBox != nullptr)
-					{
-						_impl.renderer.RemoveModelFromTagGroup(
-							pPreviousSkyBox->_model,
-							pPreviousRenderTexture->_tagGroup
-						);
-					}
-				}
-
-				if (pRenderTexture != nullptr)
-				{
-					_impl.renderer.BindCompositingPair(
-						*cameraComponent._pCamera,
-						pRenderTexture->_compositingNode
-					);
-
-					for (auto it = associatedModelComponents.begin(); it != associatedModelComponents.end(); ++it)
-					{
-						auto& modelRendererComponent = **it;
-						_impl.renderer.AddModelToTagGroup(
-							*modelRendererComponent._pModel,
-							pRenderTexture->_tagGroup
-						);
-					}
-
-					if (pPreviousSkyBox != nullptr)
-					{
-						_impl.renderer.AddModelToTagGroup(
-							pPreviousSkyBox->_model,
-							pRenderTexture->_tagGroup
-						);
-					}
-				}
-
-				cameraComponent._pPreviousRenderTexture = pRenderTexture;
-			}
-
-			if (pRenderTexture != nullptr && pPreviousSkyBox != pSkyBox)
-			{
-				if (pPreviousSkyBox != nullptr)
-				{
-					_impl.renderer.RemoveModelFromTagGroup(
-						pPreviousSkyBox->_model,
-						pRenderTexture->_tagGroup
-					);
-				}
-
-				if (pSkyBox != nullptr)
-				{
-					_impl.renderer.AddModelToTagGroup(
-						pSkyBox->_model,
-						pRenderTexture->_tagGroup
-					);
-				}
-
-				cameraComponent._pPreviousSkyBox = cameraComponent._pSkyBox;
-			}
 		}
 
-		void PRERendering::DeallocateCamera(PRECameraComponent& cameraComponent)
+		void PRERendering::UnlinkCameraComponentFromRenderTexture(
+			PRECameraComponent& cameraComponent,
+			PRERenderTexture& renderTexture
+		)
 		{
-			auto pPreviousRenderTexture = cameraComponent._pPreviousRenderTexture;
-			auto pPreviousSkyBox = cameraComponent._pPreviousSkyBox;
-			auto& associatedModelComponents = cameraComponent._associatedModelComponents;
-
-			if (pPreviousRenderTexture != nullptr)
+			for (
+				auto it = cameraComponent._associatedModelComponents.begin();
+				it != cameraComponent._associatedModelComponents.end();
+				++it
+				)
 			{
-				for (auto it = associatedModelComponents.begin(); it != associatedModelComponents.end(); ++it)
-				{
-					auto& modelRendererComponent = **it;
-					_impl.renderer.RemoveModelFromTagGroup(
-						*modelRendererComponent._pModel,
-						pPreviousRenderTexture->_tagGroup
-					);
-					modelRendererComponent._pCameraComponent = nullptr;
-				}
-
-				if (pPreviousSkyBox != nullptr)
-				{
-					_impl.renderer.RemoveModelFromTagGroup(
-						pPreviousSkyBox->_model,
-						pPreviousRenderTexture->_tagGroup
-					);
-				}
-
-				_impl.renderer.UnbindCompositingPair(
-					*cameraComponent._pCamera,
-					pPreviousRenderTexture->_compositingNode
+				auto& modelRendererComponent = **it;
+				_impl.renderer.RemoveModelFromTagGroup(
+					*modelRendererComponent._pModel,
+					renderTexture._tagGroup
 				);
-
-				// not necessary to re-assign pRenderTexture values
-				// ie: cameraComponent._pPreviousRenderTexture = cameraComponent._pRenderTexture = nullptr;
 			}
 
-			_impl.renderer.DeallocateCamera(*cameraComponent._pCamera);
+			if (cameraComponent._pCurrentSkyBox != nullptr)
+			{
+				_impl.renderer.RemoveModelFromTagGroup(
+					cameraComponent._pCurrentSkyBox->_model,
+					renderTexture._tagGroup
+				);
+			}
+
+			_impl.renderer.UnbindCompositingPair(
+				*cameraComponent._pCamera,
+				renderTexture._compositingNode
+			);
 		}
 
-		void PRERendering::AllocateModel(PREModelRendererComponent& modelRendererComponent)
+		RenderModel& PRERendering::AllocateModel()
 		{
-			auto& model = _impl.renderer.AllocateModel();
-			modelRendererComponent._pModel = &model;
+			return _impl.renderer.AllocateModel();
 		}
 
-		void PRERendering::UpdateModel(
+		void PRERendering::DeallocateModel(RenderModel& model)
+		{
+			_impl.renderer.DeallocateModel(model);
+		}
+
+		void PRERendering::UpdateModelRendererComponentModel(
 			PREModelRendererComponent& modelRendererComponent
 		)
 		{
-			modelRendererComponent._pModel->modelMatrix = modelRendererComponent._pTransformComponent->GetMatrix();
+			_impl.renderer.SetModelMesh(
+				*modelRendererComponent._pModel,
+				modelRendererComponent._pMesh != nullptr ?
+				&modelRendererComponent._pMesh->_mesh :
+				nullptr
+			);
 
-			if (modelRendererComponent._hasChanged)
+			_impl.renderer.SetModelSkeleton(
+				*modelRendererComponent._pModel,
+				modelRendererComponent._pSkeleton != nullptr ?
+				&modelRendererComponent._pSkeleton->_skeleton :
+				nullptr
+			);
+
+			_impl.renderer.SetModelMaterial(
+				*modelRendererComponent._pModel,
+				modelRendererComponent._pMaterial != nullptr ?
+				&modelRendererComponent._pMaterial->_material :
+				nullptr
+			);
+		}
+
+		void PRERendering::LinkModelRendererComponentToCameraComponent(
+			PREModelRendererComponent& modelRendererComponent,
+			PRECameraComponent& cameraComponent
+		)
+		{
+			if (cameraComponent._pCurrentRenderTexture != nullptr)
 			{
-				modelRendererComponent._hasChanged = false;
-
-				_impl.renderer.SetModelMesh(
+				_impl.renderer.AddModelToTagGroup(
 					*modelRendererComponent._pModel,
-					modelRendererComponent._pMesh != nullptr ?
-						&modelRendererComponent._pMesh->_mesh :
-						nullptr
-				);
-
-				_impl.renderer.SetModelSkeleton(
-					*modelRendererComponent._pModel,
-					modelRendererComponent._pSkeleton != nullptr ?
-						&modelRendererComponent._pSkeleton->_skeleton :
-						nullptr
-				);
-
-				_impl.renderer.SetModelMaterial(
-					*modelRendererComponent._pModel,
-					modelRendererComponent._pMaterial != nullptr ?
-						&modelRendererComponent._pMaterial->_material :
-						nullptr
+					cameraComponent._pCurrentRenderTexture->_tagGroup
 				);
 			}
+			cameraComponent._associatedModelComponents.insert(&modelRendererComponent);
+		}
 
-			auto pPreviousCameraComponent = modelRendererComponent._pPreviousCameraComponent;
-			auto pCameraComponent = modelRendererComponent._pCameraComponent;
-
-			if (pPreviousCameraComponent != pCameraComponent)
+		void PRERendering::UnlinkModelRendererComponentFromCameraComponent(
+			PREModelRendererComponent& modelRendererComponent,
+			PRECameraComponent& cameraComponent
+		)
+		{
+			if (cameraComponent._pCurrentRenderTexture != nullptr)
 			{
-				if (pPreviousCameraComponent != nullptr)
-				{
-					if (pPreviousCameraComponent->_pPreviousRenderTexture != nullptr)
-					{
-						_impl.renderer.RemoveModelFromTagGroup(
-							*modelRendererComponent._pModel,
-							pPreviousCameraComponent->_pPreviousRenderTexture->_tagGroup
-						);
-					}
-					pPreviousCameraComponent->_associatedModelComponents.erase(
-						&modelRendererComponent
-					);
-				}
+				_impl.renderer.RemoveModelFromTagGroup(
+					*modelRendererComponent._pModel,
+					cameraComponent._pCurrentRenderTexture->_tagGroup
+				);
+			}
+			cameraComponent._associatedModelComponents.erase(&modelRendererComponent);
+		}
 
-				if (pCameraComponent != nullptr)
-				{
-					pCameraComponent->_associatedModelComponents.insert(
-						&modelRendererComponent
-					);
-					if (pCameraComponent->_pPreviousRenderTexture != nullptr)
-					{
-						_impl.renderer.AddModelToTagGroup(
-							*modelRendererComponent._pModel,
-							pCameraComponent->_pPreviousRenderTexture->_tagGroup
-						);
-					}
-				}
-
-				modelRendererComponent._pPreviousCameraComponent = pCameraComponent;
+		void PRERendering::LinkSkyBoxToCameraComponent(
+			const PRESkyBox& skyBox,
+			PRECameraComponent& cameraComponent
+		)
+		{
+			if (cameraComponent._pCurrentRenderTexture != nullptr)
+			{
+				_impl.renderer.AddModelToTagGroup(
+					skyBox._model,
+					cameraComponent._pCurrentRenderTexture->_tagGroup
+				);
 			}
 		}
 
-		void PRERendering::DeallocateModel(PREModelRendererComponent& modelRendererComponent)
+		void PRERendering::UnlinkSkyBoxFromCameraComponent(
+			const PRESkyBox& skyBox,
+			PRECameraComponent& cameraComponent
+		)
 		{
-			auto pCameraComponent = modelRendererComponent._pCameraComponent;
-
-			if (pCameraComponent != nullptr)
+			if (cameraComponent._pCurrentRenderTexture != nullptr)
 			{
-				if (pCameraComponent->_pPreviousRenderTexture != nullptr)
-				{
-					_impl.renderer.RemoveModelFromTagGroup(
-						*modelRendererComponent._pModel,
-						pCameraComponent->_pPreviousRenderTexture->_tagGroup
-					);
-				}
-				pCameraComponent->_associatedModelComponents.erase(
-					&modelRendererComponent
+				_impl.renderer.RemoveModelFromTagGroup(
+					skyBox._model,
+					cameraComponent._pCurrentRenderTexture->_tagGroup
 				);
-
-				// not necessary to re-assign pCamera tracker values
-				// ie: modelRendererComponent._pPreviousCamera = modelRendererComponent._pCamera;
 			}
-
-			_impl.renderer.DeallocateModel(*modelRendererComponent._pModel);
 		}
 	}
 }

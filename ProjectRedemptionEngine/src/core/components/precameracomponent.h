@@ -9,10 +9,10 @@ namespace PRE
 {
 	namespace Core
 	{
-		class PREModelRendererComponent;
-		class PRETransformComponent;
-
 		class PRERendering;
+		class PRETransformComponent;
+		class PREModelRendererComponent;
+
 		class PRERenderTexture;
 		class PRESkyBox;
 
@@ -67,10 +67,10 @@ namespace PRE
 			float _nearClippingPlane = 0.1f;
 			float _farClippingPlane = 1000.0f;
 
-			PRERenderTexture* _pPreviousRenderTexture = nullptr;
-			PRERenderTexture* _pRenderTexture = nullptr;
-			const PRESkyBox* _pPreviousSkyBox = nullptr;
-			const PRESkyBox* _pSkyBox = nullptr;
+			PRERenderTexture* _pCurrentRenderTexture = nullptr;
+			PRERenderTexture* _pNextRenderTexture = nullptr;
+			const PRESkyBox* _pCurrentSkyBox = nullptr;
+			const PRESkyBox* _pNextSkyBox = nullptr;
 		};
 	} // namespace Core
 } // namespace PRE

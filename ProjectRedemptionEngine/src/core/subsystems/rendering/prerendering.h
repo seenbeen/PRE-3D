@@ -133,6 +133,8 @@ namespace PRE
 			void DestroySkyBox(PRESkyBox& skyBox);
 
 		private:
+			enum class CameraKind { ORTHOGRAPHIC, PERSPECTIVE };
+
 			static PRERendering& MakePRERendering(
 				const PRERenderingConfig& renderingConfig,
 				PREApplicationContext& applicationContext
@@ -150,13 +152,48 @@ namespace PRE
 			void Update();
 			void Shutdown();
 
-			void AllocateCamera(PRECameraComponent& cameraComponent);
-			void UpdateCamera(PRECameraComponent& cameraComponent);
-			void DeallocateCamera(PRECameraComponent& cameraComponent);
+			RenderCamera& AllocateCamera(
+				const CameraKind& kind,
+				float size,
+				float aspectRatio,
+				float nearClippingPlane,
+				float farClippingPlane
+			);
+			void DeallocateCamera(RenderCamera& camera);
 
-			void AllocateModel(PREModelRendererComponent& modelRendererComponent);
-			void UpdateModel(PREModelRendererComponent& modelRendererComponent);
-			void DeallocateModel(PREModelRendererComponent& modelRendererComponent);
+			void LinkCameraComponentToRenderTexture(
+				PRECameraComponent& cameraComponent,
+				PRERenderTexture& renderTexture
+			);
+			void UnlinkCameraComponentFromRenderTexture(
+				PRECameraComponent& cameraComponent,
+				PRERenderTexture& renderTexture
+			);
+
+			RenderModel& AllocateModel();
+			void DeallocateModel(RenderModel& model);
+
+			void UpdateModelRendererComponentModel(
+				PREModelRendererComponent& modelRendererComponent
+			);
+
+			void LinkModelRendererComponentToCameraComponent(
+				PREModelRendererComponent& modelRendererComponent,
+				PRECameraComponent& cameraComponent
+			);
+			void UnlinkModelRendererComponentFromCameraComponent(
+				PREModelRendererComponent& modelRendererComponent,
+				PRECameraComponent& cameraComponent
+			);
+
+			void LinkSkyBoxToCameraComponent(
+				const PRESkyBox& skyBox,
+				PRECameraComponent& cameraComponent
+			);
+			void UnlinkSkyBoxFromCameraComponent(
+				const PRESkyBox& skyBox,
+				PRECameraComponent& cameraComponent
+			);
 		};
 	} // namespace Core
 } // namespace PRE

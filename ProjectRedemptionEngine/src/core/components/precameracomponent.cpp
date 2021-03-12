@@ -3,6 +3,7 @@
 #include <include/modules/rendering.h>
 
 #include <core/components/pretransformcomponent.h>
+#include <core/components/premodelrenderercomponent.h>
 
 #include <core/subsystems/world/pregameobjectcomponent.h>
 #include <core/subsystems/rendering/prerendering.h>
@@ -73,40 +74,127 @@ namespace PRE
 
 		void PRECameraComponent::SetRenderTexture(PRERenderTexture* pRenderTexture)
 		{
-			_pRenderTexture = pRenderTexture;
+			_pNextRenderTexture = pRenderTexture;
 			// hasChanged does not need to be set here.
 		}
 
 		PRERenderTexture* PRECameraComponent::GetRenderTexture() const
 		{
-			return _pRenderTexture;
+			return _pNextRenderTexture;
 		}
 
 		void PRECameraComponent::SetSkyBox(const PRESkyBox* pSkyBox)
 		{
-			_pSkyBox = pSkyBox;
+			_pNextSkyBox = pSkyBox;
 			// hasChanged does not need to be set here.
 		}
 
 		const PRESkyBox* PRECameraComponent::GetSkyBox()
 		{
-			return _pSkyBox;
+			return _pNextSkyBox;
 		}
 
 		void PRECameraComponent::OnStart()
 		{
 			_pTransformComponent = gameObject().GetComponent<PRETransformComponent>();
-			GetRendering().AllocateCamera(*this);
+			_pCamera = &GetRendering().AllocateCamera(
+				_kind == Kind::ORTHOGRAPHIC ?
+				PRERendering::CameraKind::ORTHOGRAPHIC :
+				PRERendering::CameraKind::PERSPECTIVE,
+				_size,
+				_aspectRatio,
+				_nearClippingPlane,
+				_farClippingPlane
+			);
 		}
 
 		void PRECameraComponent::OnUpdate()
 		{
-			GetRendering().UpdateCamera(*this);
+			_pCamera->SetViewMatrix(
+				_pTransformComponent->GetInverseMatrix()
+			);
+
+			if (_hasChanged)
+			{
+				_hasChanged = false;
+				_pCamera->SetKind(
+					_kind == PRECameraComponent::Kind::ORTHOGRAPHIC ?
+					RenderCamera::Kind::ORTHOGRAPHIC :
+					RenderCamera::Kind::PERSPECTIVE
+				);
+				_pCamera->SetSize(_size);
+				_pCamera->SetAspectRatio(_aspectRatio);
+				_pCamera->SetNearClippingPlane(_nearClippingPlane);
+				_pCamera->SetFarClippingPlane(_farClippingPlane);
+			}
+
+			if (_pCurrentRenderTexture != _pNextRenderTexture)
+			{
+				if (_pCurrentRenderTexture != nullptr)
+				{
+					GetRendering().UnlinkCameraComponentFromRenderTexture(
+						*this,
+						*_pCurrentRenderTexture
+					);
+				}
+
+				_pCurrentRenderTexture = _pNextRenderTexture;
+
+				if (_pCurrentRenderTexture != nullptr)
+				{
+					GetRendering().LinkCameraComponentToRenderTexture(
+						*this,
+						*_pCurrentRenderTexture
+					);
+				}
+			}
+
+			if (_pCurrentSkyBox != _pNextSkyBox)
+			{
+				if (_pCurrentSkyBox != nullptr)
+				{
+					GetRendering().UnlinkSkyBoxFromCameraComponent(
+						*_pCurrentSkyBox,
+						*this
+					);
+				}
+
+				_pCurrentSkyBox = _pNextSkyBox;
+
+				if (_pCurrentSkyBox != nullptr)
+				{
+					GetRendering().LinkSkyBoxToCameraComponent(
+						*_pCurrentSkyBox,
+						*this
+					);
+				}
+			}
 		}
 
 		void PRECameraComponent::OnDestroy()
 		{
-			GetRendering().DeallocateCamera(*this);
+			if (_pCurrentRenderTexture != nullptr)
+			{
+				GetRendering().UnlinkCameraComponentFromRenderTexture(
+					*this,
+					*_pCurrentRenderTexture
+				);
+
+				for (
+					auto it = _associatedModelComponents.begin();
+					it != _associatedModelComponents.end();
+					++it
+					)
+				{
+					GetRendering().UnlinkModelRendererComponentFromCameraComponent(
+						**it,
+						*this
+					);
+				}
+
+				_pCurrentRenderTexture = nullptr;
+			}
+			GetRendering().DeallocateCamera(*_pCamera);
 		}
 	} // namespace Core
 } // namespace PRE

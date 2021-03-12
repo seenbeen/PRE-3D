@@ -171,9 +171,9 @@ protected:
             GetAssetManager().rootAssetPath + skyBoxFrontPath,
             GetAssetManager().rootAssetPath + skyBoxBackPath
         );
-        cameraComponent.SetSkyBox(_pSkybox);
+        //cameraComponent.SetSkyBox(_pSkybox);
         gameObject().GetComponent<PRETransformComponent>()->SetPosition(
-            glm::vec3(0, 0, 0)
+            glm::vec3(0, 0, 10)
         );
     }
 
@@ -202,7 +202,7 @@ protected:
         }
         auto _transform = gameObject().GetComponent<PRETransformComponent>();
         auto euler = _transform->GetLocalEuler() + glm::vec3(0, 30, 0) * GetTime().GetDeltaTime();
-        _transform->SetLocalEuler(euler);
+        //_transform->SetLocalEuler(euler);
     }
 
     void OnDestroy() override
@@ -306,25 +306,25 @@ void OnInitialize(PREApplicationContext& applicationContext)
     //backpack.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
     //auto pBackpackTransform = backpack.GetComponent<PRETransformComponent>();
 
-    //{
-    //    auto& vampireA = applicationContext.world.Instantiate(vampireTemplate);
-    //    auto pvampireATransform = vampireA.GetComponent<PRETransformComponent>();
-    //    pvampireATransform->SetPosition(
-    //        pvampireATransform->GetPosition() + glm::vec3(-4, 0, 0)
-    //    );
-    //    //pLinkATransform->SetParent(pBackpackTransform, true);
-    //    vampireA.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
-    //}
-    //for (int i = 0; i < 1; ++i)
-    //{
-    //    auto& vampireB = applicationContext.world.Instantiate(vampireTemplate2);
-    //    auto pvampireBTransform = vampireB.GetComponent<PRETransformComponent>();
-    //    pvampireBTransform->SetPosition(
-    //        pvampireBTransform->GetPosition() + glm::vec3(4 + i, 0, 0)
-    //    );
-    //    //pLinkBTransform->SetParent(pBackpackTransform, true);
-    //    vampireB.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
-    //}
+    {
+        auto& vampireA = applicationContext.world.Instantiate(vampireTemplate);
+        auto pvampireATransform = vampireA.GetComponent<PRETransformComponent>();
+        pvampireATransform->SetPosition(
+            pvampireATransform->GetPosition() + glm::vec3(-4, 0, 0)
+        );
+        //pLinkATransform->SetParent(pBackpackTransform, true);
+        vampireA.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
+    }
+    for (int i = 0; i < 1; ++i)
+    {
+        auto& vampireB = applicationContext.world.Instantiate(vampireTemplate2);
+        auto pvampireBTransform = vampireB.GetComponent<PRETransformComponent>();
+        pvampireBTransform->SetPosition(
+            pvampireBTransform->GetPosition() + glm::vec3(4 + i, 0, 0)
+        );
+        //pLinkBTransform->SetParent(pBackpackTransform, true);
+        vampireB.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
+    }
 }
 
 void OnShutdown(PREApplicationContext& applicationContext)
