@@ -110,7 +110,7 @@ protected:
     void OnUpdate() override
     {
          auto euler = _transform->GetLocalEuler() + glm::vec3(0, 60, 0) * GetTime().GetDeltaTime();
-         _transform->SetLocalEuler(euler);
+         //_transform->SetLocalEuler(euler);
     }
 
     void OnDestroy() override
@@ -162,7 +162,7 @@ protected:
         cameraComponent.SetKind(PRECameraComponent::Kind::PERSPECTIVE);
         cameraComponent.SetRenderTexture(&GetRendering().rootRenderTexture);
         cameraComponent.SetFarClippingPlane(1000);
-        cameraComponent.SetSize(90);
+        cameraComponent.SetSize(75);
         _pSkybox = &GetAssetManager().LoadSkyBox(
             GetAssetManager().rootAssetPath + skyBoxRightPath,
             GetAssetManager().rootAssetPath + skyBoxLeftPath,
@@ -173,7 +173,7 @@ protected:
         );
         cameraComponent.SetSkyBox(_pSkybox);
         gameObject().GetComponent<PRETransformComponent>()->SetPosition(
-            glm::vec3(0, 0, 10)
+            glm::vec3(0, 0, 0)
         );
     }
 
@@ -200,6 +200,9 @@ protected:
         {
             std::cout << "~" << 1 / GetTime().GetDeltaTime() << " FPS." << std::endl;
         }
+        auto _transform = gameObject().GetComponent<PRETransformComponent>();
+        auto euler = _transform->GetLocalEuler() + glm::vec3(0, 30, 0) * GetTime().GetDeltaTime();
+        _transform->SetLocalEuler(euler);
     }
 
     void OnDestroy() override
@@ -226,7 +229,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
             modelComponent.fragmentShaderPath = "/shaders/simplefragment.fs";
             modelComponent.meshPath = "/models/vampire_a_lusth/vampire_a_lusth.dae";
             modelComponent.skeletonPath = "/models/vampire_a_lusth/vampire_a_lusth.dae";
-            modelComponent.animationPath = "/animations/mixamo/Running.dae";
+            modelComponent.animationPath = "/animations/mixamo/Capoeira.dae";
             modelComponent.animationKey = "";
             modelComponent.diffusePath = "/models/vampire_a_lusth/textures/Vampire_diffuse.png";
             modelComponent.emissionPath = "/models/vampire_a_lusth/textures/Vampire_emission.png";
@@ -250,7 +253,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
             modelComponent.fragmentShaderPath = "/shaders/simplefragment.fs";
             modelComponent.meshPath = "/models/vampire_a_lusth/vampire_a_lusth.dae";
             modelComponent.skeletonPath = "/models/vampire_a_lusth/vampire_a_lusth.dae";
-            modelComponent.animationPath = "/animations/mixamo/Breathing Idle.dae";
+            modelComponent.animationPath = "/animations/mixamo/Thriller Part 4.dae";
             modelComponent.animationKey = "";
             modelComponent.diffusePath = "/models/vampire_a_lusth/textures/Vampire_diffuse.png";
             modelComponent.emissionPath = "/models/vampire_a_lusth/textures/Vampire_emission.png";
@@ -259,7 +262,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
             AddPREComponent<PREAnimatorComponent>();
             auto pTransform = GetPREComponent<PRETransformComponent>();
             pTransform->SetLocalScale(glm::vec3(4.0));
-            pTransform->SetPosition(glm::vec3(0, -5, 0));
+            pTransform->SetPosition(glm::vec3(0, -5, -12));
         }
     } vampireTemplate2;
 
@@ -303,25 +306,25 @@ void OnInitialize(PREApplicationContext& applicationContext)
     //backpack.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
     //auto pBackpackTransform = backpack.GetComponent<PRETransformComponent>();
 
-    {
-        auto& vampireA = applicationContext.world.Instantiate(vampireTemplate);
-        auto pvampireATransform = vampireA.GetComponent<PRETransformComponent>();
-        pvampireATransform->SetPosition(
-            pvampireATransform->GetPosition() + glm::vec3(-4, 0, 0)
-        );
-        //pLinkATransform->SetParent(pBackpackTransform, true);
-        vampireA.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
-    }
-    for (int i = 0; i < 1; ++i)
-    {
-        auto& vampireB = applicationContext.world.Instantiate(vampireTemplate2);
-        auto pvampireBTransform = vampireB.GetComponent<PRETransformComponent>();
-        pvampireBTransform->SetPosition(
-            pvampireBTransform->GetPosition() + glm::vec3(4 + i, 0, 0)
-        );
-        //pLinkBTransform->SetParent(pBackpackTransform, true);
-        vampireB.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
-    }
+    //{
+    //    auto& vampireA = applicationContext.world.Instantiate(vampireTemplate);
+    //    auto pvampireATransform = vampireA.GetComponent<PRETransformComponent>();
+    //    pvampireATransform->SetPosition(
+    //        pvampireATransform->GetPosition() + glm::vec3(-4, 0, 0)
+    //    );
+    //    //pLinkATransform->SetParent(pBackpackTransform, true);
+    //    vampireA.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
+    //}
+    //for (int i = 0; i < 1; ++i)
+    //{
+    //    auto& vampireB = applicationContext.world.Instantiate(vampireTemplate2);
+    //    auto pvampireBTransform = vampireB.GetComponent<PRETransformComponent>();
+    //    pvampireBTransform->SetPosition(
+    //        pvampireBTransform->GetPosition() + glm::vec3(4 + i, 0, 0)
+    //    );
+    //    //pLinkBTransform->SetParent(pBackpackTransform, true);
+    //    vampireB.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
+    //}
 }
 
 void OnShutdown(PREApplicationContext& applicationContext)

@@ -128,7 +128,7 @@ namespace PRE
 
 			struct ImageResource : public ResourceBase
 			{
-				static ImageResource* Load(const string& filepath);
+				static ImageResource* Load(const string& filepath, bool flipVerticallyOnLoad);
 
 				const unsigned int width;
 				const unsigned int height;

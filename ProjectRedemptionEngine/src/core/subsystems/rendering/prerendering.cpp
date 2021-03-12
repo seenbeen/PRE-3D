@@ -237,7 +237,7 @@ namespace PRE
 			"{\n"
 			"    vec4 pos = PRE_MVP * vec4(iPos, 1.0);\n"
 			"    TexCoord = iPos;\n"
-			"    gl_Position = pos.xyww;\n"
+			"    gl_Position = pos;\n"
 			"}\n";
 
 		static const string SKYBOX_FRAGMENT_SHADER_SOURCE =

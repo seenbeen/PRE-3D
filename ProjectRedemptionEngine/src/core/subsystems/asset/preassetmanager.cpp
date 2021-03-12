@@ -132,10 +132,11 @@ namespace PRE
 
 #pragma region ImageResource
 		PREAssetManager::ImageResource* PREAssetManager::ImageResource::Load(
-			const string& filepath
+			const string& filepath,
+			bool flipVerticallyOnLoad // TODO: this is such a hack...
 		)
 		{
-			stbi_set_flip_vertically_on_load(true);
+			stbi_set_flip_vertically_on_load(flipVerticallyOnLoad);
 
 			int width, height, nrComponents;
 			auto pDataStbi = stbi_load(
@@ -764,7 +765,7 @@ namespace PRE
 			auto vImageResource = _impl.assetManager.Get(texturePath);
 			if (vImageResource == nullptr)
 			{
-				auto pImageResource = ImageResource::Load(texturePath);
+				auto pImageResource = ImageResource::Load(texturePath, true);
 				_impl.assetManager.Store(
 					texturePath,
 					pImageResource->GetSize(),
@@ -924,7 +925,7 @@ namespace PRE
 						_impl.assetManager.Release(*it->first);
 					}
 
-					auto pImageResource = ImageResource::Load(path);
+					auto pImageResource = ImageResource::Load(path, false);
 					_impl.assetManager.Store(
 						path,
 						pImageResource->GetSize(),
