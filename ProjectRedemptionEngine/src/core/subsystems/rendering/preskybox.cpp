@@ -1,5 +1,7 @@
 #include <core/subsystems/rendering/preskybox.h>
 
+#include <unordered_set>
+
 #include <include/modules/rendering.h>
 
 namespace PRE

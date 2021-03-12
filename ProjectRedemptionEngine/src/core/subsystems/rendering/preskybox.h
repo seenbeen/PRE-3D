@@ -1,4 +1,6 @@
 #pragma once
+#include <unordered_set>
+
 #include <include/modules/rendering.h>
 
 namespace PRE
@@ -6,6 +8,9 @@ namespace PRE
 	namespace Core
 	{
 		class PRERendering;
+		class PRECameraComponent;
+
+		using std::unordered_set;
 
 		using PRE::RenderingModule::RenderShaderProgram;
 		using PRE::RenderingModule::RenderMesh;
@@ -26,6 +31,7 @@ namespace PRE
 			RenderTexture& _texture;
 			RenderMaterial& _material;
 			RenderModel& _model;
+			unordered_set<PRECameraComponent*> _associatedCameraComponents;
 
 			PRESkyBox(
 				RenderShaderProgram& shaderProgram,

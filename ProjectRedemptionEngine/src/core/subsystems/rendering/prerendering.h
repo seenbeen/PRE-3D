@@ -186,13 +186,13 @@ namespace PRE
 				PRECameraComponent& cameraComponent
 			);
 
-			void LinkSkyBoxToCameraComponent(
-				const PRESkyBox& skyBox,
-				PRECameraComponent& cameraComponent
+			void LinkCameraComponentToSkyBox(
+				PRECameraComponent& cameraComponent,
+				PRESkyBox& skyBox
 			);
-			void UnlinkSkyBoxFromCameraComponent(
-				const PRESkyBox& skyBox,
-				PRECameraComponent& cameraComponent
+			void UnlinkCameraComponentFromSkyBox(
+				PRECameraComponent& cameraComponent,
+				PRESkyBox& skyBox
 			);
 		};
 	} // namespace Core

@@ -22,9 +22,6 @@ namespace PRE
 			friend class PRERendering;
 
 		public:
-			void SetCameraComponent(PRECameraComponent* pCameraComponent);
-			PRECameraComponent* GetCameraComponent() const;
-
 			void SetMaterial(PREMaterial* pMaterial);
 			PREMaterial* GetMaterial() const;
 
@@ -33,6 +30,9 @@ namespace PRE
 
 			void SetSkeleton(PRESkeleton* pSkeleton);
 			PRESkeleton* GetSkeleton() const;
+
+			void SetCameraComponent(PRECameraComponent* pCameraComponent);
+			PRECameraComponent* GetCameraComponent() const;
 
 		protected:
 			void OnStart() override;
@@ -45,12 +45,13 @@ namespace PRE
 			PRETransformComponent* _pTransformComponent = nullptr;
 			RenderModel* _pModel = nullptr;
 
-			PRECameraComponent* _pCurrentCameraComponent = nullptr;
-			PRECameraComponent* _pNextCameraComponent = nullptr;
+			PRECameraComponent* _pCameraComponent = nullptr;
 
 			PREMaterial* _pMaterial = nullptr;
 			PREMesh* _pMesh = nullptr;
 			PRESkeleton* _pSkeleton = nullptr;
+
+			void AllocateIfNotAllocated();
 		};
 	} // namespace Core
 } // namespace PRE

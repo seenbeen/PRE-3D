@@ -31,6 +31,10 @@
 
 #include <core/subsystems/rendering/preskybox.h>
 
+#ifdef __PRE_DEBUG__
+#include <assert.h>
+#endif
+
 namespace PRE
 {
 	namespace Core
@@ -340,6 +344,17 @@ namespace PRE
 
 		void PRERendering::DestroySkyBox(PRESkyBox& skyBox)
 		{
+			// UnlinkCameraComponentFromSkyBox mutates _associatedCameraComponents
+			// so we'll need to make vector copy before unlinking.
+			vector<PRECameraComponent*> cameraComponents(
+				skyBox._associatedCameraComponents.begin(),
+				skyBox._associatedCameraComponents.end()
+			);
+			for (auto it = cameraComponents.begin(); it != cameraComponents.end(); ++it)
+			{
+				UnlinkCameraComponentFromSkyBox(**it, skyBox);
+			}
+
 			_impl.renderer.DeallocateShaderProgram(skyBox._shaderProgram);
 			_impl.renderer.DeallocateMesh(skyBox._mesh);
 			_impl.renderer.DeallocateTexture(skyBox._texture);
@@ -417,11 +432,20 @@ namespace PRE
 			_impl.renderer.DeallocateCamera(camera);
 		}
 
+		// Note: PRERenderTextures aren't associated with cameras because
+		// render textures can't be destroyed manually (the engine does
+		// deallocating at end of life, at which point all associations
+		// should already be unlinked)
+
 		void PRERendering::LinkCameraComponentToRenderTexture(
 			PRECameraComponent& cameraComponent,
 			PRERenderTexture& renderTexture
 		)
 		{
+#ifdef __PRE_DEBUG__
+			assert(cameraComponent._pRenderTexture == nullptr);
+#endif
+
 			for (
 				auto it = cameraComponent._associatedModelComponents.begin();
 				it != cameraComponent._associatedModelComponents.end();
@@ -435,10 +459,10 @@ namespace PRE
 				);
 			}
 
-			if (cameraComponent._pCurrentSkyBox != nullptr)
+			if (cameraComponent._pSkyBox != nullptr)
 			{
 				_impl.renderer.AddModelToTagGroup(
-					cameraComponent._pCurrentSkyBox->_model,
+					cameraComponent._pSkyBox->_model,
 					renderTexture._tagGroup
 				);
 			}
@@ -447,6 +471,8 @@ namespace PRE
 				*cameraComponent._pCamera,
 				renderTexture._compositingNode
 			);
+
+			cameraComponent._pRenderTexture = &renderTexture;
 		}
 
 		void PRERendering::UnlinkCameraComponentFromRenderTexture(
@@ -454,6 +480,10 @@ namespace PRE
 			PRERenderTexture& renderTexture
 		)
 		{
+#ifdef __PRE_DEBUG__
+			assert(cameraComponent._pRenderTexture == &renderTexture);
+#endif
+
 			for (
 				auto it = cameraComponent._associatedModelComponents.begin();
 				it != cameraComponent._associatedModelComponents.end();
@@ -467,10 +497,10 @@ namespace PRE
 				);
 			}
 
-			if (cameraComponent._pCurrentSkyBox != nullptr)
+			if (cameraComponent._pSkyBox != nullptr)
 			{
 				_impl.renderer.RemoveModelFromTagGroup(
-					cameraComponent._pCurrentSkyBox->_model,
+					cameraComponent._pSkyBox->_model,
 					renderTexture._tagGroup
 				);
 			}
@@ -479,6 +509,8 @@ namespace PRE
 				*cameraComponent._pCamera,
 				renderTexture._compositingNode
 			);
+
+			cameraComponent._pRenderTexture = nullptr;
 		}
 
 		RenderModel& PRERendering::AllocateModel()
@@ -522,13 +554,20 @@ namespace PRE
 			PRECameraComponent& cameraComponent
 		)
 		{
-			if (cameraComponent._pCurrentRenderTexture != nullptr)
+#ifdef __PRE_DEBUG__
+			assert(modelRendererComponent._pCameraComponent == nullptr);
+			assert(cameraComponent._associatedModelComponents.find(&modelRendererComponent) == cameraComponent._associatedModelComponents.end());
+#endif
+
+			if (cameraComponent._pRenderTexture != nullptr)
 			{
 				_impl.renderer.AddModelToTagGroup(
 					*modelRendererComponent._pModel,
-					cameraComponent._pCurrentRenderTexture->_tagGroup
+					cameraComponent._pRenderTexture->_tagGroup
 				);
 			}
+
+			modelRendererComponent._pCameraComponent = &cameraComponent;
 			cameraComponent._associatedModelComponents.insert(&modelRendererComponent);
 		}
 
@@ -537,42 +576,65 @@ namespace PRE
 			PRECameraComponent& cameraComponent
 		)
 		{
-			if (cameraComponent._pCurrentRenderTexture != nullptr)
+#ifdef __PRE_DEBUG__
+			assert(modelRendererComponent._pCameraComponent == &cameraComponent);
+			assert(cameraComponent._associatedModelComponents.find(&modelRendererComponent) != cameraComponent._associatedModelComponents.end());
+#endif
+
+			if (cameraComponent._pRenderTexture != nullptr)
 			{
 				_impl.renderer.RemoveModelFromTagGroup(
 					*modelRendererComponent._pModel,
-					cameraComponent._pCurrentRenderTexture->_tagGroup
+					cameraComponent._pRenderTexture->_tagGroup
 				);
 			}
+
+			modelRendererComponent._pCameraComponent = nullptr;
 			cameraComponent._associatedModelComponents.erase(&modelRendererComponent);
 		}
 
-		void PRERendering::LinkSkyBoxToCameraComponent(
-			const PRESkyBox& skyBox,
-			PRECameraComponent& cameraComponent
+		void PRERendering::LinkCameraComponentToSkyBox(
+			PRECameraComponent& cameraComponent,
+			PRESkyBox& skyBox
 		)
 		{
-			if (cameraComponent._pCurrentRenderTexture != nullptr)
+#ifdef __PRE_DEBUG__
+			assert(cameraComponent._pSkyBox == nullptr);
+			assert(skyBox._associatedCameraComponents.find(&cameraComponent) == skyBox._associatedCameraComponents.end());
+#endif
+
+			if (cameraComponent._pRenderTexture != nullptr)
 			{
 				_impl.renderer.AddModelToTagGroup(
 					skyBox._model,
-					cameraComponent._pCurrentRenderTexture->_tagGroup
+					cameraComponent._pRenderTexture->_tagGroup
 				);
 			}
+
+			cameraComponent._pSkyBox = &skyBox;
+			skyBox._associatedCameraComponents.insert(&cameraComponent);
 		}
 
-		void PRERendering::UnlinkSkyBoxFromCameraComponent(
-			const PRESkyBox& skyBox,
-			PRECameraComponent& cameraComponent
+		void PRERendering::UnlinkCameraComponentFromSkyBox(
+			PRECameraComponent& cameraComponent,
+			PRESkyBox& skyBox
 		)
 		{
-			if (cameraComponent._pCurrentRenderTexture != nullptr)
+#ifdef __PRE_DEBUG__
+			assert(cameraComponent._pSkyBox == &skyBox);
+			assert(skyBox._associatedCameraComponents.find(&cameraComponent) != skyBox._associatedCameraComponents.end());
+#endif
+
+			if (cameraComponent._pRenderTexture != nullptr)
 			{
 				_impl.renderer.RemoveModelFromTagGroup(
 					skyBox._model,
-					cameraComponent._pCurrentRenderTexture->_tagGroup
+					cameraComponent._pRenderTexture->_tagGroup
 				);
 			}
+
+			cameraComponent._pSkyBox = nullptr;
+			skyBox._associatedCameraComponents.erase(&cameraComponent);
 		}
 	}
 }

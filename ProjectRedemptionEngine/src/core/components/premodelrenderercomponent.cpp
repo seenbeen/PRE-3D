@@ -14,17 +14,6 @@ namespace PRE
 	{
 		using PRE::RenderingModule::RenderModel;
 
-		void PREModelRendererComponent::SetCameraComponent(PRECameraComponent* pCameraComponent)
-		{
-			_pNextCameraComponent = pCameraComponent;
-			// hasChanged does not need to be set here.
-		}
-
-		PRECameraComponent* PREModelRendererComponent::GetCameraComponent() const
-		{
-			return _pNextCameraComponent;
-		}
-
 		void PREModelRendererComponent::SetMaterial(PREMaterial* pMaterial)
 		{
 			_pMaterial = pMaterial;
@@ -58,10 +47,35 @@ namespace PRE
 			return _pSkeleton;
 		}
 
+		void PREModelRendererComponent::SetCameraComponent(PRECameraComponent* pCameraComponent)
+		{
+			AllocateIfNotAllocated();
+			if (_pCameraComponent != nullptr)
+			{
+				GetRendering().UnlinkModelRendererComponentFromCameraComponent(
+					*this,
+					*_pCameraComponent
+				);
+			}
+			if (pCameraComponent != nullptr)
+			{
+				GetRendering().LinkModelRendererComponentToCameraComponent(
+					*this,
+					*pCameraComponent
+				);
+			}
+			// hasChanged does not need to be set here.
+		}
+
+		PRECameraComponent* PREModelRendererComponent::GetCameraComponent() const
+		{
+			return _pCameraComponent;
+		}
+
 		void PREModelRendererComponent::OnStart()
 		{
 			_pTransformComponent = gameObject().GetComponent<PRETransformComponent>();
-			_pModel = &GetRendering().AllocateModel();
+			AllocateIfNotAllocated();
 		}
 
 		void PREModelRendererComponent::OnUpdate()
@@ -74,41 +88,26 @@ namespace PRE
 
 				GetRendering().UpdateModelRendererComponentModel(*this);
 			}
-
-			if (_pCurrentCameraComponent != _pNextCameraComponent)
-			{
-				if (_pCurrentCameraComponent != nullptr)
-				{
-					GetRendering().UnlinkModelRendererComponentFromCameraComponent(
-						*this,
-						*_pCurrentCameraComponent
-					);
-				}
-
-				_pCurrentCameraComponent = _pNextCameraComponent;
-
-				if (_pCurrentCameraComponent != nullptr)
-				{
-					GetRendering().LinkModelRendererComponentToCameraComponent(
-						*this,
-						*_pCurrentCameraComponent
-					);
-				}
-			}
 		}
 
 		void PREModelRendererComponent::OnDestroy()
 		{
-			if (_pCurrentCameraComponent != nullptr)
+			if (_pCameraComponent != nullptr)
 			{
 				GetRendering().UnlinkModelRendererComponentFromCameraComponent(
 					*this,
-					*_pCurrentCameraComponent
+					*_pCameraComponent
 				);
-
-				_pCurrentCameraComponent = nullptr;
 			}
 			GetRendering().DeallocateModel(*_pModel);
+		}
+
+		void PREModelRendererComponent::AllocateIfNotAllocated()
+		{
+			if (_pModel == nullptr)
+			{
+				_pModel = &GetRendering().AllocateModel();
+			}
 		}
 	} // namespace Core
 } // namespace PRE

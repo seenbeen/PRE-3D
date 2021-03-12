@@ -44,8 +44,8 @@ namespace PRE
 			void SetRenderTexture(PRERenderTexture* pRenderTexture);
 			PRERenderTexture* GetRenderTexture() const;
 
-			void SetSkyBox(const PRESkyBox* pSkyBox);
-			const PRESkyBox* GetSkyBox();
+			void SetSkyBox(PRESkyBox* pSkyBox);
+			PRESkyBox* GetSkyBox();
 
 		protected:
 			void OnStart() override;
@@ -67,10 +67,10 @@ namespace PRE
 			float _nearClippingPlane = 0.1f;
 			float _farClippingPlane = 1000.0f;
 
-			PRERenderTexture* _pCurrentRenderTexture = nullptr;
-			PRERenderTexture* _pNextRenderTexture = nullptr;
-			const PRESkyBox* _pCurrentSkyBox = nullptr;
-			const PRESkyBox* _pNextSkyBox = nullptr;
+			PRERenderTexture* _pRenderTexture = nullptr;
+			PRESkyBox* _pSkyBox = nullptr;
+
+			void AllocateIfNotAllocated();
 		};
 	} // namespace Core
 } // namespace PRE
