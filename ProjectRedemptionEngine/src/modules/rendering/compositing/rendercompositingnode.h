@@ -45,9 +45,7 @@ namespace PRE
 			RenderCompositingNode(unsigned int tagGroup, RenderCompositingTarget* pCompositingTarget);
 			~RenderCompositingNode();
 
-			RenderTexture& GetPosition();
-			RenderTexture& GetNormals();
-			RenderTexture& GetAlbedoSpecular();
+			RenderTexture& GetTarget();
 
 			void AddDependency(RenderCompositingNode& compositingNode);
 			void RemoveDependency(RenderCompositingNode& compositingNode);

@@ -435,6 +435,43 @@ namespace PRE
 			return *texture;
 		}
 
+		RenderTexture& Renderer::AllocateTexture(
+			unsigned int rightWidth,
+			unsigned int rightHeight,
+			const unsigned char* rightData,
+			unsigned int leftWidth,
+			unsigned int leftHeight,
+			const unsigned char* leftData,
+			unsigned int topWidth,
+			unsigned int topHeight,
+			const unsigned char* topData,
+			unsigned int bottomWidth,
+			unsigned int bottomHeight,
+			const unsigned char* bottomData,
+			unsigned int frontWidth,
+			unsigned int frontHeight,
+			const unsigned char* frontData,
+			unsigned int backWidth,
+			unsigned int backHeight,
+			const unsigned char* backData
+		)
+		{
+			auto texture = new RenderTexture(
+				rightWidth, rightHeight, rightData,
+				leftWidth, leftHeight, leftData,
+				topWidth, topHeight, topData,
+				bottomWidth, bottomHeight, bottomData,
+				frontWidth, frontHeight, frontData,
+				backWidth, backHeight, backData
+			);
+
+#ifdef __PRE_DEBUG__
+			_textures.insert(texture);
+#endif
+
+			return *texture;
+		}
+
 		void Renderer::DeallocateTexture(RenderTexture& texture)
 		{
 			auto pTexture = &texture;

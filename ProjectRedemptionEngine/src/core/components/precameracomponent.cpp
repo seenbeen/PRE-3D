@@ -7,6 +7,7 @@
 #include <core/subsystems/world/pregameobjectcomponent.h>
 #include <core/subsystems/rendering/prerendering.h>
 #include <core/subsystems/rendering/prerendertexture.h>
+#include <core/subsystems/rendering/preskybox.h>
 
 namespace PRE
 {
@@ -79,6 +80,17 @@ namespace PRE
 		PRERenderTexture* PRECameraComponent::GetRenderTexture() const
 		{
 			return _pRenderTexture;
+		}
+
+		void PRECameraComponent::SetSkyBox(const PRESkyBox* pSkyBox)
+		{
+			_pSkyBox = pSkyBox;
+			// hasChanged does not need to be set here.
+		}
+
+		const PRESkyBox* PRECameraComponent::GetSkyBox()
+		{
+			return _pSkyBox;
 		}
 
 		void PRECameraComponent::OnStart()

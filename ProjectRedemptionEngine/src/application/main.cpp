@@ -147,6 +147,14 @@ private:
 
 class CameraControllerComponent : public PREGameObjectComponent
 {
+public:
+    string skyBoxRightPath;
+    string skyBoxLeftPath;
+    string skyBoxTopPath;
+    string skyBoxBottomPath;
+    string skyBoxFrontPath;
+    string skyBoxBackPath;
+
 protected:
     void OnStart() override
     {
@@ -155,6 +163,15 @@ protected:
         cameraComponent.SetRenderTexture(&GetRendering().rootRenderTexture);
         cameraComponent.SetFarClippingPlane(1000);
         cameraComponent.SetSize(90);
+        _pSkybox = &GetAssetManager().LoadSkyBox(
+            GetAssetManager().rootAssetPath + skyBoxRightPath,
+            GetAssetManager().rootAssetPath + skyBoxLeftPath,
+            GetAssetManager().rootAssetPath + skyBoxTopPath,
+            GetAssetManager().rootAssetPath + skyBoxBottomPath,
+            GetAssetManager().rootAssetPath + skyBoxFrontPath,
+            GetAssetManager().rootAssetPath + skyBoxBackPath
+        );
+        cameraComponent.SetSkyBox(_pSkybox);
         gameObject().GetComponent<PRETransformComponent>()->SetPosition(
             glm::vec3(0, 0, 10)
         );
@@ -184,6 +201,14 @@ protected:
             std::cout << "~" << 1 / GetTime().GetDeltaTime() << " FPS." << std::endl;
         }
     }
+
+    void OnDestroy() override
+    {
+        GetRendering().DestroySkyBox(*_pSkybox);
+    }
+
+private:
+    PRESkyBox* _pSkybox = nullptr;
 };
 
 void OnInitialize(PREApplicationContext& applicationContext)
@@ -260,8 +285,14 @@ void OnInitialize(PREApplicationContext& applicationContext)
     protected:
         void OnInstantiateTemplate() override
         {
-            AddPREComponent<CameraControllerComponent>();
             AddPREComponent<PRECameraComponent>();
+            auto& cameraComponent = *AddPREComponent<CameraControllerComponent>();
+            cameraComponent.skyBoxRightPath = "/skyboxes/Night MoonBurst/Right+X.png";
+            cameraComponent.skyBoxLeftPath = "/skyboxes/Night MoonBurst/Left-X.png";
+            cameraComponent.skyBoxTopPath = "/skyboxes/Night MoonBurst/Top+Y.png";
+            cameraComponent.skyBoxBottomPath = "/skyboxes/Night MoonBurst/Bottom-Y.png";
+            cameraComponent.skyBoxFrontPath = "/skyboxes/Night MoonBurst/Front+Z.png";
+            cameraComponent.skyBoxBackPath = "/skyboxes/Night MoonBurst/Back-Z.png";
         }
     } cameraTemplate;
 

@@ -36,31 +36,13 @@ namespace PRE
 
 		void PREMaterial::SetTextureBinding(
 			PRERenderTexture& renderTexture,
-			const CompositingAttachment& attachment,
 			unsigned int bindUnit
 		)
 		{
-			switch (attachment)
-			{
-			case CompositingAttachment::POSITIONS:
-				_material.SetTextureBinding(
-					renderTexture._compositingNode,
-					RenderMaterial::CompositingAttachment::POSITIONS,
-					bindUnit
-				);
-			case CompositingAttachment::NORMALS:
-				_material.SetTextureBinding(
-					renderTexture._compositingNode,
-					RenderMaterial::CompositingAttachment::NORMALS,
-					bindUnit
-				);
-			case CompositingAttachment::ALBEDO_SPECULAR:
-				_material.SetTextureBinding(
-					renderTexture._compositingNode,
-					RenderMaterial::CompositingAttachment::ALBEDO_SPECULAR,
-					bindUnit
-				);
-			}
+			_material.SetTextureBinding(
+				renderTexture._compositingNode,
+				bindUnit
+			);
 		}
 
 		PREMaterial::~PREMaterial() {}

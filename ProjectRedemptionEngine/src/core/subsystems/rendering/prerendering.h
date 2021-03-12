@@ -28,6 +28,8 @@ namespace PRE
 		class PREAnimator;
 		class PREAnimatorConfig;
 
+		class PRESkyBox;
+
 		using std::string;
 		using PRE::RenderingModule::Renderer;
 		using PRE::RenderingModule::RenderCamera;
@@ -107,6 +109,28 @@ namespace PRE
 				const PREAnimatorConfig& animatorConfig
 			);
 			void DestroyAnimator(PREAnimator& animator);
+
+			PRESkyBox& CreateSkyBox(
+				unsigned int rightWidth,
+				unsigned int rightHeight,
+				const unsigned char* rightData,
+				unsigned int leftWidth,
+				unsigned int leftHeight,
+				const unsigned char* leftData,
+				unsigned int topWidth,
+				unsigned int topHeight,
+				const unsigned char* topData,
+				unsigned int bottomWidth,
+				unsigned int bottomHeight,
+				const unsigned char* bottomData,
+				unsigned int frontWidth,
+				unsigned int frontHeight,
+				const unsigned char* frontData,
+				unsigned int backWidth,
+				unsigned int backHeight,
+				const unsigned char* backData
+			);
+			void DestroySkyBox(PRESkyBox& skyBox);
 
 		private:
 			static PRERendering& MakePRERendering(

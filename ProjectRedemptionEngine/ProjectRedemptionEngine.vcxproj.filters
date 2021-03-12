@@ -371,6 +371,9 @@
     <ClInclude Include="src\modules\rendering\texture\rendertexture.h">
       <Filter>Header Files\Modules\Rendering\Texture</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\subsystems\rendering\preskybox.h">
+      <Filter>Header Files\Core\Subsystems\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\modules\gameobject\gameobject.cpp">
@@ -552,6 +555,9 @@
     </ClCompile>
     <ClCompile Include="src\modules\rendering\texture\rendertexture.cpp">
       <Filter>Source Files\Modules\Rendering\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\rendering\preskybox.cpp">
+      <Filter>Source Files\Core\Subsystems\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

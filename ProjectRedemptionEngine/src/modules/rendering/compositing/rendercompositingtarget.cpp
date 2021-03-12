@@ -25,23 +25,12 @@ namespace PRE
 			// gl state and then doing some manual tweaking.
 			// TODO: maybe clean up later?
 
-			auto position = new RenderTexture();
-			position->Bind();
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
-			position->BindTarget(GL_COLOR_ATTACHMENT0);
-			
-			auto normals = new RenderTexture();
-			normals->Bind();
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
-			normals->BindTarget(GL_COLOR_ATTACHMENT1);
-			
-			auto albedoSpecular = new RenderTexture();
-			albedoSpecular->Bind();
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-			albedoSpecular->BindTarget(GL_COLOR_ATTACHMENT2);
+			auto target = new RenderTexture(RenderTexture::TextureKind::STANDARD);
+			target->Bind();
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+			target->BindTarget(GL_COLOR_ATTACHMENT0);
 
-			unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-			glDrawBuffers(3, attachments);
+			glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
 			unsigned int rboDepth;
 			glGenRenderbuffers(1, &rboDepth);
@@ -55,50 +44,65 @@ namespace PRE
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-			return *(new Impl(gBufferId, *position, *normals, *albedoSpecular));
+			return *(new Impl(gBufferId, *target));
+		}
+
+		RenderCompositingTarget::Impl& RenderCompositingTarget::Impl::MakeImpl(
+			unsigned int rightWidth, unsigned int rightHeight,
+			unsigned int leftWidth, unsigned int leftHeight,
+			unsigned int topWidth, unsigned int topHeight,
+			unsigned int bottomWidth, unsigned int bottomHeight,
+			unsigned int frontWidth, unsigned int frontHeight,
+			unsigned int backWidth, unsigned int backHeight
+		)
+		{
+
 		}
 
 		RenderCompositingTarget::Impl::Impl(
 			GLuint gBufferId,
-			RenderTexture& position,
-			RenderTexture& normals,
-			RenderTexture& albedoSpecular
+			RenderTexture& target
 		)
 			:
 			gBufferId(gBufferId),
-			position(position),
-			normals(normals),
-			albedoSpecular(albedoSpecular) {}
+			target(target) {}
 
 		RenderCompositingTarget::Impl::~Impl()
 		{
-			delete& albedoSpecular;
-			delete& normals;
-			delete& position;
+			delete &target;
 			glDeleteFramebuffers(1, &gBufferId);
 		}
 
 		RenderCompositingTarget::RenderCompositingTarget(unsigned int width, unsigned int height)
-			: _impl(Impl::MakeImpl(width, height)) {}
+			:
+			_impl(Impl::MakeImpl(width, height)) {}
+
+		RenderCompositingTarget::RenderCompositingTarget(
+			unsigned int rightWidth, unsigned int rightHeight,
+			unsigned int leftWidth, unsigned int leftHeight,
+			unsigned int topWidth, unsigned int topHeight,
+			unsigned int bottomWidth, unsigned int bottomHeight,
+			unsigned int frontWidth, unsigned int frontHeight,
+			unsigned int backWidth, unsigned int backHeight
+		)
+			:
+			_impl(Impl::MakeImpl(
+				rightWidth, rightHeight,
+				leftWidth, leftHeight,
+				topWidth, topHeight,
+				bottomWidth, bottomHeight,
+				frontWidth, frontHeight,
+				backWidth, backHeight
+			)) {}
 
 		RenderCompositingTarget::~RenderCompositingTarget()
 		{
 			delete &_impl;
 		}
 
-		RenderTexture& RenderCompositingTarget::GetPosition()
+		RenderTexture& RenderCompositingTarget::GetTarget()
 		{
-			return _impl.position;
-		}
-
-		RenderTexture& RenderCompositingTarget::GetNormals()
-		{
-			return _impl.normals;
-		}
-
-		RenderTexture& RenderCompositingTarget::GetAlbedoSpecular()
-		{
-			return _impl.albedoSpecular;
+			return _impl.target;
 		}
 
 		void RenderCompositingTarget::Bind(RenderCompositingTarget* pCompositingTarget)

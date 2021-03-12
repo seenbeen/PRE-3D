@@ -45,13 +45,10 @@ namespace PRE
 			};
 
 		public:
-			enum class CompositingAttachment { POSITIONS, NORMALS, ALBEDO_SPECULAR };
-
 			void SetShaderProgram(RenderShaderProgram* pShaderProgram);
 			void SetTextureBinding(RenderTexture* pRenderTexture, GLenum bindUnit);
 			void SetTextureBinding(
 				RenderCompositingNode& compositingNode,
-				const CompositingAttachment& attachment,
 				GLenum bindUnit
 			);
 

@@ -32,6 +32,7 @@
 #include <core/subsystems/rendering/preanimation.h>
 #include <core/subsystems/rendering/preanimationconfig.h>
 #include <core/subsystems/rendering/preanimationchannelconfig.h>
+#include <core/subsystems/rendering/preskybox.h>
 
 #ifdef __PRE_DEBUG__
 #include <assert.h>
@@ -77,6 +78,21 @@ namespace PRE
 			:
 			assimpResource(assimpResource) {}
 
+		PREAssetManager::SkyBoxEntry::SkyBoxEntry(
+			const string& rightFace,
+			const string& leftFace,
+			const string& topFace,
+			const string& bottomFace,
+			const string& frontFace,
+			const string& backFace
+		)
+			:
+			rightFace(rightFace),
+			leftFace(leftFace),
+			topFace(topFace),
+			bottomFace(bottomFace),
+			frontFace(frontFace),
+			backFace(backFace) {}
 #pragma endregion
 
 		PREAssetManager::ResourceBase::~ResourceBase() {}
@@ -681,6 +697,7 @@ namespace PRE
 			assert(meshes.size() == 0);
 			assert(skeletons.size() == 0);
 			assert(animations.size() == 0);
+			assert(skyBoxes.size() == 0);
 #endif
 			delete &assetManager;
 		}
@@ -884,6 +901,64 @@ namespace PRE
 			return animation;
 		}
 
+		PRESkyBox& PREAssetManager::LoadSkyBox(
+			const string& rightPath,
+			const string& leftPath,
+			const string& topPath,
+			const string& bottomPath,
+			const string& frontPath,
+			const string& backPath
+		)
+		{
+			const string* const paths[] { &rightPath, &leftPath, &topPath, &bottomPath, &frontPath, &backPath };
+			unordered_map<const string*, void*> imageResources;
+
+			for (auto i = 0; i < 6; ++i)
+			{
+				const auto& path = *paths[i];
+				auto vImageResource = _impl.assetManager.Get(path);
+				if (vImageResource == nullptr)
+				{
+					for (auto it = imageResources.begin(); it != imageResources.end(); ++it)
+					{
+						_impl.assetManager.Release(*it->first);
+					}
+
+					auto pImageResource = ImageResource::Load(path);
+					_impl.assetManager.Store(
+						path,
+						pImageResource->GetSize(),
+						pImageResource,
+						UnloadResourceData,
+						nullptr
+					);
+
+					return LoadSkyBox(rightPath, leftPath, topPath, bottomPath, frontPath, backPath);
+				}
+				imageResources[&path] = vImageResource;
+			}
+
+			auto& right = *static_cast<ImageResource*>(imageResources.find(&rightPath)->second);
+			auto& left = *static_cast<ImageResource*>(imageResources.find(&leftPath)->second);
+			auto& top = *static_cast<ImageResource*>(imageResources.find(&topPath)->second);
+			auto& bottom = *static_cast<ImageResource*>(imageResources.find(&bottomPath)->second);
+			auto& front = *static_cast<ImageResource*>(imageResources.find(&frontPath)->second);
+			auto& back = *static_cast<ImageResource*>(imageResources.find(&backPath)->second);
+
+			auto& skybox = _impl.applicationContext.rendering.CreateSkyBox(
+				right.width, right.height, right.data,
+				left.width, left.height, left.data,
+				top.width, top.height, top.data,
+				bottom.width, bottom.height, bottom.data,
+				front.width, front.height, front.data,
+				back.width, back.height, back.data
+			);
+
+			_impl.skyBoxes[&skybox] = new SkyBoxEntry(rightPath, leftPath, topPath, bottomPath, frontPath, backPath);
+
+			return skybox;
+		}
+
 		void PREAssetManager::UnloadResourceData(void* vNil, void* vResource)
 		{
 			delete static_cast<ResourceBase*>(vResource);
@@ -981,6 +1056,27 @@ namespace PRE
 			delete pAnimationEntry;
 
 			_impl.animations.erase(it);
+		}
+
+		void PREAssetManager::TryFreeSkyBox(const PRESkyBox& skyBox)
+		{
+			auto it = _impl.skyBoxes.find(&skyBox);
+			if (it == _impl.skyBoxes.end())
+			{
+				return;
+			}
+			auto pSkyboxEntry = it->second;
+
+			_impl.assetManager.Release(pSkyboxEntry->rightFace);
+			_impl.assetManager.Release(pSkyboxEntry->leftFace);
+			_impl.assetManager.Release(pSkyboxEntry->topFace);
+			_impl.assetManager.Release(pSkyboxEntry->bottomFace);
+			_impl.assetManager.Release(pSkyboxEntry->frontFace);
+			_impl.assetManager.Release(pSkyboxEntry->backFace);
+
+			delete pSkyboxEntry;
+
+			_impl.skyBoxes.erase(it);
 		}
 
 		PREAssetManager::PREAssetManager(

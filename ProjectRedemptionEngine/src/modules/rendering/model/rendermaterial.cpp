@@ -53,28 +53,13 @@ namespace PRE
 
 		void RenderMaterial::SetTextureBinding(
 			RenderCompositingNode& compositingNode,
-			const CompositingAttachment& attachment,
 			GLenum bindUnit
 		)
 		{
-			switch (attachment)
-			{
-			case CompositingAttachment::POSITIONS:
-				SetTextureBinding(
-					&compositingNode.GetPosition(),
-					bindUnit
-				);
-			case CompositingAttachment::NORMALS:
-				SetTextureBinding(
-					&compositingNode.GetNormals(),
-					bindUnit
-				);
-			case CompositingAttachment::ALBEDO_SPECULAR:
-				SetTextureBinding(
-					&compositingNode.GetAlbedoSpecular(),
-					bindUnit
-				);
-			}
+			SetTextureBinding(
+				&compositingNode.GetTarget(),
+				bindUnit
+			);
 		}
 
 		RenderMaterial::RenderMaterial()

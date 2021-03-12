@@ -27,18 +27,23 @@ namespace PRE
 			private:
 				const GLuint gBufferId;
 
-				RenderTexture& position;
-				RenderTexture& normals;
-				RenderTexture& albedoSpecular;
+				RenderTexture& target;
 
 				static Impl& MakeImpl(unsigned int width, unsigned int height);
+				static Impl& MakeImpl(
+					unsigned int rightWidth, unsigned int rightHeight,
+					unsigned int leftWidth, unsigned int leftHeight,
+					unsigned int topWidth, unsigned int topHeight,
+					unsigned int bottomWidth, unsigned int bottomHeight,
+					unsigned int frontWidth, unsigned int frontHeight,
+					unsigned int backWidth, unsigned int backHeight
+				);
 
 				Impl(
 					GLuint gBufferId,
-					RenderTexture& position,
-					RenderTexture& normals,
-					RenderTexture& albedoSpecular
+					RenderTexture& target
 				);
+
 				~Impl();
 			};
 
@@ -46,11 +51,17 @@ namespace PRE
 			Impl& _impl;
 			
 			RenderCompositingTarget(unsigned int width, unsigned int height);
+			RenderCompositingTarget(
+				unsigned int rightWidth, unsigned int rightHeight,
+				unsigned int leftWidth, unsigned int leftHeight,
+				unsigned int topWidth, unsigned int topHeight,
+				unsigned int bottomWidth, unsigned int bottomHeight,
+				unsigned int frontWidth, unsigned int frontHeight,
+				unsigned int backWidth, unsigned int backHeight
+			);
 			~RenderCompositingTarget();
 
-			RenderTexture& GetPosition();
-			RenderTexture& GetNormals();
-			RenderTexture& GetAlbedoSpecular();
+			RenderTexture& GetTarget();
 
 			static void Bind(RenderCompositingTarget* pCompositingTarget);
 		};

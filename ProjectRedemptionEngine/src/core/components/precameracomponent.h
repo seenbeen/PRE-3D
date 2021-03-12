@@ -14,6 +14,7 @@ namespace PRE
 
 		class PRERendering;
 		class PRERenderTexture;
+		class PRESkyBox;
 
 		using std::unordered_set;
 		using PRE::RenderingModule::RenderCamera;
@@ -43,6 +44,9 @@ namespace PRE
 			void SetRenderTexture(PRERenderTexture* pRenderTexture);
 			PRERenderTexture* GetRenderTexture() const;
 
+			void SetSkyBox(const PRESkyBox* pSkyBox);
+			const PRESkyBox* GetSkyBox();
+
 		protected:
 			void OnStart() override;
 			void OnUpdate() override;
@@ -65,6 +69,8 @@ namespace PRE
 
 			PRERenderTexture* _pPreviousRenderTexture = nullptr;
 			PRERenderTexture* _pRenderTexture = nullptr;
+			const PRESkyBox* _pPreviousSkyBox = nullptr;
+			const PRESkyBox* _pSkyBox = nullptr;
 		};
 	} // namespace Core
 } // namespace PRE

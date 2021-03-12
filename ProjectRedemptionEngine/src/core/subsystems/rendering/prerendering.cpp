@@ -1,6 +1,9 @@
 #include <core/subsystems/rendering/prerendering.h>
 
+#include <string>
 #include <vector>
+
+#include <glm/glm.hpp>
 
 #include <include/modules/rendering.h>
 #include <include/modules/animation.h>
@@ -26,17 +29,20 @@
 #include <core/subsystems/rendering/preanimator.h>
 #include <core/subsystems/rendering/preanimation.h>
 
+#include <core/subsystems/rendering/preskybox.h>
+
 namespace PRE
 {
 	namespace Core
 	{
+		using std::string;
+		using std::vector;
+
 		using PRE::RenderingModule::Renderer;
 		using PRE::RenderingModule::RenderCamera;
 		using PRE::RenderingModule::RenderModel;
 
 		using PRE::AnimationModule::Animation;
-
-		using std::vector;
 
 		PRERendering::Impl& PRERendering::Impl::MakeImpl(
 			PREApplicationContext& applicationContext,
@@ -97,9 +103,9 @@ namespace PRE
 
 		void PRERendering::DestroyShader(PREShader& shader)
 		{
-			_impl.applicationContext.assetManager.TryFreeShader(shader);
 			_impl.renderer.DeallocateShaderProgram(shader._shaderProgram);
 			delete &shader;
+			_impl.applicationContext.assetManager.TryFreeShader(shader);
 		}
 
 		PRETexture& PRERendering::CreateTexture(
@@ -121,9 +127,9 @@ namespace PRE
 
 		void PRERendering::DestroyTexture(PRETexture& texture)
 		{
-			_impl.applicationContext.assetManager.TryFreeTexture(texture);
 			_impl.renderer.DeallocateTexture(texture._texture);
 			delete &texture;
+			_impl.applicationContext.assetManager.TryFreeTexture(texture);
 		}
 
 		PREMaterial& PRERendering::CreateMaterial()
@@ -166,9 +172,9 @@ namespace PRE
 
 		void PRERendering::DestroyMesh(PREMesh& mesh)
 		{
-			_impl.applicationContext.assetManager.TryFreeMesh(mesh);
 			_impl.renderer.DeallocateMesh(mesh._mesh);
 			delete &mesh;
+			_impl.applicationContext.assetManager.TryFreeMesh(mesh);
 		}
 
 		PRESkeleton& PRERendering::CreateSkeleton(
@@ -186,9 +192,9 @@ namespace PRE
 
 		void PRERendering::DestroySkeleton(PRESkeleton& skeleton)
 		{
-			_impl.applicationContext.assetManager.TryFreeSkeleton(skeleton);
 			_impl.renderer.DeallocateSkeleton(skeleton._skeleton);
 			delete &skeleton;
+			_impl.applicationContext.assetManager.TryFreeSkeleton(skeleton);
 		}
 
 		PREAnimation& PRERendering::CreateAnimation(
@@ -200,8 +206,8 @@ namespace PRE
 
 		void PRERendering::DestroyAnimation(PREAnimation& animation)
 		{
-			_impl.applicationContext.assetManager.TryFreeAnimation(animation);
 			delete &animation;
+			_impl.applicationContext.assetManager.TryFreeAnimation(animation);
 		}
 
 		PREAnimator& PRERendering::CreateAnimator(
@@ -214,6 +220,132 @@ namespace PRE
 		void PRERendering::DestroyAnimator(PREAnimator& animator)
 		{
 			delete &animator;
+		}
+
+#pragma region SkyBox
+		static const string SKYBOX_SAMPLER_KEY = "skyboxCubeSampler";
+		static const int SKYBOX_SAMPLER_UNIT = 0;
+		static const string SKYBOX_VERTEX_SHADER_SOURCE =
+			"#version 330 core\n"
+			"layout (location = 0) in vec3 iPos;\n"
+			"\n"
+			"uniform mat4 PRE_MVP;\n"
+			"\n"
+			"out vec3 TexCoord;\n"
+			"\n"
+			"void main()\n"
+			"{\n"
+			"    vec4 pos = PRE_MVP * vec4(iPos, 1.0);\n"
+			"    TexCoord = iPos;\n"
+			"    gl_Position = pos.xyww;\n"
+			"}\n";
+
+		static const string SKYBOX_FRAGMENT_SHADER_SOURCE =
+			"#version 330 core\n"
+			"in vec3 TexCoord;\n"
+			"\n"
+			"out vec4 FragColor;\n"
+			"\n"
+			"uniform samplerCube skyboxCubeSampler;\n"
+			"\n"
+			"void main()\n"
+			"{\n"
+			"    FragColor = texture(skyboxCubeSampler, TexCoord);\n"
+			"}\n";
+
+		static const unsigned int SKYBOX_VERTEX_COUNT = 8u;
+		static const glm::vec3 SKYBOX_VERTICES[]
+		{
+			glm::vec3(-1, -1, 1),
+			glm::vec3(1, -1, 1),
+			glm::vec3(1, 1, 1),
+			glm::vec3(-1, 1, 1),
+			glm::vec3(-1, -1, -1),
+			glm::vec3(1, -1, -1),
+			glm::vec3(1, 1, -1),
+			glm::vec3(-1, 1, -1),
+		};
+		static const unsigned int SKYBOX_TRIANGLE_ELEMENT_COUNT = 36u;
+		static const unsigned int SKYBOX_TRIANGLE_ELEMENTS[]
+		{
+			5u, 2u, 6u, 5u, 1u, 2u, // right
+			0u, 7u, 3u, 0u, 4u, 7u, // left
+			7u, 2u, 3u, 7u, 6u, 2u, // top
+			5u, 0u, 1u, 5u, 4u, 0u, // bottom
+			4u, 6u, 7u, 4u, 5u, 6u, // front
+			1u, 3u, 2u, 1u, 0u, 3u // back
+		};
+#pragma endregion
+
+		PRESkyBox& PRERendering::CreateSkyBox(
+			unsigned int rightWidth,
+			unsigned int rightHeight,
+			const unsigned char* rightData,
+			unsigned int leftWidth,
+			unsigned int leftHeight,
+			const unsigned char* leftData,
+			unsigned int topWidth,
+			unsigned int topHeight,
+			const unsigned char* topData,
+			unsigned int bottomWidth,
+			unsigned int bottomHeight,
+			const unsigned char* bottomData,
+			unsigned int frontWidth,
+			unsigned int frontHeight,
+			const unsigned char* frontData,
+			unsigned int backWidth,
+			unsigned int backHeight,
+			const unsigned char* backData
+		)
+		{
+			auto& vShader = _impl.renderer.AllocateVertexShader(SKYBOX_VERTEX_SHADER_SOURCE);
+			auto& fShader = _impl.renderer.AllocateFragmentShader(SKYBOX_FRAGMENT_SHADER_SOURCE);
+
+			auto& shaderProgram = _impl.renderer.AllocateShaderProgram(vShader, fShader);
+			_impl.renderer.DeallocateVertexShader(vShader);
+			_impl.renderer.DeallocateFragmentShader(fShader);
+
+			shaderProgram.SetInt(SKYBOX_SAMPLER_KEY, SKYBOX_SAMPLER_UNIT);
+
+			auto& mesh = _impl.renderer.AllocateMesh(
+				SKYBOX_VERTEX_COUNT,
+				SKYBOX_VERTICES,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				SKYBOX_TRIANGLE_ELEMENT_COUNT,
+				SKYBOX_TRIANGLE_ELEMENTS
+			);
+
+			auto& texture = _impl.renderer.AllocateTexture(
+				rightWidth, rightHeight, rightData,
+				leftWidth, leftHeight, leftData,
+				topWidth, topHeight, topData,
+				bottomWidth, bottomHeight, bottomData,
+				frontWidth, frontHeight, frontData,
+				backWidth, backHeight, backData
+			);
+			auto& material = _impl.renderer.AllocateMaterial();
+			material.SetShaderProgram(&shaderProgram);
+			material.SetTextureBinding(&texture, SKYBOX_SAMPLER_UNIT);
+			auto& model = _impl.renderer.AllocateModel();
+			_impl.renderer.SetModelMesh(model, &mesh);
+			_impl.renderer.SetModelMaterial(model, &material);
+			
+			return *(new PRESkyBox(shaderProgram, mesh, texture, material, model));
+		}
+
+		void PRERendering::DestroySkyBox(PRESkyBox& skyBox)
+		{
+			_impl.renderer.DeallocateShaderProgram(skyBox._shaderProgram);
+			_impl.renderer.DeallocateMesh(skyBox._mesh);
+			_impl.renderer.DeallocateTexture(skyBox._texture);
+			_impl.renderer.DeallocateMaterial(skyBox._material);
+			_impl.renderer.DeallocateModel(skyBox._model);
+			_impl.applicationContext.assetManager.TryFreeSkyBox(skyBox);
 		}
 
 		PRERendering& PRERendering::MakePRERendering(
@@ -296,6 +428,8 @@ namespace PRE
 
 			auto pPreviousRenderTexture = cameraComponent._pPreviousRenderTexture;
 			auto pRenderTexture = cameraComponent._pRenderTexture;
+			auto pPreviousSkyBox = cameraComponent._pPreviousSkyBox;
+			auto pSkyBox = cameraComponent._pSkyBox;
 			auto& associatedModelComponents = cameraComponent._associatedModelComponents;
 
 			if (pPreviousRenderTexture != pRenderTexture)
@@ -315,6 +449,14 @@ namespace PRE
 						*cameraComponent._pCamera,
 						pPreviousRenderTexture->_compositingNode
 					);
+
+					if (pPreviousSkyBox != nullptr)
+					{
+						_impl.renderer.RemoveModelFromTagGroup(
+							pPreviousSkyBox->_model,
+							pPreviousRenderTexture->_tagGroup
+						);
+					}
 				}
 
 				if (pRenderTexture != nullptr)
@@ -332,32 +474,70 @@ namespace PRE
 							pRenderTexture->_tagGroup
 						);
 					}
+
+					if (pPreviousSkyBox != nullptr)
+					{
+						_impl.renderer.AddModelToTagGroup(
+							pPreviousSkyBox->_model,
+							pRenderTexture->_tagGroup
+						);
+					}
 				}
 
 				cameraComponent._pPreviousRenderTexture = pRenderTexture;
+			}
+
+			if (pRenderTexture != nullptr && pPreviousSkyBox != pSkyBox)
+			{
+				if (pPreviousSkyBox != nullptr)
+				{
+					_impl.renderer.RemoveModelFromTagGroup(
+						pPreviousSkyBox->_model,
+						pRenderTexture->_tagGroup
+					);
+				}
+
+				if (pSkyBox != nullptr)
+				{
+					_impl.renderer.AddModelToTagGroup(
+						pSkyBox->_model,
+						pRenderTexture->_tagGroup
+					);
+				}
+
+				cameraComponent._pPreviousSkyBox = cameraComponent._pSkyBox;
 			}
 		}
 
 		void PRERendering::DeallocateCamera(PRECameraComponent& cameraComponent)
 		{
-			auto pRenderTexture = cameraComponent._pRenderTexture;
+			auto pPreviousRenderTexture = cameraComponent._pPreviousRenderTexture;
+			auto pPreviousSkyBox = cameraComponent._pPreviousSkyBox;
 			auto& associatedModelComponents = cameraComponent._associatedModelComponents;
 
-			if (pRenderTexture != nullptr)
+			if (pPreviousRenderTexture != nullptr)
 			{
 				for (auto it = associatedModelComponents.begin(); it != associatedModelComponents.end(); ++it)
 				{
 					auto& modelRendererComponent = **it;
 					_impl.renderer.RemoveModelFromTagGroup(
 						*modelRendererComponent._pModel,
-						pRenderTexture->_tagGroup
+						pPreviousRenderTexture->_tagGroup
 					);
 					modelRendererComponent._pCameraComponent = nullptr;
 				}
 
+				if (pPreviousSkyBox != nullptr)
+				{
+					_impl.renderer.RemoveModelFromTagGroup(
+						pPreviousSkyBox->_model,
+						pPreviousRenderTexture->_tagGroup
+					);
+				}
+
 				_impl.renderer.UnbindCompositingPair(
 					*cameraComponent._pCamera,
-					pRenderTexture->_compositingNode
+					pPreviousRenderTexture->_compositingNode
 				);
 
 				// not necessary to re-assign pRenderTexture values

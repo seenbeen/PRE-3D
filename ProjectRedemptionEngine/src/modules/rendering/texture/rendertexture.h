@@ -19,6 +19,8 @@ namespace PRE
 			friend class RenderCompositingTarget;
 			friend class RenderMaterial;
 
+			enum class TextureKind { STANDARD, CUBE_MAP };
+
 			class Impl
 			{
 				Impl& operator=(const Impl&) = delete;
@@ -27,7 +29,11 @@ namespace PRE
 				friend class RenderTexture;
 
 			private:
+				const TextureKind textureKind;
+
 				const GLuint textureId;
+				
+				static Impl& MakeImpl(const TextureKind& textureKind);
 
 				static Impl& MakeImpl(
 					unsigned int width,
@@ -35,22 +41,63 @@ namespace PRE
 					const unsigned char* data
 				);
 
-				static Impl& MakeImpl();
+				static Impl& MakeImpl(
+					unsigned int rightWidth,
+					unsigned int rightHeight,
+					const unsigned char* rightData,
+					unsigned int leftWidth,
+					unsigned int leftHeight,
+					const unsigned char* leftData,
+					unsigned int topWidth,
+					unsigned int topHeight,
+					const unsigned char* topData,
+					unsigned int bottomWidth,
+					unsigned int bottomHeight,
+					const unsigned char* bottomData,
+					unsigned int frontWidth,
+					unsigned int frontHeight,
+					const unsigned char* frontData,
+					unsigned int backWidth,
+					unsigned int backHeight,
+					const unsigned char* backData
+				);
 
-				Impl(GLuint textureId);
+				Impl(const TextureKind& textureKind, GLuint textureId);
 				~Impl();
 			};
 
 		private:
 			Impl& _impl;
 
-			RenderTexture();
+			RenderTexture(const TextureKind& textureKind);
 
 			RenderTexture(
 				unsigned int width,
 				unsigned int height,
 				const unsigned char* data
 			);
+
+			RenderTexture(
+				unsigned int rightWidth,
+				unsigned int rightHeight,
+				const unsigned char* rightData,
+				unsigned int leftWidth,
+				unsigned int leftHeight,
+				const unsigned char* leftData,
+				unsigned int topWidth,
+				unsigned int topHeight,
+				const unsigned char* topData,
+				unsigned int bottomWidth,
+				unsigned int bottomHeight,
+				const unsigned char* bottomData,
+				unsigned int frontWidth,
+				unsigned int frontHeight,
+				const unsigned char* frontData,
+				unsigned int backWidth,
+				unsigned int backHeight,
+				const unsigned char* backData
+			);
+
 			~RenderTexture();
 
 			void Bind();

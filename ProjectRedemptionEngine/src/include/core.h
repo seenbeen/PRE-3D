@@ -20,6 +20,7 @@
 #include <core/subsystems/rendering/preskeleton.h>
 #include <core/subsystems/rendering/pretexture.h>
 #include <core/subsystems/rendering/prematerial.h>
+#include <core/subsystems/rendering/preskybox.h>
 
 // animation
 #include <core/subsystems/rendering/preanimationchannelconfig.h>

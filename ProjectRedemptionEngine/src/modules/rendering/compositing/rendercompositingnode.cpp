@@ -34,19 +34,9 @@ namespace PRE
 			delete &_impl;
 		}
 
-		RenderTexture& RenderCompositingNode::GetPosition()
+		RenderTexture& RenderCompositingNode::GetTarget()
 		{
-			return _pCompositingTarget->GetPosition();
-		}
-
-		RenderTexture& RenderCompositingNode::GetNormals()
-		{
-			return _pCompositingTarget->GetNormals();
-		}
-
-		RenderTexture& RenderCompositingNode::GetAlbedoSpecular()
-		{
-			return _pCompositingTarget->GetAlbedoSpecular();
+			return _pCompositingTarget->GetTarget();
 		}
 
 		void RenderCompositingNode::AddDependency(

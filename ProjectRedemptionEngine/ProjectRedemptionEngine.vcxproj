@@ -39,6 +39,7 @@
     <ClCompile Include="src\core\subsystems\rendering\prerendertexture.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\preshader.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\preskeleton.cpp" />
+    <ClCompile Include="src\core\subsystems\rendering\preskybox.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\pretexture.cpp" />
     <ClCompile Include="src\core\subsystems\time\pretime.cpp" />
     <ClCompile Include="src\core\subsystems\time\pretimeconfig.cpp" />
@@ -99,6 +100,7 @@
     <ClInclude Include="src\core\subsystems\rendering\prerendertexture.h" />
     <ClInclude Include="src\core\subsystems\rendering\preshader.h" />
     <ClInclude Include="src\core\subsystems\rendering\preskeleton.h" />
+    <ClInclude Include="src\core\subsystems\rendering\preskybox.h" />
     <ClInclude Include="src\core\subsystems\rendering\pretexture.h" />
     <ClInclude Include="src\core\subsystems\time\pretime.h" />
     <ClInclude Include="src\core\subsystems\time\pretimeconfig.h" />

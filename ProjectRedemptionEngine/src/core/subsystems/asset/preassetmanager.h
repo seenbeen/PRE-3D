@@ -28,6 +28,7 @@ namespace PRE
 		class PRETexture;
 		class PREAnimation;
 		class PREAnimationConfig;
+		class PRESkyBox;
 
 		using std::pair;
 		using std::string;
@@ -70,16 +71,37 @@ namespace PRE
 				MeshEntry(const string& assimpResource);
 			};
 
-			struct SkeletonEntry {
+			struct SkeletonEntry
+			{
 				const string assimpResource;
 
 				SkeletonEntry(const string& assimpResource);
 			};
 
-			struct AnimationEntry {
+			struct AnimationEntry
+			{
 				const string assimpResource;
 
 				AnimationEntry(const string& assimpResource);
+			};
+
+			struct SkyBoxEntry
+			{
+				const string rightFace;
+				const string leftFace;
+				const string topFace;
+				const string bottomFace;
+				const string frontFace;
+				const string backFace;
+
+				SkyBoxEntry(
+					const string& rightFace,
+					const string& leftFace,
+					const string& topFace,
+					const string& bottomFace,
+					const string& frontFace,
+					const string& backFace
+				);
 			};
 #pragma endregion
 
@@ -224,6 +246,7 @@ namespace PRE
 				unordered_map<const PREMesh*, MeshEntry*> meshes;
 				unordered_map<const PRESkeleton*, SkeletonEntry*> skeletons;
 				unordered_map<const PREAnimation*, AnimationEntry*> animations;
+				unordered_map<const PRESkyBox*, SkyBoxEntry*> skyBoxes;
 
 				PREApplicationContext& applicationContext;
 				AssetManager& assetManager;
@@ -243,6 +266,14 @@ namespace PRE
 			PREMesh& LoadMesh(const string& meshPath);
 			PRESkeleton& LoadSkeleton(const string& skeletonPath);
 			PREAnimation& LoadAnimation(const string& animationPath, const string& animationName);
+			PRESkyBox& LoadSkyBox(
+				const string& rightPath,
+				const string& leftPath,
+				const string& topPath,
+				const string& bottomPath,
+				const string& frontPath,
+				const string& backPath
+			);
 
 		private:
 			static void UnloadResourceData(void* vNil, void* vResource);
@@ -262,6 +293,7 @@ namespace PRE
 			void TryFreeMesh(const PREMesh& mesh);
 			void TryFreeSkeleton(const PRESkeleton& skeleton);
 			void TryFreeAnimation(const PREAnimation& animation);
+			void TryFreeSkyBox(const PRESkyBox& skyBox);
 
 			Impl& _impl;
 
