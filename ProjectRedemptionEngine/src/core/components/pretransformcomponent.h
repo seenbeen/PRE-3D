@@ -28,6 +28,12 @@ namespace PRE
 			list<PRETransformComponent*> GetChildren();
 #pragma endregion
 
+#pragma region Utilities
+			glm::vec3 GetForward();
+			glm::vec3 GetUp();
+			glm::vec3 GetRight();
+#pragma endregion
+
 #pragma region Position
 			const glm::vec3& GetPosition();
 			const glm::vec3& GetLocalPosition();

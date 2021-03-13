@@ -108,6 +108,21 @@ namespace PRE
 			}
 #pragma endregion
 
+#pragma region Utilities
+			glm::vec3 GetForward()
+			{
+				return -glm::normalize(glm::vec3(_matrix[2]));
+			}
+			glm::vec3 GetUp()
+			{
+				return glm::normalize(glm::vec3(_matrix[1]));
+			}
+			glm::vec3 GetRight()
+			{
+				return glm::normalize(glm::vec3(_matrix[0]));
+			}
+#pragma endregion
+
 #pragma region Position
 			const glm::vec3& GetPosition()
 			{
@@ -258,7 +273,7 @@ namespace PRE
 				glm::vec4 perspective;
 
 				glm::decompose(_localMatrix, _localScale, _localRotation, _localPosition, skew, perspective);
-				_localEuler = glm::eulerAngles(_localRotation);
+				_localEuler = glm::degrees(glm::eulerAngles(_localRotation));
 
 				// TODO: Cache
 				_inverseMatrix = glm::inverse(_matrix);
@@ -278,7 +293,7 @@ namespace PRE
 
 				if (_parentTransform != nullptr)
 				{
-					_matrix = _parentTransform->_matrix * _localMatrix;
+					_matrix = _localMatrix * _parentTransform->_matrix;
 				}
 				else
 				{
@@ -289,7 +304,7 @@ namespace PRE
 				glm::vec4 perspective;
 
 				glm::decompose(_matrix, _scale, _rotation, _position, skew, perspective);
-				_euler = glm::eulerAngles(_rotation);
+				_euler = glm::degrees(glm::eulerAngles(_rotation));
 
 				// TODO: Cache
 				_inverseMatrix = glm::inverse(_matrix);
@@ -309,7 +324,7 @@ namespace PRE
 				glm::vec4 perspective;
 
 				glm::decompose(_matrix, _scale, _rotation, _position, skew, perspective);
-				_euler = glm::eulerAngles(_rotation);
+				_euler = glm::degrees(glm::eulerAngles(_rotation));
 
 				UpdateMatrix();
 			}

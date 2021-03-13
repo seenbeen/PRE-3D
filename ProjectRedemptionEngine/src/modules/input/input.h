@@ -18,6 +18,7 @@ namespace PRE
 			bool ApplicationHasQuit();
 
 			void MousePosition(int& mouseX, int& mouseY);
+			void MouseMotion(int& mouseDX, int& mouseDY);
 
 			bool MouseButtonLeftState();
 
@@ -42,6 +43,10 @@ namespace PRE
 			bool KeyPressed(unsigned int keyCode);
 			bool KeyReleased(unsigned int keyCode);
 
+			// TODO: Integrate SDL_Window ptr across Rendering and Input modules
+			void SetMousePosition(unsigned int x, unsigned int y);
+			void LockMouse(bool isLocked);
+
 		private:
 			static const int SDL_NUM_SCANCODES = 512;
 
@@ -49,6 +54,9 @@ namespace PRE
 
 			int _mouseX;
 			int _mouseY;
+
+			int _mouseDX;
+			int _mouseDY;
 
 			bool _mousePreviousLeft;
 			bool _mouseLeft;

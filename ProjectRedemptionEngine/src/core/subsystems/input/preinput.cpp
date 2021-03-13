@@ -21,6 +21,11 @@ namespace PRE
 			_input.MousePosition(mouseX, mouseY);
 		}
 
+		void PREInput::MouseMotion(int& mouseDX, int& mouseDY)
+		{
+			_input.MouseMotion(mouseDX, mouseDY);
+		}
+
 		bool PREInput::MouseButtonLeftState()
 		{
 			return _input.MouseButtonLeftState();
@@ -89,6 +94,16 @@ namespace PRE
 		bool PREInput::KeyReleased(const PREKeyCode& keyCode)
 		{
 			return _input.KeyReleased((unsigned int)keyCode);
+		}
+
+		void PREInput::SetMousePosition(unsigned int x, unsigned int y)
+		{
+			_input.SetMousePosition(x, y);
+		}
+
+		void PREInput::LockMouse(bool isLocked)
+		{
+			_input.LockMouse(isLocked);
 		}
 
 		PREInput& PREInput::MakePREInput(

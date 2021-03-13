@@ -153,6 +153,80 @@ private:
     PREAnimator* _pAnimator = nullptr;
 };
 
+class FlyCamControllerComponent : public PREGameObjectComponent
+{
+public:
+    float speed = 5.0f;
+    float rotationSpeed = 30.0f;
+
+protected:
+    void OnStart() override
+    {
+        _pTransform = gameObject().GetComponent<PRETransformComponent>();
+        _pInput = &GetInput();
+        _pTime = &GetTime();
+        _pInput->LockMouse(true);
+    }
+
+    void OnUpdate() override
+    {
+        glm::vec3 delta;
+
+        // flycam controls
+        if (_pInput->KeyState(PREKeyCode::S))
+        {
+            delta -= _pTransform->GetForward();
+        }
+        else if (_pInput->KeyState(PREKeyCode::W))
+        {
+            delta += _pTransform->GetForward();
+        }
+        if (_pInput->KeyState(PREKeyCode::A))
+        {
+            delta -= _pTransform->GetRight();
+        }
+        else if (_pInput->KeyState(PREKeyCode::D))
+        {
+            delta += _pTransform->GetRight();
+        }
+        if (_pInput->KeyState(PREKeyCode::Q))
+        {
+            delta -= _pTransform->GetUp();
+        }
+        else if (_pInput->KeyState(PREKeyCode::E))
+        {
+            delta += _pTransform->GetUp();
+        }
+
+        if (glm::length(delta))
+        {
+            _pTransform->SetPosition(
+                _pTransform->GetPosition() + speed * delta * _pTime->GetDeltaTime()
+            );
+        }
+
+        int mdx, mdy;
+        _pInput->MouseMotion(mdx, mdy);
+        if (mdx || mdy)
+        {
+            auto dx = (float)mdx / HALF_WINDOW_WIDTH;
+            auto dy = -(float)mdy / HALF_WINDOW_HEIGHT;
+
+            _pTransform->SetEuler(
+                _pTransform->GetEuler() + glm::vec3(dy, dx, 0) * rotationSpeed
+            );
+        }
+    }
+
+private:
+    static const int HALF_WINDOW_WIDTH = 1024 / 2;
+    static const int HALF_WINDOW_HEIGHT = 768 / 2;
+
+    PRETransformComponent* _pTransform = nullptr;
+    PREInput* _pInput = nullptr;
+    PRETime* _pTime = nullptr;
+};
+
 class CameraControllerComponent : public PREGameObjectComponent
 {
 public:
@@ -180,32 +254,33 @@ protected:
             GetAssetManager().rootAssetPath + skyBoxBackPath
         );
         cameraComponent.SetSkyBox(_pSkybox);
+        _pTransform = gameObject().GetComponent<PRETransformComponent>();
+        _pInput = &GetInput();
     }
 
     void OnUpdate() override
     {
-        if (GetInput().ApplicationHasQuit())
+        if (_pInput->ApplicationHasQuit() || _pInput->KeyPressed(PREKeyCode::ESCAPE))
         {
             std::cout << "Application Quitting..." << std::endl;
             Quit();
         }
-        if (GetInput().MouseButtonLeftPressed())
+        if (_pInput->MouseButtonLeftPressed())
         {
             int x, y;
-            GetInput().MousePosition(x, y);
+            _pInput->MousePosition(x, y);
             std::cout << "PRESSED AT (" << x << ", " << y << ")" << std::endl;
         }
-        if (GetInput().MouseButtonLeftReleased())
+        if (_pInput->MouseButtonLeftReleased())
         {
             int x, y;
-            GetInput().MousePosition(x, y);
+            _pInput->MousePosition(x, y);
             std::cout << "RELEASED AT (" << x << ", " << y << ")" << std::endl;
         }
-        if (GetInput().KeyPressed(PREKeyCode::SPACE))
+        if (_pInput->KeyPressed(PREKeyCode::SPACE))
         {
             std::cout << "~" << 1 / GetTime().GetDeltaTime() << " FPS." << std::endl;
         }
-        auto _transform = gameObject().GetComponent<PRETransformComponent>();
     }
 
     void OnDestroy() override
@@ -215,6 +290,8 @@ protected:
 
 private:
     PRESkyBox* _pSkybox = nullptr;
+    PRETransformComponent* _pTransform = nullptr;
+    PREInput* _pInput = nullptr;
 };
 
 class VampireTemplate : public PREGameObjectTemplate
@@ -226,6 +303,7 @@ protected:
     void OnInstantiateTemplate() override
     {
         AddPREComponent<PREModelRendererComponent>();
+        AddPREComponent<PREAnimatorComponent>();
         auto& modelComponent = *AddPREComponent<SimpleModelComponent>();
         modelComponent.vertexShaderPath = "/shaders/skinnedvertex.vs";
         modelComponent.fragmentShaderPath = "/shaders/simplefragment.fs";
@@ -237,10 +315,6 @@ protected:
         modelComponent.emissionPath = "/models/vampire_a_lusth/textures/Vampire_emission.png";
         modelComponent.normalPath = "/models/vampire_a_lusth/textures/Vampire_normal.png";
         modelComponent.specularPath = "/models/vampire_a_lusth/textures/Vampire_specular.png";
-        AddPREComponent<PREAnimatorComponent>();
-        auto pTransform = GetPREComponent<PRETransformComponent>();
-        pTransform->SetLocalScale(glm::vec3(4.0));
-        pTransform->SetPosition(glm::vec3(0, -5, 0));
     }
 } ;
 
@@ -250,6 +324,7 @@ protected:
     void OnInstantiateTemplate() override
     {
         AddPREComponent<PRECameraComponent>();
+        AddPREComponent<FlyCamControllerComponent>();
         auto& cameraComponent = *AddPREComponent<CameraControllerComponent>();
         cameraComponent.skyBoxRightPath = "/skyboxes/Night MoonBurst/Right+X.png";
         cameraComponent.skyBoxLeftPath = "/skyboxes/Night MoonBurst/Left-X.png";
@@ -258,7 +333,7 @@ protected:
         cameraComponent.skyBoxFrontPath = "/skyboxes/Night MoonBurst/Front+Z.png";
         cameraComponent.skyBoxBackPath = "/skyboxes/Night MoonBurst/Back-Z.png";
         GetPREComponent<PRETransformComponent>()->SetPosition(
-            glm::vec3(0, 0, 10)
+            glm::vec3(0, 1, 2.5)
         );
     }
 };
@@ -284,7 +359,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
     auto& vampireA = applicationContext.world.Instantiate(capoeiraTemplate);
     auto& vampireATransform = *vampireA.GetComponent<PRETransformComponent>();
     vampireATransform.SetPosition(
-        vampireATransform.GetPosition() + glm::vec3(-4, 0, 0)
+        vampireATransform.GetPosition() + glm::vec3(-1, 0, 0)
     );
     vampireATransform.SetParent(&sceneRootTransform, true);
     vampireA.GetComponent<PREModelRendererComponent>()->SetCameraComponent(&cameraComponent);
@@ -292,7 +367,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
     auto& vampireB = applicationContext.world.Instantiate(thrillerTemplate);
     auto& vampireBTransform = *vampireB.GetComponent<PRETransformComponent>();
     vampireBTransform.SetPosition(
-        vampireBTransform.GetPosition() + glm::vec3(4, 0, -15)
+        vampireBTransform.GetPosition() + glm::vec3(1, 0, -2)
     );
     vampireBTransform.SetParent(&sceneRootTransform, true);
     vampireB.GetComponent<PREModelRendererComponent>()->SetCameraComponent(&cameraComponent);

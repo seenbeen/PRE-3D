@@ -13,6 +13,8 @@ namespace PRE
 			_applicationHasQuit(false),
 			_mouseX(0),
 			_mouseY(0),
+			_mouseDX(0),
+			_mouseDY(0),
 			_mousePreviousLeft(false),
 			_mouseLeft(false),
 			_mousePreviousWheel(false),
@@ -51,7 +53,10 @@ namespace PRE
 			{
 				_keyState[i] = keyState[i];
 			}
-
+			_mouseHScroll = 0;
+			_mouseVScroll = 0;
+			_mouseDX = 0;
+			_mouseDY = 0;
 			SDL_Event evt;
 			while (SDL_PollEvent(&evt))
 			{
@@ -63,6 +68,10 @@ namespace PRE
 				case SDL_MOUSEWHEEL:
 					_mouseHScroll = evt.wheel.x;
 					_mouseVScroll = evt.wheel.y;
+					break;
+				case SDL_MOUSEMOTION:
+					_mouseDX = evt.motion.xrel;
+					_mouseDY = evt.motion.yrel;
 					break;
 				}
 			}
@@ -77,6 +86,12 @@ namespace PRE
 		{
 			mouseX = _mouseX;
 			mouseY = _mouseY;
+		}
+
+		void Input::MouseMotion(int& mouseDX, int& mouseDY)
+		{
+			mouseDX = _mouseDX;
+			mouseDY = _mouseDY;
 		}
 
 		bool Input::MouseButtonLeftState()
@@ -147,6 +162,16 @@ namespace PRE
 		bool Input::KeyReleased(unsigned int keyCode)
 		{
 			return _keyPreviousState[keyCode] && !_keyState[keyCode];
+		}
+
+		void Input::SetMousePosition(unsigned int x, unsigned int y)
+		{
+			SDL_WarpMouseInWindow(nullptr, (int)x, (int)y);
+		}
+
+		void Input::LockMouse(bool isLocked)
+		{
+			SDL_SetRelativeMouseMode(isLocked ? SDL_TRUE : SDL_FALSE);
 		}
 	} // namespace InputModule
 } // namespace PRE

@@ -52,6 +52,21 @@ namespace PRE
 		}
 #pragma endregion
 
+#pragma region Utilities
+		glm::vec3 PRETransformComponent::GetForward()
+		{
+			return _transform.GetForward();
+		}
+		glm::vec3 PRETransformComponent::GetUp()
+		{
+			return _transform.GetUp();
+		}
+		glm::vec3 PRETransformComponent::GetRight()
+		{
+			return _transform.GetRight();
+		}
+#pragma endregion
+
 #pragma region Position
 		const glm::vec3& PRETransformComponent::GetPosition()
 		{

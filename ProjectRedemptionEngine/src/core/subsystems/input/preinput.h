@@ -24,6 +24,7 @@ namespace PRE
 			bool ApplicationHasQuit();
 
 			void MousePosition(int& mouseX, int& mouseY);
+			void MouseMotion(int& mouseDX, int& mouseDY);
 
 			bool MouseButtonLeftState();
 
@@ -47,6 +48,9 @@ namespace PRE
 
 			bool KeyPressed(const PREKeyCode& keyCode);
 			bool KeyReleased(const PREKeyCode& keyCode);
+
+			void SetMousePosition(unsigned int x, unsigned int y);
+			void LockMouse(bool isLocked);
 
 		private:
 			static PREInput& MakePREInput(
