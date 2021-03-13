@@ -222,7 +222,7 @@ copy /Y "$(SolutionDir)Deps\assimp\lib\x64\assimp-vc142-mt.dll" "$(SolutionDir)B
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>__PRE_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>__PRE_DEBUG__;_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>Default</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>

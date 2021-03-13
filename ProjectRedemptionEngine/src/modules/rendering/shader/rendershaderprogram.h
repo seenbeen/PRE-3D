@@ -24,6 +24,16 @@ namespace PRE
 			friend class Renderer;
 			friend class RenderMaterial;
 
+		public:
+			enum class DepthFunction {
+				NEVER,
+				LESS_THAN, LESS_THAN_OR_EQUAL,
+				EQUAL, NOT_EQUAL,
+				GREATER_THAN, GREATER_THAN_OR_EQUAL,
+				ALWAYS
+			};
+
+		private:
 			class Impl
 			{
 				Impl& operator=(const Impl&) = delete;
@@ -34,6 +44,10 @@ namespace PRE
 			private:
 				const GLuint programId;
 
+				bool backFaceCullEnabled;
+				bool depthWrite;
+				DepthFunction depthFunction;
+
 				static Impl& MakeImpl(
 					const RenderVertexShader& vertexShader,
 					const RenderFragmentShader& fragmentShader
@@ -43,6 +57,10 @@ namespace PRE
 			};
 
 		public:
+			void SetBackFaceCulling(bool enabled);
+			void SetDepthWrite(bool enabled);
+			void SetDepthFunction(const DepthFunction& depthFunction);
+
 			void SetBool(const string& name, bool value);
 			void SetInt(const string& name, int value);
 			void SetFloat(const string& name, float value);

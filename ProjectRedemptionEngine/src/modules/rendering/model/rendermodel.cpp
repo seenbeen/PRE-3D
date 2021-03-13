@@ -52,7 +52,10 @@ namespace PRE
 			_impl.pMaterial = pMaterial;
 		}
 
-		void RenderModel::Render(const glm::mat4& viewProjectionMatrix)
+		void RenderModel::Render(
+			const glm::mat4& viewMatrix,
+			const glm::mat4& projectionMatrix
+		)
 		{
 			if (_impl.pMesh != nullptr && _impl.pMaterial != nullptr)
 			{
@@ -62,15 +65,16 @@ namespace PRE
 					vector<glm::mat4> result;
 					_impl.pSkeleton->GetCurrentState(result);
 					_impl.pMaterial->Bind(
-						viewProjectionMatrix * modelMatrix,
-						&result
+						viewMatrix * modelMatrix,
+						projectionMatrix,
+						result
 					);
 				}
 				else
 				{
 					_impl.pMaterial->Bind(
-						viewProjectionMatrix * modelMatrix,
-						nullptr
+						viewMatrix * modelMatrix,
+						projectionMatrix
 					);
 				}
 				_impl.pMesh->Render();

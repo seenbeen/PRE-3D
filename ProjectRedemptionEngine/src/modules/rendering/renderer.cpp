@@ -109,6 +109,7 @@ namespace PRE
 		// TODO: spatial query optimization
 		void Renderer::Update()
 		{
+			glDepthMask(GL_TRUE);
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -689,23 +690,22 @@ namespace PRE
 			assert(_tagGroups.find(currentNode._tagGroup) != _tagGroups.end());
 #endif
 
-			const glm::mat4* pViewProjectionMatrix = &MAT4_IDENTITY;
-
 			auto itCamera = _compositingNodeCameraPairs.find(pCurrentNode);
 			if (itCamera != _compositingNodeCameraPairs.end())
 			{
-				pViewProjectionMatrix = &itCamera->second->GetViewProjectionMatrix();
-			}
-			auto& viewProjectionMatrix = *pViewProjectionMatrix;
+				auto& camera = *itCamera->second;
+				const auto& viewMatrix = camera.GetViewMatrix();
+				const auto& projectionMatrix = camera.GetProjectionMatrix();
 
-			RenderCompositingTarget::Bind(currentNode._pCompositingTarget);
-			auto& tagModelSet = _tagGroups[currentNode._tagGroup];
-			for (auto it = tagModelSet.begin(); it != tagModelSet.end(); ++it)
-			{
-				auto& model = **it;
-				model.Render(viewProjectionMatrix);
+				RenderCompositingTarget::Bind(currentNode._pCompositingTarget);
+				auto& tagModelSet = _tagGroups[currentNode._tagGroup];
+				for (auto it = tagModelSet.begin(); it != tagModelSet.end(); ++it)
+				{
+					auto& model = **it;
+					model.Render(viewMatrix, projectionMatrix);
+				}
+				RenderCompositingTarget::Bind(nullptr);
 			}
-			RenderCompositingTarget::Bind(nullptr);
 
 #ifdef __PRE_DEBUG__
 			visited.erase(pCurrentNode);

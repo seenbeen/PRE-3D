@@ -27,15 +27,13 @@ namespace PRE
 		)
 			:
 			projectionMatrixChanged(true),
-			viewMatrixChanged(true),
 			kind(kind),
 			size(size),
 			aspectRatio(aspectRatio),
 			nearClippingPlane(nearClippingPlane),
 			farClippingPlane(farClippingPlane),
 			viewMatrix(),
-			projectionMatrix(),
-			viewProjectionMatrix() {}
+			projectionMatrix() {}
 
 		RenderCamera::Impl::~Impl() {}
 
@@ -72,42 +70,42 @@ namespace PRE
 		void RenderCamera::SetViewMatrix(const glm::mat4& viewMatrix)
 		{
 			_impl.viewMatrix = viewMatrix;
-			_impl.viewMatrixChanged = true;
 		}
 
-		const glm::mat4& RenderCamera::GetViewProjectionMatrix()
+		const glm::mat4& RenderCamera::GetViewMatrix()
 		{
-			if (_impl.viewMatrixChanged || _impl.projectionMatrixChanged)
+
+			return _impl.viewMatrix;
+		}
+
+		const glm::mat4& RenderCamera::GetProjectionMatrix()
+		{
+			if (_impl.projectionMatrixChanged)
 			{
-				_impl.viewMatrixChanged = false;
-				if (_impl.projectionMatrixChanged)
+				_impl.projectionMatrixChanged = false;
+				if (_impl.kind == Kind::ORTHOGRAPHIC)
 				{
-					_impl.projectionMatrixChanged = false;
-					if (_impl.kind == Kind::ORTHOGRAPHIC)
-					{
-						auto hAspect = _impl.size * _impl.aspectRatio;
-						_impl.projectionMatrix = glm::ortho(
-							-hAspect,
-							hAspect,
-							-_impl.size,
-							_impl.size,
-							_impl.nearClippingPlane,
-							_impl.farClippingPlane
-						);
-					}
-					else
-					{
-						_impl.projectionMatrix = glm::perspective(
-							glm::radians(_impl.size),
-							_impl.aspectRatio,
-							_impl.nearClippingPlane,
-							_impl.farClippingPlane
-						);
-					}
+					auto hAspect = _impl.size * _impl.aspectRatio;
+					_impl.projectionMatrix = glm::ortho(
+						-hAspect,
+						hAspect,
+						-_impl.size,
+						_impl.size,
+						_impl.nearClippingPlane,
+						_impl.farClippingPlane
+					);
 				}
-				_impl.viewProjectionMatrix = _impl.projectionMatrix * _impl.viewMatrix;
+				else
+				{
+					_impl.projectionMatrix = glm::perspective(
+						glm::radians(_impl.size),
+						_impl.aspectRatio,
+						_impl.nearClippingPlane,
+						_impl.farClippingPlane
+					);
+				}
 			}
-			return _impl.viewProjectionMatrix;
+			return _impl.projectionMatrix;
 		}
 
 		RenderCamera::RenderCamera(

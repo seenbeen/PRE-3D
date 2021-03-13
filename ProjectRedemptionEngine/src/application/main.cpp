@@ -1,5 +1,4 @@
 #ifdef __PRE_DEBUG__
-#define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
 #endif
@@ -81,30 +80,33 @@ protected:
         modelRendererComponent.SetSkeleton(_pSkeleton);
         modelRendererComponent.SetMaterial(_pMaterial);
 
-        _pAnim = &GetAssetManager().LoadAnimation(
-            GetAssetManager().rootAssetPath + animationPath,
-            animationKey
-        );
+        if (!animationPath.empty())
+        {
+            _pAnim = &GetAssetManager().LoadAnimation(
+                GetAssetManager().rootAssetPath + animationPath,
+                animationKey
+            );
 
-        PREAnimatorConfig animatorConfig;
-        animatorConfig.AddState(
-            "default",
-            [](PREAnimatorComponent::Controller& controller) {},
-            *_pAnim
-        );
+            PREAnimatorConfig animatorConfig;
+            animatorConfig.AddState(
+                "default",
+                [](PREAnimatorComponent::Controller& controller) {},
+                *_pAnim
+            );
 
-        _pAnimator = &GetRendering().CreateAnimator(animatorConfig);
+            _pAnimator = &GetRendering().CreateAnimator(animatorConfig);
 
-        auto pAnimatorComponent = gameObject().GetComponent<PREAnimatorComponent>();
-        pAnimatorComponent->SetAnimator(
-            _pAnimator,
-            "default",
-            nullptr,
-            0,
-            1,
-            false
-        );
-        pAnimatorComponent->SetSkeleton(_pSkeleton);
+            auto pAnimatorComponent = gameObject().GetComponent<PREAnimatorComponent>();
+            pAnimatorComponent->SetAnimator(
+                _pAnimator,
+                "default",
+                nullptr,
+                0,
+                1,
+                false
+            );
+            pAnimatorComponent->SetSkeleton(_pSkeleton);
+        }
     }
 
     void OnUpdate() override
@@ -127,8 +129,14 @@ protected:
         GetRendering().DestroyTexture(*_pNormalTexture);
         GetRendering().DestroyTexture(*_pSpecularTexture);
         GetRendering().DestroyMaterial(*_pMaterial);
-        GetRendering().DestroyAnimation(*_pAnim);
-        GetRendering().DestroyAnimator(*_pAnimator);
+        if (_pAnim != nullptr)
+        {
+            GetRendering().DestroyAnimation(*_pAnim);
+        }
+        if (_pAnimator != nullptr)
+        {
+            GetRendering().DestroyAnimator(*_pAnimator);
+        }
     }
 
 private:
@@ -172,9 +180,6 @@ protected:
             GetAssetManager().rootAssetPath + skyBoxBackPath
         );
         cameraComponent.SetSkyBox(_pSkybox);
-        gameObject().GetComponent<PRETransformComponent>()->SetPosition(
-            glm::vec3(0, 0, 0)
-        );
     }
 
     void OnUpdate() override
@@ -201,8 +206,6 @@ protected:
             std::cout << "~" << 1 / GetTime().GetDeltaTime() << " FPS." << std::endl;
         }
         auto _transform = gameObject().GetComponent<PRETransformComponent>();
-        auto euler = _transform->GetLocalEuler() + glm::vec3(0, 30, 0) * GetTime().GetDeltaTime();
-        _transform->SetLocalEuler(euler);
     }
 
     void OnDestroy() override
@@ -214,117 +217,87 @@ private:
     PRESkyBox* _pSkybox = nullptr;
 };
 
+class VampireTemplate : public PREGameObjectTemplate
+{
+public:
+    string animationPath;
+
+protected:
+    void OnInstantiateTemplate() override
+    {
+        AddPREComponent<PREModelRendererComponent>();
+        auto& modelComponent = *AddPREComponent<SimpleModelComponent>();
+        modelComponent.vertexShaderPath = "/shaders/skinnedvertex.vs";
+        modelComponent.fragmentShaderPath = "/shaders/simplefragment.fs";
+        modelComponent.meshPath = "/models/vampire_a_lusth/vampire_a_lusth.dae";
+        modelComponent.skeletonPath = "/models/vampire_a_lusth/vampire_a_lusth.dae";
+        modelComponent.animationPath = animationPath;
+        modelComponent.animationKey = "";
+        modelComponent.diffusePath = "/models/vampire_a_lusth/textures/Vampire_diffuse.png";
+        modelComponent.emissionPath = "/models/vampire_a_lusth/textures/Vampire_emission.png";
+        modelComponent.normalPath = "/models/vampire_a_lusth/textures/Vampire_normal.png";
+        modelComponent.specularPath = "/models/vampire_a_lusth/textures/Vampire_specular.png";
+        AddPREComponent<PREAnimatorComponent>();
+        auto pTransform = GetPREComponent<PRETransformComponent>();
+        pTransform->SetLocalScale(glm::vec3(4.0));
+        pTransform->SetPosition(glm::vec3(0, -5, 0));
+    }
+} ;
+
+class CameraTemplate : public PREGameObjectTemplate
+{
+protected:
+    void OnInstantiateTemplate() override
+    {
+        AddPREComponent<PRECameraComponent>();
+        auto& cameraComponent = *AddPREComponent<CameraControllerComponent>();
+        cameraComponent.skyBoxRightPath = "/skyboxes/Night MoonBurst/Right+X.png";
+        cameraComponent.skyBoxLeftPath = "/skyboxes/Night MoonBurst/Left-X.png";
+        cameraComponent.skyBoxTopPath = "/skyboxes/Night MoonBurst/Top+Y.png";
+        cameraComponent.skyBoxBottomPath = "/skyboxes/Night MoonBurst/Bottom-Y.png";
+        cameraComponent.skyBoxFrontPath = "/skyboxes/Night MoonBurst/Front+Z.png";
+        cameraComponent.skyBoxBackPath = "/skyboxes/Night MoonBurst/Back-Z.png";
+        GetPREComponent<PRETransformComponent>()->SetPosition(
+            glm::vec3(0, 0, 10)
+        );
+    }
+};
+
 void OnInitialize(PREApplicationContext& applicationContext)
 {
     std::cout << "ON INITIALIZE" << std::endl;
-    // applicationContext.time.SetFrameLimit(60);
-    class : public PREGameObjectTemplate
-    {
-    protected:
-        void OnInstantiateTemplate() override
-        {
-            AddPREComponent<PREModelRendererComponent>();
-            auto &modelComponent = *AddPREComponent<SimpleModelComponent>();
-            modelComponent.vertexShaderPath = "/shaders/skinnedvertex.vs";
-            modelComponent.fragmentShaderPath = "/shaders/simplefragment.fs";
-            modelComponent.meshPath = "/models/vampire_a_lusth/vampire_a_lusth.dae";
-            modelComponent.skeletonPath = "/models/vampire_a_lusth/vampire_a_lusth.dae";
-            modelComponent.animationPath = "/animations/mixamo/Capoeira.dae";
-            modelComponent.animationKey = "";
-            modelComponent.diffusePath = "/models/vampire_a_lusth/textures/Vampire_diffuse.png";
-            modelComponent.emissionPath = "/models/vampire_a_lusth/textures/Vampire_emission.png";
-            modelComponent.normalPath = "/models/vampire_a_lusth/textures/Vampire_normal.png";
-            modelComponent.specularPath = "/models/vampire_a_lusth/textures/Vampire_specular.png";
-            AddPREComponent<PREAnimatorComponent>();
-            auto pTransform = GetPREComponent<PRETransformComponent>();
-            pTransform->SetLocalScale(glm::vec3(4.0));
-            pTransform->SetPosition(glm::vec3(0, -5, 0));
-        }
-    } vampireTemplate;
 
-    class : public PREGameObjectTemplate
-    {
-    protected:
-        void OnInstantiateTemplate() override
-        {
-            AddPREComponent<PREModelRendererComponent>();
-            auto& modelComponent = *AddPREComponent<SimpleModelComponent>();
-            modelComponent.vertexShaderPath = "/shaders/skinnedvertex.vs";
-            modelComponent.fragmentShaderPath = "/shaders/simplefragment.fs";
-            modelComponent.meshPath = "/models/vampire_a_lusth/vampire_a_lusth.dae";
-            modelComponent.skeletonPath = "/models/vampire_a_lusth/vampire_a_lusth.dae";
-            modelComponent.animationPath = "/animations/mixamo/Thriller Part 4.dae";
-            modelComponent.animationKey = "";
-            modelComponent.diffusePath = "/models/vampire_a_lusth/textures/Vampire_diffuse.png";
-            modelComponent.emissionPath = "/models/vampire_a_lusth/textures/Vampire_emission.png";
-            modelComponent.normalPath = "/models/vampire_a_lusth/textures/Vampire_normal.png";
-            modelComponent.specularPath = "/models/vampire_a_lusth/textures/Vampire_specular.png";
-            AddPREComponent<PREAnimatorComponent>();
-            auto pTransform = GetPREComponent<PRETransformComponent>();
-            pTransform->SetLocalScale(glm::vec3(4.0));
-            pTransform->SetPosition(glm::vec3(0, -5, -12));
-        }
-    } vampireTemplate2;
+    VampireTemplate capoeiraTemplate, thrillerTemplate;
+    capoeiraTemplate.animationPath = "/animations/mixamo/Capoeira.dae";
+    thrillerTemplate.animationPath = "/animations/mixamo/Thriller Part 4.dae";
 
-    class : public PREGameObjectTemplate
-    {
-    protected:
-        void OnInstantiateTemplate() override
-        {
-            AddPREComponent<PREModelRendererComponent>();
-            auto& modelComponent = *AddPREComponent<SimpleModelComponent>();
-            modelComponent.vertexShaderPath = "/shaders/simplevertex.vs";
-            modelComponent.fragmentShaderPath = "/shaders/simplefragment.fs";
-            modelComponent.meshPath = "/models/backpack/backpack.obj";
-            modelComponent.diffusePath = "/models/backpack/diffuse.jpg";
-            modelComponent.emissionPath = "/models/backpack/roughness.jpg";
-            modelComponent.normalPath = "/models/backpack/normal.png";
-            modelComponent.specularPath = "/models/backpack/specular.jpg";
-        }
-    } backpackTemplate;
+    CameraTemplate cameraTemplate;
 
-    class : public PREGameObjectTemplate
-    {
-    protected:
-        void OnInstantiateTemplate() override
-        {
-            AddPREComponent<PRECameraComponent>();
-            auto& cameraComponent = *AddPREComponent<CameraControllerComponent>();
-            cameraComponent.skyBoxRightPath = "/skyboxes/Night MoonBurst/Right+X.png";
-            cameraComponent.skyBoxLeftPath = "/skyboxes/Night MoonBurst/Left-X.png";
-            cameraComponent.skyBoxTopPath = "/skyboxes/Night MoonBurst/Top+Y.png";
-            cameraComponent.skyBoxBottomPath = "/skyboxes/Night MoonBurst/Bottom-Y.png";
-            cameraComponent.skyBoxFrontPath = "/skyboxes/Night MoonBurst/Front+Z.png";
-            cameraComponent.skyBoxBackPath = "/skyboxes/Night MoonBurst/Back-Z.png";
-        }
-    } cameraTemplate;
+    auto& sceneRoot = applicationContext.world.Instantiate();
+    auto& sceneRootTransform = *sceneRoot.GetComponent<PRETransformComponent>();
 
     auto& camera = applicationContext.world.Instantiate(cameraTemplate);
-    auto pCameraComponent = camera.GetComponent<PRECameraComponent>();
-    
-    //auto& backpack = applicationContext.world.Instantiate(backpackTemplate);
-    //backpack.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
-    //auto pBackpackTransform = backpack.GetComponent<PRETransformComponent>();
+    auto& cameraComponent = *camera.GetComponent<PRECameraComponent>();
+    auto& cameraTransform = *camera.GetComponent<PRETransformComponent>();
+    cameraTransform.SetParent(&sceneRootTransform, true);
 
-    //{
-    //    auto& vampireA = applicationContext.world.Instantiate(vampireTemplate);
-    //    auto pvampireATransform = vampireA.GetComponent<PRETransformComponent>();
-    //    pvampireATransform->SetPosition(
-    //        pvampireATransform->GetPosition() + glm::vec3(-4, 0, 0)
-    //    );
-    //    //pLinkATransform->SetParent(pBackpackTransform, true);
-    //    vampireA.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
-    //}
-    //for (int i = 0; i < 1; ++i)
-    //{
-    //    auto& vampireB = applicationContext.world.Instantiate(vampireTemplate2);
-    //    auto pvampireBTransform = vampireB.GetComponent<PRETransformComponent>();
-    //    pvampireBTransform->SetPosition(
-    //        pvampireBTransform->GetPosition() + glm::vec3(4 + i, 0, 0)
-    //    );
-    //    //pLinkBTransform->SetParent(pBackpackTransform, true);
-    //    vampireB.GetComponent<PREModelRendererComponent>()->SetCameraComponent(pCameraComponent);
-    //}
+    auto& vampireA = applicationContext.world.Instantiate(capoeiraTemplate);
+    auto& vampireATransform = *vampireA.GetComponent<PRETransformComponent>();
+    vampireATransform.SetPosition(
+        vampireATransform.GetPosition() + glm::vec3(-4, 0, 0)
+    );
+    vampireATransform.SetParent(&sceneRootTransform, true);
+    vampireA.GetComponent<PREModelRendererComponent>()->SetCameraComponent(&cameraComponent);
+
+    auto& vampireB = applicationContext.world.Instantiate(thrillerTemplate);
+    auto& vampireBTransform = *vampireB.GetComponent<PRETransformComponent>();
+    vampireBTransform.SetPosition(
+        vampireBTransform.GetPosition() + glm::vec3(4, 0, -15)
+    );
+    vampireBTransform.SetParent(&sceneRootTransform, true);
+    vampireB.GetComponent<PREModelRendererComponent>()->SetCameraComponent(&cameraComponent);
+    
+    sceneRootTransform.SetEuler(glm::vec3(0, 180, 0));
 }
 
 void OnShutdown(PREApplicationContext& applicationContext)
@@ -354,8 +327,5 @@ int main(int argc, char *argv[])
             )
         );
     }
-#ifdef __PRE_DEBUG__
-    _CrtDumpMemoryLeaks();
-#endif
     return 0;
 }

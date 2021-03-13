@@ -13,7 +13,15 @@ namespace PRE
 			preGameObjectTemplate._preApplicationContext = &_preApplicationContext;
 			return _gameObjectWorld.Instantiate(preGameObjectTemplate);
 		}
-
+		GameObject& PREWorld::Instantiate()
+		{
+			class : public PREGameObjectTemplate
+			{
+			protected:
+				void OnInstantiateTemplate() override {}
+			} blankTemplate;
+			return Instantiate(blankTemplate);
+		}
 		void PREWorld::Destroy(GameObject& gameObject)
 		{
 			_gameObjectWorld.Destroy(gameObject);

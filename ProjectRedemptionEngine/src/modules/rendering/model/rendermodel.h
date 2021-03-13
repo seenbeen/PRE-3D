@@ -48,7 +48,10 @@ namespace PRE
 			void SetSkeleton(RenderSkeleton* pSkeleton);
 			void SetMaterial(RenderMaterial* pMaterial);
 
-			void Render(const glm::mat4& viewProjectionMatrix);
+			void Render(
+				const glm::mat4& viewMatrix,
+				const glm::mat4& projectionMatrix
+			);
 		};
 	} // namespace RenderingModule
 } // namespace PRE

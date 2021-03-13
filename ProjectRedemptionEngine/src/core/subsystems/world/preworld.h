@@ -23,6 +23,7 @@ namespace PRE
 
 		public:
 			GameObject& Instantiate(PREGameObjectTemplate& preGameObjectTemplate);
+			GameObject& Instantiate();
 			void Destroy(GameObject& gameObject);
 
 		private:

@@ -233,15 +233,16 @@ namespace PRE
 			"#version 330 core\n"
 			"layout (location = 0) in vec3 iPos;\n"
 			"\n"
-			"uniform mat4 PRE_MVP;\n"
+			"uniform mat4 PRE_MODEL_VIEW_MATRIX;\n"
+			"uniform mat4 PRE_PROJECTION_MATRIX;\n"
 			"\n"
 			"out vec3 TexCoord;\n"
 			"\n"
 			"void main()\n"
 			"{\n"
-			"    vec4 pos = PRE_MVP * vec4(iPos, 1.0);\n"
+			"    vec4 pos = PRE_PROJECTION_MATRIX * mat4(mat3(PRE_MODEL_VIEW_MATRIX)) * vec4(iPos, 1.0);\n"
 			"    TexCoord = iPos;\n"
-			"    gl_Position = pos;\n"
+			"    gl_Position = pos.xyww;\n"
 			"}\n";
 
 		static const string SKYBOX_FRAGMENT_SHADER_SOURCE =
@@ -310,6 +311,8 @@ namespace PRE
 			_impl.renderer.DeallocateFragmentShader(fShader);
 
 			shaderProgram.SetInt(SKYBOX_SAMPLER_KEY, SKYBOX_SAMPLER_UNIT);
+			shaderProgram.SetDepthWrite(false);
+			shaderProgram.SetDepthFunction(RenderShaderProgram::DepthFunction::LESS_THAN_OR_EQUAL);
 
 			auto& mesh = _impl.renderer.AllocateMesh(
 				SKYBOX_VERTEX_COUNT,
@@ -361,6 +364,8 @@ namespace PRE
 			_impl.renderer.DeallocateMaterial(skyBox._material);
 			_impl.renderer.DeallocateModel(skyBox._model);
 			_impl.applicationContext.assetManager.TryFreeSkyBox(skyBox);
+
+			delete &skyBox;
 		}
 
 		PRERendering& PRERendering::MakePRERendering(

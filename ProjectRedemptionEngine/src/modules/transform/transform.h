@@ -311,10 +311,7 @@ namespace PRE
 				glm::decompose(_matrix, _scale, _rotation, _position, skew, perspective);
 				_euler = glm::eulerAngles(_rotation);
 
-				for (auto it = _childTransforms.begin(); it != _childTransforms.end(); ++it)
-				{
-					(*it)->AncestryChanged();
-				}
+				UpdateMatrix();
 			}
 		};
 	} // namespace TransformSubsystem

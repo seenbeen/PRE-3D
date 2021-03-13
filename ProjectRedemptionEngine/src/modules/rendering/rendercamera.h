@@ -35,7 +35,6 @@ namespace PRE
 				);
 
 				bool projectionMatrixChanged;
-				bool viewMatrixChanged;
 
 				Kind kind;
 
@@ -46,7 +45,6 @@ namespace PRE
 
 				glm::mat4 viewMatrix;
 				glm::mat4 projectionMatrix;
-				glm::mat4 viewProjectionMatrix;
 
 				Impl(
 					const Kind& kind,
@@ -66,7 +64,8 @@ namespace PRE
 			void SetFarClippingPlane(float farClippingPlane);
 			void SetViewMatrix(const glm::mat4& viewMatrix);
 
-			const glm::mat4& GetViewProjectionMatrix();
+			const glm::mat4& GetViewMatrix();
+			const glm::mat4& GetProjectionMatrix();
 
 		private:
 			Impl& _impl;

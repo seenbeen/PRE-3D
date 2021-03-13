@@ -7,12 +7,13 @@ layout (location = 4) in vec2 iUV;
 layout (location = 5) in ivec4 iBoneIndices;
 layout (location = 6) in vec4 iBoneWeights;
 
-uniform mat4 PRE_MVP;
+uniform mat4 PRE_MODEL_VIEW_MATRIX;
+uniform mat4 PRE_PROJECTION_MATRIX;
 
 out vec2 TexCoord;
 
 void main()
 {
-    gl_Position = PRE_MVP * vec4(iPos, 1.0);
+    gl_Position = PRE_PROJECTION_MATRIX * PRE_MODEL_VIEW_MATRIX * vec4(iPos, 1.0);
     TexCoord = iUV;
 }
