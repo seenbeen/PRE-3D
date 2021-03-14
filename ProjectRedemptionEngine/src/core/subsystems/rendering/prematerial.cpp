@@ -40,7 +40,7 @@ namespace PRE
 		)
 		{
 			_material.SetTextureBinding(
-				renderTexture._compositingNode,
+				renderTexture._pCompositingTarget,
 				bindUnit
 			);
 		}

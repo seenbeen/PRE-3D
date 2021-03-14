@@ -6,8 +6,8 @@ namespace PRE
 	namespace RenderingModule
 	{
 		class Renderer;
-		class RenderCompositingNode;
 		class RenderTexture;
+		class RenderMaterial;
 
 		class RenderCompositingTarget
 		{
@@ -15,7 +15,7 @@ namespace PRE
 			RenderCompositingTarget(const RenderCompositingTarget&) = delete;
 
 			friend class Renderer;
-			friend class RenderCompositingNode;
+			friend class RenderMaterial;
 
 			class Impl
 			{
@@ -25,7 +25,7 @@ namespace PRE
 				friend class RenderCompositingTarget;
 
 			private:
-				const GLuint gBufferId;
+				const GLuint bufferId;
 
 				RenderTexture& target;
 
@@ -40,7 +40,7 @@ namespace PRE
 				);
 
 				Impl(
-					GLuint gBufferId,
+					GLuint bufferId,
 					RenderTexture& target
 				);
 

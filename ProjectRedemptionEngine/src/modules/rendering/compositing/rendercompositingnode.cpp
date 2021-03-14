@@ -1,10 +1,10 @@
 #include <modules/rendering/compositing/rendercompositingnode.h>
 
+#include <algorithm>
 #include <unordered_set>
+#include <vector>
 
 #include <modules/rendering/compositing/rendercompositingtarget.h>
-
-#include <modules/rendering/texture/rendertexture.h>
 
 #ifdef __PRE_DEBUG__
 #include <assert.h>
@@ -14,29 +14,70 @@ namespace PRE
 {
 	namespace RenderingModule
 	{
-		RenderCompositingNode::Impl& RenderCompositingNode::Impl::MakeImpl()
+		void RenderCompositingNode::RenderComposition::SetCamera(RenderCamera* pCamera)
 		{
-			return *(new Impl());
+			this->pCamera = pCamera;
 		}
 
-		RenderCompositingNode::Impl::Impl() {}
+		void RenderCompositingNode::RenderComposition::SetCompositingTarget(RenderCompositingTarget* pCompositingTarget)
+		{
+			this->pCompositingTarget = pCompositingTarget;
+		}
+
+		void RenderCompositingNode::RenderComposition::AddModel(RenderModel& model)
+		{
+#ifdef __PRE_DEBUG__
+			assert(std::find(models.begin(), models.end(), &model) == models.end());
+#endif
+
+			models.push_back(&model);
+		}
+
+		RenderCompositingNode::RenderComposition::RenderComposition()
+			:
+			pCamera(nullptr),
+			pCompositingTarget(nullptr) {}
+
+		RenderCompositingNode::RenderComposition::~RenderComposition() {}
+
+		RenderCompositingNode::Impl& RenderCompositingNode::Impl::MakeImpl(
+			RenderComposition& composition,
+			OnRender onRender,
+			void* vContext
+		)
+		{
+			return *(new Impl(composition, onRender, vContext));
+		}
+
+		RenderCompositingNode::Impl::Impl(
+			RenderComposition& composition,
+			OnRender onRender,
+			void* vContext
+		)
+			:
+			composition(composition),
+			onRender(onRender),
+			vContext(vContext) {}
 
 		RenderCompositingNode::Impl::~Impl() {}
 
-		RenderCompositingNode::RenderCompositingNode(unsigned int tagGroup, RenderCompositingTarget* pCompositingTarget)
+		RenderCompositingNode::RenderCompositingNode(
+			OnRender onRender,
+			void* vContext
+		)
 			:
-			_tagGroup(tagGroup),
-			_pCompositingTarget(pCompositingTarget),
-			_impl(Impl::MakeImpl()) {}
+			_impl(
+				Impl::MakeImpl(
+					*(new RenderComposition()),
+					onRender,
+					vContext
+				)
+			) {}
 
 		RenderCompositingNode::~RenderCompositingNode()
 		{
+			delete &_impl.composition;
 			delete &_impl;
-		}
-
-		RenderTexture& RenderCompositingNode::GetTarget()
-		{
-			return _pCompositingTarget->GetTarget();
 		}
 
 		void RenderCompositingNode::AddDependency(
@@ -63,6 +104,16 @@ namespace PRE
 #endif
 
 			_impl.compositingNodeDependencies.erase(it);
+		}
+
+		const RenderCompositingNode::RenderComposition& RenderCompositingNode::GetRenderComposition()
+		{
+			_impl.composition.models.clear();
+			_impl.composition.pCamera = nullptr;
+			_impl.composition.pCompositingTarget = nullptr;
+			_impl.onRender(_impl.composition, _impl.vContext);
+
+			return _impl.composition;
 		}
 
 		const unordered_set<RenderCompositingNode*>& RenderCompositingNode::GetDependencies()

@@ -113,32 +113,6 @@ namespace PRE
 			return *(new RenderTexture::Impl(TextureKind::CUBE_MAP, textureId));
 		}
 
-		RenderTexture::Impl& RenderTexture::Impl::MakeImpl(const TextureKind& textureKind)
-		{
-			GLuint textureId;
-			glGenTextures(1, &textureId);
-
-			if (textureKind == TextureKind::STANDARD)
-			{
-				glBindTexture(GL_TEXTURE_2D, textureId);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				glBindTexture(GL_TEXTURE_2D, GL_NONE);
-			}
-			else
-			{
-				glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
-				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-				glBindTexture(GL_TEXTURE_CUBE_MAP, GL_NONE);
-			}
-
-			return *(new RenderTexture::Impl(textureKind, textureId));
-		}
-
 		RenderTexture::Impl::Impl(const TextureKind& textureKind, GLuint textureId)
 			:
 			textureKind(textureKind),
@@ -148,10 +122,6 @@ namespace PRE
 		{
 			glDeleteTextures(1, &textureId);
 		}
-
-		RenderTexture::RenderTexture(const TextureKind& textureKind)
-			:
-			_impl(Impl::MakeImpl(textureKind)) {}
 
 		RenderTexture::RenderTexture(
 			unsigned int width,
@@ -198,7 +168,7 @@ namespace PRE
 
 		void RenderTexture::Bind()
 		{
-			if (_impl.textureKind == TextureKind::STANDARD)
+			if (_impl.textureKind == Impl::TextureKind::STANDARD)
 			{
 				glBindTexture(GL_TEXTURE_2D, _impl.textureId);
 			}

@@ -242,7 +242,7 @@ protected:
     {
         auto& cameraComponent = *gameObject().GetComponent<PRECameraComponent>();
         cameraComponent.SetKind(PRECameraComponent::Kind::PERSPECTIVE);
-        cameraComponent.SetRenderTexture(&GetRendering().rootRenderTexture);
+        cameraComponent.SetRenderTexture(&GetRendering().GetScreenRenderTexture());
         cameraComponent.SetFarClippingPlane(1000);
         cameraComponent.SetSize(75);
         _pSkybox = &GetAssetManager().LoadSkyBox(

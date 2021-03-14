@@ -19,8 +19,6 @@ namespace PRE
 			friend class RenderCompositingTarget;
 			friend class RenderMaterial;
 
-			enum class TextureKind { STANDARD, CUBE_MAP };
-
 			class Impl
 			{
 				Impl& operator=(const Impl&) = delete;
@@ -29,12 +27,12 @@ namespace PRE
 				friend class RenderTexture;
 
 			private:
+				enum class TextureKind { STANDARD, CUBE_MAP };
+
 				const TextureKind textureKind;
 
 				const GLuint textureId;
 				
-				static Impl& MakeImpl(const TextureKind& textureKind);
-
 				static Impl& MakeImpl(
 					unsigned int width,
 					unsigned int height,
@@ -68,8 +66,6 @@ namespace PRE
 
 		private:
 			Impl& _impl;
-
-			RenderTexture(const TextureKind& textureKind);
 
 			RenderTexture(
 				unsigned int width,

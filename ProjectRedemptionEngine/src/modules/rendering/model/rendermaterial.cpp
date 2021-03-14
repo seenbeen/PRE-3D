@@ -34,10 +34,10 @@ namespace PRE
 			_impl.pShaderProgram = pShaderProgram;
 		}
 
-		void RenderMaterial::SetTextureBinding(RenderTexture* pRenderTexture, GLenum bindUnit)
+		void RenderMaterial::SetTextureBinding(RenderTexture* pTexture, GLenum bindUnit)
 		{
 			bindUnit = GL_TEXTURE0 + bindUnit;
-			if (pRenderTexture == nullptr)
+			if (pTexture == nullptr)
 			{
 				auto it = _impl.textureBindings.find(bindUnit);
 				if (it != _impl.textureBindings.end())
@@ -47,17 +47,14 @@ namespace PRE
 			}
 			else
 			{
-				_impl.textureBindings[bindUnit] = pRenderTexture;
+				_impl.textureBindings[bindUnit] = pTexture;
 			}
 		}
 
-		void RenderMaterial::SetTextureBinding(
-			RenderCompositingNode& compositingNode,
-			GLenum bindUnit
-		)
+		void RenderMaterial::SetTextureBinding(RenderCompositingTarget* pCompositingTarget, GLenum bindUnit)
 		{
 			SetTextureBinding(
-				&compositingNode.GetTarget(),
+				&pCompositingTarget->GetTarget(),
 				bindUnit
 			);
 		}

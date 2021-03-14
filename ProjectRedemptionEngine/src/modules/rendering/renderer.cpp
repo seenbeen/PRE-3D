@@ -37,8 +37,6 @@ namespace PRE
 		using std::unordered_set;
 		using std::vector;
 
-		const unsigned int Renderer::ROOT_TAG_GROUP = 0;
-
 		Renderer& Renderer::MakeRenderer(
 			const string& windowTitle,
 			unsigned int windowWidth,
@@ -113,30 +111,88 @@ namespace PRE
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+#ifdef __PRE_DEBUG__
 			unordered_set<RenderCompositingNode*> visited;
+#endif
+
 			unordered_set<RenderCompositingNode*> rendered;
 
+			for (
+				auto it = _compositingNodes.begin();
+				it != _compositingNodes.end();
+				++it
+				)
+			{
+
 #if __PRE_DEBUG__
-			UpdateRecurse(rootCompositingNode, rendered, visited);
+				UpdateRecurse(**it, rendered, visited);
 #else
-			UpdateRecurse(rootCompositingNode, rendered);
+				UpdateRecurse(**it, rendered);
 #endif
+
+			}
 
 			SDL_GL_SwapWindow(&_window);
 		}
 
-		RenderCompositingNode& Renderer::AllocateCompositingNode(
-			unsigned int renderTag,
+		RenderCompositingTarget& Renderer::AllocateCompositingTarget(
 			unsigned int width,
 			unsigned int height
 		)
 		{
 			auto pCompositingTarget = new RenderCompositingTarget(width, height);
-			auto pCompositingNode = new RenderCompositingNode(renderTag, pCompositingTarget);
 
 #ifdef __PRE_DEBUG__
-			_compositingNodes.insert(pCompositingNode);
+			_compositingTargets.insert(pCompositingTarget);
 #endif
+
+			return *pCompositingTarget;
+		}
+
+		RenderCompositingTarget& Renderer::AllocateCompositingTarget(
+			unsigned int rightWidth, unsigned int rightHeight,
+			unsigned int leftWidth, unsigned int leftHeight,
+			unsigned int topWidth, unsigned int topHeight,
+			unsigned int bottomWidth, unsigned int bottomHeight,
+			unsigned int frontWidth, unsigned int frontHeight,
+			unsigned int backWidth, unsigned int backHeight
+		)
+		{
+			auto pCompositingTarget = new RenderCompositingTarget(
+				rightWidth, rightHeight,
+				leftWidth, leftHeight,
+				topWidth, topHeight,
+				bottomWidth, bottomHeight,
+				frontWidth, frontHeight,
+				backWidth, backHeight
+			);
+
+#ifdef __PRE_DEBUG__
+			_compositingTargets.insert(pCompositingTarget);
+#endif
+
+			return *pCompositingTarget;
+		}
+
+		RenderCompositingTarget& Renderer::DeallocateCompositingTarget(
+			RenderCompositingTarget& compositingTarget
+		)
+		{
+#ifdef __PRE_DEBUG__
+			assert(_compositingTargets.find(&compositingTarget) != _compositingTargets.end());
+#endif
+
+			_compositingTargets.erase(&compositingTarget);
+		}
+
+		RenderCompositingNode& Renderer::AllocateCompositingNode(
+			RenderCompositingNode::OnRender onRender,
+			void* vContext
+		)
+		{
+			auto pCompositingNode = new RenderCompositingNode(onRender, vContext);
+
+			_compositingNodes.insert(pCompositingNode);
 
 			return *pCompositingNode;
 		}
@@ -147,7 +203,6 @@ namespace PRE
 		)
 		{
 #ifdef __PRE_DEBUG__
-			assert(&dependency != &rootCompositingNode);
 			assert(_compositingNodes.find(&dependent) != _compositingNodes.end());
 			assert(_compositingNodes.find(&dependency) != _compositingNodes.end());
 #endif
@@ -173,13 +228,11 @@ namespace PRE
 			auto pCompositingNode = &compositingNode;
 
 #ifdef __PRE_DEBUG__
-			assert(pCompositingNode != &rootCompositingNode);
 			assert(_compositingNodes.find(pCompositingNode) != _compositingNodes.end());
-			assert(_compositingNodeCameraPairs.find(pCompositingNode) == _compositingNodeCameraPairs.end());
-			_compositingNodes.erase(pCompositingNode);
 #endif
 
-			delete pCompositingNode->_pCompositingTarget;
+			_compositingNodes.erase(pCompositingNode);
+
 			delete pCompositingNode;
 		}
 
@@ -214,65 +267,10 @@ namespace PRE
 
 #ifdef __PRE_DEBUG__
 			assert(_cameras.find(pCamera) != _cameras.end());
-			assert(_cameraCompositingNodePairs.find(pCamera) == _cameraCompositingNodePairs.end());
 			_cameras.erase(pCamera);
 #endif
 
 			delete pCamera;
-		}
-
-		void Renderer::BindCompositingPair(
-			RenderCamera& camera,
-			RenderCompositingNode& compositingNode
-		)
-		{
-			auto pCamera = &camera;
-			auto pCompositingNode = &compositingNode;
-
-#ifdef __PRE_DEBUG__
-			assert(_cameras.find(pCamera) != _cameras.end());
-			assert(!(
-				&compositingNode != &rootCompositingNode &&
-				_compositingNodes.find(pCompositingNode) == _compositingNodes.end())
-			);
-			assert(_cameraCompositingNodePairs.find(pCamera) == _cameraCompositingNodePairs.end());
-			assert(_compositingNodeCameraPairs.find(pCompositingNode) == _compositingNodeCameraPairs.end());
-#endif
-
-			_compositingNodeCameraPairs[pCompositingNode] = pCamera;
-
-#ifdef __PRE_DEBUG__
-			_cameraCompositingNodePairs[pCamera] = pCompositingNode;
-#endif
-		}
-
-		void Renderer::UnbindCompositingPair(
-			RenderCamera& camera,
-			RenderCompositingNode& compositingNode
-		)
-		{
-#ifdef __PRE_DEBUG__
-			auto itCameraPair = _cameraCompositingNodePairs.find(&camera);
-#endif
-
-			auto itCompositingNodePair = _compositingNodeCameraPairs.find(&compositingNode);
-
-#ifdef __PRE_DEBUG__
-			assert(_cameras.find(&camera) != _cameras.end());
-			assert(!(
-				&compositingNode != &rootCompositingNode &&
-				_compositingNodes.find(&compositingNode) == _compositingNodes.end()
-			));
-			assert(
-				itCameraPair != _cameraCompositingNodePairs.end() &&
-				itCameraPair->first == &camera &&
-				itCompositingNodePair != _compositingNodeCameraPairs.end() &&
-				itCompositingNodePair->first == &compositingNode
-			);
-			_cameraCompositingNodePairs.erase(itCameraPair);
-#endif
-
-			_compositingNodeCameraPairs.erase(itCompositingNodePair);
 		}
 
 		RenderVertexShader& Renderer::AllocateVertexShader(const string& shaderSource)
@@ -514,7 +512,6 @@ namespace PRE
 
 #ifdef __PRE_DEBUG__
 			_models.insert(pModel);
-			_modelTagGroups[pModel];
 #endif
 
 			return *pModel;
@@ -568,77 +565,23 @@ namespace PRE
 
 #ifdef __PRE_DEBUG__
 			assert(_models.find(pModel) != _models.end());
-			assert(_modelTagGroups.find(pModel)->second.empty());
 			_models.erase(pModel);
-			_modelTagGroups.erase(pModel);
 #endif
 
 			delete pModel;
 		}
 
-		void Renderer::DeclareTagGroup(unsigned int tagGroup)
-		{
-#ifdef __PRE_DEBUG__
-			assert(_tagGroups.find(tagGroup) == _tagGroups.end());
-#endif
-			_tagGroups[tagGroup];
-		}
-
-		void Renderer::AddModelToTagGroup(RenderModel& model, unsigned int tagGroup)
-		{
-#ifdef __PRE_DEBUG__
-			assert(_models.find(&model) != _models.end());
-			assert(_tagGroups.find(tagGroup) != _tagGroups.end());
-			auto& modelTagGroup = _modelTagGroups.find(&model)->second;
-			assert(modelTagGroup.find(tagGroup) == modelTagGroup.end());
-			modelTagGroup.insert(tagGroup);
-#endif
-
-			_tagGroups[tagGroup].insert(&model);
-		}
-
-		void Renderer::RemoveModelFromTagGroup(RenderModel& model, unsigned int tagGroup)
-		{
-#ifdef __PRE_DEBUG__
-			assert(_models.find(&model) != _models.end());
-			assert(_tagGroups.find(tagGroup) != _tagGroups.end());
-			auto& modelTagGroup = _modelTagGroups.find(&model)->second;
-			assert(modelTagGroup.find(tagGroup) != modelTagGroup.end());
-			modelTagGroup.erase(tagGroup);
-#endif
-
-			_tagGroups[tagGroup].erase(&model);
-		}
-
-		void Renderer::RevokeTagGroup(unsigned int tagGroup)
-		{
-#ifdef __PRE_DEBUG__
-			assert(tagGroup != ROOT_TAG_GROUP);
-			assert(_tagGroups.find(tagGroup) != _tagGroups.end());
-#endif
-
-			_tagGroups.erase(tagGroup);
-		}
-
-		const glm::mat4 Renderer::MAT4_IDENTITY = glm::mat4();
-
 		Renderer::Renderer(SDL_Window& window, SDL_GLContext& glContext)
 			:
-			rootCompositingNode(*(new RenderCompositingNode(ROOT_TAG_GROUP, nullptr))),
 			_window(window),
-			_glContext(glContext)
-		{
-			_tagGroups[ROOT_TAG_GROUP];
-		}
+			_glContext(glContext) {}
 
 		Renderer::~Renderer()
 		{
-			delete& rootCompositingNode;
 #ifdef __PRE_DEBUG__
+			assert(_compositingTargets.size() == 0);
 			assert(_compositingNodes.size() == 0);
 			assert(_cameras.size() == 0);
-			assert(_compositingNodeCameraPairs.size() == 0);
-			assert(_cameraCompositingNodePairs.size() == 0);
 			assert(_vertexShaders.size() == 0);
 			assert(_fragmentShaders.size() == 0);
 			assert(_shaderPrograms.size() == 0);
@@ -647,8 +590,6 @@ namespace PRE
 			assert(_textures.size() == 0);
 			assert(_materials.size() == 0);
 			assert(_models.size() == 0);
-			assert(_tagGroups.size() == 1);
-			assert(_modelTagGroups.size() == 0);
 #endif
 		}
 
@@ -686,23 +627,35 @@ namespace PRE
 
 			}
 
+			auto& composition = pCurrentNode->GetRenderComposition();
+
 #ifdef __PRE_DEBUG__
-			assert(_tagGroups.find(currentNode._tagGroup) != _tagGroups.end());
+			assert(
+				composition.pCamera == nullptr ||
+				_cameras.find(composition.pCamera) != _cameras.end()
+			);
+			assert(
+				composition.pCompositingTarget == nullptr ||
+				_compositingTargets.find(composition.pCompositingTarget) != _compositingTargets.end()
+			);
 #endif
 
-			auto itCamera = _compositingNodeCameraPairs.find(pCurrentNode);
-			if (itCamera != _compositingNodeCameraPairs.end())
+			if (composition.pCamera != nullptr)
 			{
-				auto& camera = *itCamera->second;
-				const auto& viewMatrix = camera.GetViewMatrix();
-				const auto& projectionMatrix = camera.GetProjectionMatrix();
+				const auto& viewMatrix = composition.pCamera->GetViewMatrix();
+				const auto& projectionMatrix = composition.pCamera->GetProjectionMatrix();
 
-				RenderCompositingTarget::Bind(currentNode._pCompositingTarget);
-				auto& tagModelSet = _tagGroups[currentNode._tagGroup];
-				for (auto it = tagModelSet.begin(); it != tagModelSet.end(); ++it)
+				RenderCompositingTarget::Bind(composition.pCompositingTarget);
+				auto& models = composition.models;
+				for (auto it = models.begin(); it != models.end(); ++it)
 				{
-					auto& model = **it;
-					model.Render(viewMatrix, projectionMatrix);
+					auto pModel = *it;
+
+#ifdef __PRE_DEBUG__
+					assert(_models.find(pModel) != _models.end());
+#endif
+
+					pModel->Render(viewMatrix, projectionMatrix);
 				}
 				RenderCompositingTarget::Bind(nullptr);
 			}

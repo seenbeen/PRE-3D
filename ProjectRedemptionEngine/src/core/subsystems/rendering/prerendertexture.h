@@ -5,9 +5,12 @@ namespace PRE
 {
 	namespace Core
 	{
+		class PRECameraComponent;
+
 		class PRERendering;
 		class PREMaterial;
 
+		using PRE::RenderingModule::RenderCompositingTarget;
 		using PRE::RenderingModule::RenderCompositingNode;
 
 		class PRERenderTexture
@@ -19,10 +22,21 @@ namespace PRE
 			friend class PREMaterial;
 
 		private:
-			const unsigned int _tagGroup;
+			static void OnRender(
+				RenderCompositingNode::RenderComposition& composition,
+				void* vContext
+			);
+
+			PRERendering& _rendering;
+			RenderCompositingTarget* const _pCompositingTarget;
 			RenderCompositingNode& _compositingNode;
 
-			PRERenderTexture(unsigned int tagGroup, RenderCompositingNode& compositingNode);
+			PRECameraComponent* _pAssociatedCameraComponent;
+
+			PRERenderTexture(
+				PRERendering& rendering,
+				RenderCompositingTarget* pCompositingTarget
+			);
 			~PRERenderTexture();
 		};
 	} // namespace Core

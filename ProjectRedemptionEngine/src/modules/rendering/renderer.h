@@ -13,12 +13,12 @@ typedef void* SDL_GLContext;
 #include <glm/glm.hpp>
 
 #include <modules/rendering/model/renderskeleton.h>
+#include <modules/rendering/compositing/rendercompositingnode.h>
 
 namespace PRE
 {
 	namespace RenderingModule
 	{
-		class RenderCompositingNode;
 		class RenderCamera;
 		class RenderVertexShader;
 		class RenderFragmentShader;
@@ -41,8 +41,6 @@ namespace PRE
 		public:
 			enum class CameraKind { ORTHOGRAPHIC, PERSPECTIVE };
 
-			static const unsigned int ROOT_TAG_GROUP;
-
 			static Renderer& MakeRenderer(
 				const string& windowTitle,
 				unsigned int windowWidth,
@@ -52,14 +50,29 @@ namespace PRE
 			static void SetActiveRenderer(Renderer& renderer);
 			static void ShutdownRenderer(Renderer& renderer);
 
-			RenderCompositingNode& rootCompositingNode;
-
 			void Update();
 
-			RenderCompositingNode& AllocateCompositingNode(
-				unsigned int tagGroup,
+			RenderCompositingTarget& AllocateCompositingTarget(
 				unsigned int width,
 				unsigned int height
+			);
+
+			RenderCompositingTarget& AllocateCompositingTarget(
+				unsigned int rightWidth, unsigned int rightHeight,
+				unsigned int leftWidth, unsigned int leftHeight,
+				unsigned int topWidth, unsigned int topHeight,
+				unsigned int bottomWidth, unsigned int bottomHeight,
+				unsigned int frontWidth, unsigned int frontHeight,
+				unsigned int backWidth, unsigned int backHeight
+			);
+
+			RenderCompositingTarget& DeallocateCompositingTarget(
+				RenderCompositingTarget& compositingTarget
+			);
+
+			RenderCompositingNode& AllocateCompositingNode(
+				RenderCompositingNode::OnRender onRender,
+				void* vContext
 			);
 			void AttachCompositingNodeDependency(
 				RenderCompositingNode& dependent,
@@ -79,16 +92,6 @@ namespace PRE
 				float farClippingPlane
 			);
 			void DeallocateCamera(RenderCamera& camera);
-
-			void BindCompositingPair(
-				RenderCamera& camera,
-				RenderCompositingNode& compositingNode
-			);
-
-			void UnbindCompositingPair(
-				RenderCamera& camera,
-				RenderCompositingNode& compositingNode
-			);
 
 			RenderVertexShader& AllocateVertexShader(const string& shaderSource);
 			void DeallocateVertexShader(const RenderVertexShader& vertexShader);
@@ -157,28 +160,18 @@ namespace PRE
 			void SetModelMaterial(RenderModel& model, RenderMaterial* pMaterial);
 			void DeallocateModel(RenderModel& model);
 
-			void DeclareTagGroup(unsigned int tagGroup);
-			void AddModelToTagGroup(RenderModel& model, unsigned int tagGroup);
-			void RemoveModelFromTagGroup(RenderModel& model, unsigned int tagGroup);
-			void RevokeTagGroup(unsigned int tagGroup);
-
 		private:
-			static const glm::mat4 MAT4_IDENTITY;
-
 			SDL_Window& _window;
 			SDL_GLContext& _glContext;
 
 #ifdef __PRE_DEBUG__
-			unordered_set<RenderCompositingNode*> _compositingNodes;
-
-			unordered_set<const RenderCamera*> _cameras;
+			unordered_set<RenderCompositingTarget*> _compositingTargets;
 #endif
 
-			unordered_map<RenderCompositingNode*, RenderCamera*> _compositingNodeCameraPairs;
+			unordered_set<RenderCompositingNode*> _compositingNodes;
 
 #ifdef __PRE_DEBUG__
-			// Note: this should be a 1:1 match to the above at all times, used for debugging
-			unordered_map<const RenderCamera*, const RenderCompositingNode*> _cameraCompositingNodePairs;
+			unordered_set<const RenderCamera*> _cameras;
 
 			unordered_set<const RenderVertexShader*> _vertexShaders;
 			unordered_set<const RenderFragmentShader*> _fragmentShaders;
@@ -190,13 +183,6 @@ namespace PRE
 			unordered_set<const RenderMaterial*> _materials;
 
 			unordered_set<const RenderModel*> _models;
-#endif
-
-			unordered_map<unsigned int, unordered_set<RenderModel*>> _tagGroups;
-
-#ifdef __PRE_DEBUG__
-			// used to track whether a model is still part of a tag group
-			unordered_map<const RenderModel*, unordered_set<unsigned int>> _modelTagGroups;
 #endif
 
 			Renderer(SDL_Window& window, SDL_GLContext& glContext);

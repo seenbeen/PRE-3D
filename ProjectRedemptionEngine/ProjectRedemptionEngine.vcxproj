@@ -93,6 +93,7 @@
     <ClInclude Include="src\core\subsystems\rendering\preanimator.h" />
     <ClInclude Include="src\core\subsystems\rendering\preanimatorconfig.h" />
     <ClInclude Include="src\core\subsystems\rendering\preboneconfig.h" />
+    <ClInclude Include="src\core\subsystems\rendering\prelight.h" />
     <ClInclude Include="src\core\subsystems\rendering\prematerial.h" />
     <ClInclude Include="src\core\subsystems\rendering\premesh.h" />
     <ClInclude Include="src\core\subsystems\rendering\prerendering.h" />

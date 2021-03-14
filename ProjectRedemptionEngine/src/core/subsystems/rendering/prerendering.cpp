@@ -61,7 +61,6 @@ namespace PRE
 			Renderer& renderer
 		)
 			:
-			tagGroupCounter(0),
 			applicationContext(applicationContext),
 			renderer(renderer) {}
 
@@ -70,14 +69,17 @@ namespace PRE
 			Renderer::ShutdownRenderer(renderer);
 		}
 
+		PRERenderTexture& PRERendering::GetScreenRenderTexture()
+		{
+			return _screenRenderTexture;
+		}
+
 		PRERenderTexture& PRERendering::CreateRenderTexture(unsigned int width, unsigned int height)
 		{
-			_impl.renderer.DeclareTagGroup(++_impl.tagGroupCounter);
 			return *(
 				new PRERenderTexture(
-					_impl.tagGroupCounter,
-					_impl.renderer.AllocateCompositingNode(
-						_impl.tagGroupCounter,
+					*this,
+					&_impl.renderer.AllocateCompositingTarget(
 						width,
 						height
 					)
@@ -87,10 +89,11 @@ namespace PRE
 
 		void PRERendering::DestroyRenderTexture(PRERenderTexture& renderTexture)
 		{
-			auto tagGroup = renderTexture._tagGroup;
-			_impl.renderer.DeallocateCompositingNode(renderTexture._compositingNode);
+			if (renderTexture._pCompositingTarget != nullptr)
+			{
+				_impl.renderer.DeallocateCompositingTarget(*renderTexture._pCompositingTarget);
+			}
 			delete &renderTexture;
-			_impl.renderer.RevokeTagGroup(tagGroup);
 		}
 
 		PREShader& PRERendering::CreateShader(const string& vertex, const string& fragment)
@@ -386,19 +389,12 @@ namespace PRE
 			Renderer& renderer
 		)
 			:
-			rootRenderTexture(
-				*(
-					new PRERenderTexture(
-						Renderer::ROOT_TAG_GROUP,
-						renderer.rootCompositingNode
-					)
-				)
-			),
-			_impl(Impl::MakeImpl(applicationContext, renderer)) {}
+			_impl(Impl::MakeImpl(applicationContext, renderer)),
+			_screenRenderTexture(*(new PRERenderTexture(*this, nullptr))) {}
 		
 		PRERendering::~PRERendering()
 		{
-			delete &rootRenderTexture;
+			delete &_screenRenderTexture;
 			delete &_impl;
 		}
 
@@ -411,6 +407,47 @@ namespace PRE
 		}
 
 		void PRERendering::Shutdown() {}
+
+		RenderCompositingNode& PRERendering::AllocateCompositingNode(
+			RenderCompositingNode::OnRender onRender,
+			PRERenderTexture& renderTexture
+		)
+		{
+			return _impl.renderer.AllocateCompositingNode(onRender, &renderTexture);
+		}
+
+		void PRERendering::DeallocateCompositingNode(
+			RenderCompositingNode& compositingNode
+		)
+		{
+			_impl.renderer.DeallocateCompositingNode(compositingNode);
+		}
+
+		void PRERendering::ComposeRenderComposition(
+			RenderCompositingNode::RenderComposition& composition,
+			PRECameraComponent& cameraComponent
+		)
+		{
+			cameraComponent.AllocateIfNotAllocated();
+			composition.SetCamera(cameraComponent._pCamera);
+
+			// TODO: Spatial query optimizing to only render visible models
+			for (
+				auto it = cameraComponent._associatedModelComponents.begin();
+				it != cameraComponent._associatedModelComponents.end();
+				++it
+			)
+			{
+				auto& modelRendererComponent = **it;
+				modelRendererComponent.AllocateIfNotAllocated();
+				composition.AddModel(*modelRendererComponent._pModel);
+			}
+
+			if (cameraComponent._pSkyBox != nullptr)
+			{
+				composition.AddModel(cameraComponent._pSkyBox->_model);
+			}
+		}
 
 		RenderCamera& PRERendering::AllocateCamera(
 			const CameraKind& kind,
@@ -437,11 +474,6 @@ namespace PRE
 			_impl.renderer.DeallocateCamera(camera);
 		}
 
-		// Note: PRERenderTextures aren't associated with cameras because
-		// render textures can't be destroyed manually (the engine does
-		// deallocating at end of life, at which point all associations
-		// should already be unlinked)
-
 		void PRERendering::LinkCameraComponentToRenderTexture(
 			PRECameraComponent& cameraComponent,
 			PRERenderTexture& renderTexture
@@ -449,35 +481,11 @@ namespace PRE
 		{
 #ifdef __PRE_DEBUG__
 			assert(cameraComponent._pRenderTexture == nullptr);
+			assert(renderTexture._pAssociatedCameraComponent == nullptr);
 #endif
 
-			for (
-				auto it = cameraComponent._associatedModelComponents.begin();
-				it != cameraComponent._associatedModelComponents.end();
-				++it
-				)
-			{
-				auto& modelRendererComponent = **it;
-				_impl.renderer.AddModelToTagGroup(
-					*modelRendererComponent._pModel,
-					renderTexture._tagGroup
-				);
-			}
-
-			if (cameraComponent._pSkyBox != nullptr)
-			{
-				_impl.renderer.AddModelToTagGroup(
-					cameraComponent._pSkyBox->_model,
-					renderTexture._tagGroup
-				);
-			}
-
-			_impl.renderer.BindCompositingPair(
-				*cameraComponent._pCamera,
-				renderTexture._compositingNode
-			);
-
 			cameraComponent._pRenderTexture = &renderTexture;
+			renderTexture._pAssociatedCameraComponent = &cameraComponent;
 		}
 
 		void PRERendering::UnlinkCameraComponentFromRenderTexture(
@@ -487,35 +495,11 @@ namespace PRE
 		{
 #ifdef __PRE_DEBUG__
 			assert(cameraComponent._pRenderTexture == &renderTexture);
+			assert(renderTexture._pAssociatedCameraComponent == &cameraComponent);
 #endif
 
-			for (
-				auto it = cameraComponent._associatedModelComponents.begin();
-				it != cameraComponent._associatedModelComponents.end();
-				++it
-				)
-			{
-				auto& modelRendererComponent = **it;
-				_impl.renderer.RemoveModelFromTagGroup(
-					*modelRendererComponent._pModel,
-					renderTexture._tagGroup
-				);
-			}
-
-			if (cameraComponent._pSkyBox != nullptr)
-			{
-				_impl.renderer.RemoveModelFromTagGroup(
-					cameraComponent._pSkyBox->_model,
-					renderTexture._tagGroup
-				);
-			}
-
-			_impl.renderer.UnbindCompositingPair(
-				*cameraComponent._pCamera,
-				renderTexture._compositingNode
-			);
-
 			cameraComponent._pRenderTexture = nullptr;
+			renderTexture._pAssociatedCameraComponent = nullptr;
 		}
 
 		RenderModel& PRERendering::AllocateModel()
@@ -564,14 +548,6 @@ namespace PRE
 			assert(cameraComponent._associatedModelComponents.find(&modelRendererComponent) == cameraComponent._associatedModelComponents.end());
 #endif
 
-			if (cameraComponent._pRenderTexture != nullptr)
-			{
-				_impl.renderer.AddModelToTagGroup(
-					*modelRendererComponent._pModel,
-					cameraComponent._pRenderTexture->_tagGroup
-				);
-			}
-
 			modelRendererComponent._pCameraComponent = &cameraComponent;
 			cameraComponent._associatedModelComponents.insert(&modelRendererComponent);
 		}
@@ -585,14 +561,6 @@ namespace PRE
 			assert(modelRendererComponent._pCameraComponent == &cameraComponent);
 			assert(cameraComponent._associatedModelComponents.find(&modelRendererComponent) != cameraComponent._associatedModelComponents.end());
 #endif
-
-			if (cameraComponent._pRenderTexture != nullptr)
-			{
-				_impl.renderer.RemoveModelFromTagGroup(
-					*modelRendererComponent._pModel,
-					cameraComponent._pRenderTexture->_tagGroup
-				);
-			}
 
 			modelRendererComponent._pCameraComponent = nullptr;
 			cameraComponent._associatedModelComponents.erase(&modelRendererComponent);
@@ -608,14 +576,6 @@ namespace PRE
 			assert(skyBox._associatedCameraComponents.find(&cameraComponent) == skyBox._associatedCameraComponents.end());
 #endif
 
-			if (cameraComponent._pRenderTexture != nullptr)
-			{
-				_impl.renderer.AddModelToTagGroup(
-					skyBox._model,
-					cameraComponent._pRenderTexture->_tagGroup
-				);
-			}
-
 			cameraComponent._pSkyBox = &skyBox;
 			skyBox._associatedCameraComponents.insert(&cameraComponent);
 		}
@@ -629,14 +589,6 @@ namespace PRE
 			assert(cameraComponent._pSkyBox == &skyBox);
 			assert(skyBox._associatedCameraComponents.find(&cameraComponent) != skyBox._associatedCameraComponents.end());
 #endif
-
-			if (cameraComponent._pRenderTexture != nullptr)
-			{
-				_impl.renderer.RemoveModelFromTagGroup(
-					skyBox._model,
-					cameraComponent._pRenderTexture->_tagGroup
-				);
-			}
 
 			cameraComponent._pSkyBox = nullptr;
 			skyBox._associatedCameraComponents.erase(&cameraComponent);

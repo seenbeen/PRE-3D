@@ -11,7 +11,7 @@ namespace PRE
 	namespace RenderingModule
 	{
 		class Renderer;
-		class RenderCompositingNode;
+		class RenderCompositingTarget;
 		class RenderShaderProgram;
 		class RenderTexture;
 		class RenderModel;
@@ -46,11 +46,8 @@ namespace PRE
 
 		public:
 			void SetShaderProgram(RenderShaderProgram* pShaderProgram);
-			void SetTextureBinding(RenderTexture* pRenderTexture, GLenum bindUnit);
-			void SetTextureBinding(
-				RenderCompositingNode& compositingNode,
-				GLenum bindUnit
-			);
+			void SetTextureBinding(RenderTexture* pTexture, GLenum bindUnit);
+			void SetTextureBinding(RenderCompositingTarget* pCompositingTarget, GLenum bindUnit);
 
 		private:
 			Impl& _impl;

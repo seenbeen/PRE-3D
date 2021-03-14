@@ -17,7 +17,9 @@ namespace PRE
 		class PRESkyBox;
 
 		using std::unordered_set;
+
 		using PRE::RenderingModule::RenderCamera;
+		using PRE::RenderingModule::RenderCompositingNode;
 
 		class PRECameraComponent : public PREGameObjectComponent
 		{

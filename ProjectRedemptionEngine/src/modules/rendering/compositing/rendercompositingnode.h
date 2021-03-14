@@ -1,16 +1,19 @@
 #pragma once
 #include <unordered_set>
+#include <vector>
 
 namespace PRE
 {
 	namespace RenderingModule
 	{
 		class Renderer;
+		class RenderCamera;
 		class RenderCompositingTarget;
 		class RenderTexture;
-		class RenderMaterial;
+		class RenderModel;
 
 		using std::unordered_set;
+		using std::vector;
 
 		class RenderCompositingNode
 		{
@@ -18,8 +21,33 @@ namespace PRE
 			RenderCompositingNode(const RenderCompositingNode&) = delete;
 
 			friend class Renderer;
-			friend class RenderMaterial;
 
+		public:
+			class RenderComposition
+			{
+				RenderComposition& operator=(const RenderComposition&) = delete;
+				RenderComposition(const RenderComposition&) = delete;
+
+				friend class Renderer;
+				friend class RenderCompositingNode;
+
+			public:
+				void SetCamera(RenderCamera* pCamera);
+				void SetCompositingTarget(RenderCompositingTarget* pCompositingTarget);
+				void AddModel(RenderModel& model);
+
+			private:
+				RenderCamera* pCamera;
+				RenderCompositingTarget* pCompositingTarget;
+				vector<RenderModel*> models;
+
+				RenderComposition();
+				~RenderComposition();
+			};
+
+			typedef void (*OnRender)(RenderComposition& composition, void* vContext);
+
+		private:
 			class Impl
 			{
 				Impl& operator=(const Impl&) = delete;
@@ -30,26 +58,33 @@ namespace PRE
 			private:
 				unordered_set<RenderCompositingNode*> compositingNodeDependencies;
 
-				static Impl& MakeImpl();
+				RenderComposition& composition;
+				OnRender const onRender;
+				void* const vContext;
 
-				Impl();
+				static Impl& MakeImpl(
+					RenderComposition& composition,
+					OnRender onRender,
+					void* vContext
+				);
+
+				Impl(
+					RenderComposition& composition,
+					OnRender onRender,
+					void* vContext
+				);
 				~Impl();
 			};
 
-		private:
-			const unsigned int _tagGroup;
-			RenderCompositingTarget* _pCompositingTarget;
-
 			Impl& _impl;
 
-			RenderCompositingNode(unsigned int tagGroup, RenderCompositingTarget* pCompositingTarget);
+			RenderCompositingNode(OnRender onRender, void* vContext);
 			~RenderCompositingNode();
-
-			RenderTexture& GetTarget();
 
 			void AddDependency(RenderCompositingNode& compositingNode);
 			void RemoveDependency(RenderCompositingNode& compositingNode);
 
+			const RenderComposition& GetRenderComposition();
 			const unordered_set<RenderCompositingNode*>& GetDependencies();
 		};
 	} // namespace RenderingModule

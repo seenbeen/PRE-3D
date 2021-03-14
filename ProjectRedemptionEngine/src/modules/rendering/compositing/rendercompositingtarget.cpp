@@ -21,13 +21,8 @@ namespace PRE
 			glGenFramebuffers(1, &gBufferId);
 			glBindFramebuffer(GL_FRAMEBUFFER, gBufferId);
 
-			// this is kinda hack-y... we're using objects to set
-			// gl state and then doing some manual tweaking.
-			// TODO: maybe clean up later?
-
-			auto target = new RenderTexture(RenderTexture::TextureKind::STANDARD);
+			auto target = new RenderTexture(width, height, nullptr);
 			target->Bind();
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
 			target->BindTarget(GL_COLOR_ATTACHMENT0);
 
 			glDrawBuffer(GL_COLOR_ATTACHMENT0);
@@ -56,21 +51,21 @@ namespace PRE
 			unsigned int backWidth, unsigned int backHeight
 		)
 		{
-
+			// TODO: Cubemap framebuffers
 		}
 
 		RenderCompositingTarget::Impl::Impl(
-			GLuint gBufferId,
+			GLuint bufferId,
 			RenderTexture& target
 		)
 			:
-			gBufferId(gBufferId),
+			bufferId(bufferId),
 			target(target) {}
 
 		RenderCompositingTarget::Impl::~Impl()
 		{
 			delete &target;
-			glDeleteFramebuffers(1, &gBufferId);
+			glDeleteFramebuffers(1, &bufferId);
 		}
 
 		RenderCompositingTarget::RenderCompositingTarget(unsigned int width, unsigned int height)
@@ -86,14 +81,16 @@ namespace PRE
 			unsigned int backWidth, unsigned int backHeight
 		)
 			:
-			_impl(Impl::MakeImpl(
-				rightWidth, rightHeight,
-				leftWidth, leftHeight,
-				topWidth, topHeight,
-				bottomWidth, bottomHeight,
-				frontWidth, frontHeight,
-				backWidth, backHeight
-			)) {}
+			_impl(
+				Impl::MakeImpl(
+					rightWidth, rightHeight,
+					leftWidth, leftHeight,
+					topWidth, topHeight,
+					bottomWidth, bottomHeight,
+					frontWidth, frontHeight,
+					backWidth, backHeight
+				)
+			) {}
 
 		RenderCompositingTarget::~RenderCompositingTarget()
 		{
@@ -113,7 +110,7 @@ namespace PRE
 			}
 			else
 			{
-				glBindFramebuffer(GL_FRAMEBUFFER, pCompositingTarget->_impl.gBufferId);
+				glBindFramebuffer(GL_FRAMEBUFFER, pCompositingTarget->_impl.bufferId);
 			}
 		}
 	} // namespace RenderingModule

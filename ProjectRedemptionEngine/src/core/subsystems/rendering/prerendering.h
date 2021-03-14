@@ -32,6 +32,7 @@ namespace PRE
 
 		using std::string;
 		using PRE::RenderingModule::Renderer;
+		using PRE::RenderingModule::RenderCompositingNode;
 		using PRE::RenderingModule::RenderCamera;
 		using PRE::RenderingModule::RenderModel;
 
@@ -43,6 +44,7 @@ namespace PRE
 			friend class PREApplicationContext;
 			friend class PREModelRendererComponent;
 			friend class PRECameraComponent;
+			friend class PRERenderTexture;
 
 			class Impl
 			{
@@ -54,7 +56,6 @@ namespace PRE
 			private:
 				static Impl& MakeImpl(PREApplicationContext& applicationContext, Renderer& renderer);
 
-				unsigned int tagGroupCounter;
 				PREApplicationContext& applicationContext;
 				Renderer& renderer;
 
@@ -63,7 +64,7 @@ namespace PRE
 			};
 
 		public:
-			PRERenderTexture& rootRenderTexture;
+			PRERenderTexture& GetScreenRenderTexture();
 
 			PRERenderTexture& CreateRenderTexture(unsigned int width, unsigned int height);
 			void DestroyRenderTexture(PRERenderTexture& renderTexture);
@@ -141,6 +142,7 @@ namespace PRE
 			);
 
 			Impl& _impl;
+			PRERenderTexture& _screenRenderTexture;
 
 			PRERendering(
 				PREApplicationContext& applicationContext,
@@ -151,6 +153,19 @@ namespace PRE
 			void Initialize();
 			void Update();
 			void Shutdown();
+
+			RenderCompositingNode& AllocateCompositingNode(
+				RenderCompositingNode::OnRender onRender,
+				PRERenderTexture& renderTexture
+			);
+			void DeallocateCompositingNode(
+				RenderCompositingNode& compositingNode
+			);
+
+			void ComposeRenderComposition(
+				RenderCompositingNode::RenderComposition& composition,
+				PRECameraComponent& cameraComponent
+			);
 
 			RenderCamera& AllocateCamera(
 				const CameraKind& kind,

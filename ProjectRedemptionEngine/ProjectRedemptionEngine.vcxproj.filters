@@ -374,6 +374,9 @@
     <ClInclude Include="src\core\subsystems\rendering\preskybox.h">
       <Filter>Header Files\Core\Subsystems\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\subsystems\rendering\prelight.h">
+      <Filter>Header Files\Core\Subsystems\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\modules\gameobject\gameobject.cpp">
