@@ -13,19 +13,27 @@ namespace PRE
 		using PRE::RenderingModule::RenderMaterial;
 
 		PREMaterial::PREMaterial(RenderMaterial& material)
-			: _material(material) {}
+			:
+			_material(material),
+			_pShader(nullptr) {}
 
 		void PREMaterial::SetShader(PREShader* pShader)
 		{
+			_pShader = pShader;
 			_material.SetShaderProgram(
-				pShader != nullptr ?
-					&pShader->_shaderProgram :
+				_pShader != nullptr ?
+					&_pShader->_shaderProgram :
 					nullptr
 			);
 		}
 
 		void PREMaterial::SetTextureBinding(PRETexture* pTexture, unsigned int bindUnit)
 		{
+			auto it = _renderTextureBindings.find(bindUnit);
+			if (it != _renderTextureBindings.end())
+			{
+				_renderTextureBindings.erase(it);
+			}
 			_material.SetTextureBinding(
 				pTexture != nullptr ?
 					&pTexture->_texture :
@@ -39,12 +47,27 @@ namespace PRE
 			unsigned int bindUnit
 		)
 		{
-			_material.SetTextureBinding(
-				renderTexture._pCompositingTarget,
-				bindUnit
-			);
+			_renderTextureBindings[bindUnit] = &renderTexture;
 		}
 
 		PREMaterial::~PREMaterial() {}
+
+		void PREMaterial::BindRenderTextureAccumulatorBindings()
+		{
+			for (
+				auto it = _renderTextureBindings.begin();
+				it != _renderTextureBindings.end();
+				++it
+			)
+			{
+				auto& renderTexture = *it->second;
+				_material.SetTextureBinding(
+					!renderTexture._accumulatorBufferIsA ?
+						renderTexture._pBufferA :
+						renderTexture._pBufferB,
+					it->first
+				);
+			}
+		}
 	} // namespace Core
 } // namespace PRE

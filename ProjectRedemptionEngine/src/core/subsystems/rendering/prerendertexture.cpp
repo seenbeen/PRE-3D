@@ -1,50 +1,30 @@
 #include <core/subsystems/rendering/prerendertexture.h>
 
+#include <list>
 #include <include/modules/rendering.h>
 
-#include <core/subsystems/rendering/prerendering.h>
 
 namespace PRE
 {
 	namespace Core
 	{
+		using std::list;
+
 		using PRE::RenderingModule::RenderCompositingTarget;
 		using PRE::RenderingModule::RenderCompositingNode;
 
-		void PRERenderTexture::OnRender(
-			RenderCompositingNode::RenderComposition& composition,
-			void* vContext
-		)
-		{
-			auto& renderTexture = *static_cast<PRERenderTexture*>(vContext);
-			if (renderTexture._pAssociatedCameraComponent != nullptr)
-			{
-				renderTexture._rendering.ComposeRenderComposition(
-					composition,
-					*renderTexture._pAssociatedCameraComponent
-				);
-				composition.SetCompositingTarget(renderTexture._pCompositingTarget);
-			}
-		}
-
 		PRERenderTexture::PRERenderTexture(
-			PRERendering& rendering,
-			RenderCompositingTarget* pCompositingTarget
+			list<PRERenderTexture*>::iterator it,
+			RenderCompositingTarget& bufferA,
+			RenderCompositingTarget& bufferB
 		)
 			:
-			_rendering(rendering),
-			_pCompositingTarget(pCompositingTarget),
-			_compositingNode(
-				_rendering.AllocateCompositingNode(
-					OnRender,
-					*this
-				)
-			),
-			_pAssociatedCameraComponent(nullptr) {}
+			_it(it),
+			_pAssociatedCameraComponent(nullptr),
+			_pBufferA(&bufferA),
+			_pBufferB(&bufferB),
+			_accumulatorBufferIsA(false) {}
 
-		PRERenderTexture::~PRERenderTexture()
-		{
-			_rendering.DeallocateCompositingNode(_compositingNode);
-		}
+		PRERenderTexture::~PRERenderTexture() {}
 	} // namespace Core
 } // namespace PRE

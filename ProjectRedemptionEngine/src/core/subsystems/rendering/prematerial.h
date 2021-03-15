@@ -1,4 +1,6 @@
 #pragma once
+#include <unordered_map>
+
 #include <include/modules/rendering.h>
 
 namespace PRE
@@ -10,6 +12,7 @@ namespace PRE
 		class PREShader;
 		class PRETexture;
 
+		using std::unordered_map;
 		using PRE::RenderingModule::RenderMaterial;
 
 		class PREMaterial
@@ -29,9 +32,14 @@ namespace PRE
 
 		private:
 			RenderMaterial& _material;
+			PREShader* _pShader;
+
+			unordered_map<unsigned int, PRERenderTexture*> _renderTextureBindings;
 
 			PREMaterial(RenderMaterial& material);
 			~PREMaterial();
+
+			void BindRenderTextureAccumulatorBindings();
 		};
 	} // namespace Core
 } // namespace PRE

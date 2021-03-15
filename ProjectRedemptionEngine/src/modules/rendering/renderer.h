@@ -50,6 +50,9 @@ namespace PRE
 			static void SetActiveRenderer(Renderer& renderer);
 			static void ShutdownRenderer(Renderer& renderer);
 
+			const unsigned int width;
+			const unsigned int height;
+
 			void Update();
 
 			RenderCompositingTarget& AllocateCompositingTarget(
@@ -66,7 +69,7 @@ namespace PRE
 				unsigned int backWidth, unsigned int backHeight
 			);
 
-			RenderCompositingTarget& DeallocateCompositingTarget(
+			void DeallocateCompositingTarget(
 				RenderCompositingTarget& compositingTarget
 			);
 
@@ -185,7 +188,7 @@ namespace PRE
 			unordered_set<const RenderModel*> _models;
 #endif
 
-			Renderer(SDL_Window& window, SDL_GLContext& glContext);
+			Renderer(unsigned int width, unsigned int height, SDL_Window& window, SDL_GLContext& glContext);
 			~Renderer();
 
 #ifdef __PRE_DEBUG__

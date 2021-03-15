@@ -1,5 +1,7 @@
 #pragma once
+#include <list>
 #include <string>
+#include <unordered_set>
 
 #include <glad/glad.h>
 
@@ -12,8 +14,10 @@ namespace PRE
 		struct PRERenderingConfig;
 
 		class PREApplicationContext;
+
 		class PREModelRendererComponent;
 		class PRECameraComponent;
+		class PREPointLightComponent;
 
 		class PRERenderTexture;
 		class PREShader;
@@ -23,6 +27,8 @@ namespace PRE
 		class PRETexture;
 		class PREMaterial;
 
+		class PRELightRenderPassContext;
+
 		class PREAnimation;
 		class PREAnimationConfig;
 		class PREAnimator;
@@ -30,10 +36,16 @@ namespace PRE
 
 		class PRESkyBox;
 
+		using std::list;
 		using std::string;
+		using std::unordered_set;
+
 		using PRE::RenderingModule::Renderer;
 		using PRE::RenderingModule::RenderCompositingNode;
 		using PRE::RenderingModule::RenderCamera;
+		using PRE::RenderingModule::RenderShaderProgram;
+		using PRE::RenderingModule::RenderMesh;
+		using PRE::RenderingModule::RenderMaterial;
 		using PRE::RenderingModule::RenderModel;
 
 		class PRERendering
@@ -54,12 +66,40 @@ namespace PRE
 				friend class PRERendering;
 
 			private:
-				static Impl& MakeImpl(PREApplicationContext& applicationContext, Renderer& renderer);
+				static Impl& MakeImpl(
+					PREApplicationContext& applicationContext,
+					Renderer& renderer,
+					PRERendering& rendering
+				);
+
+				static void ScreenOnRender(
+					RenderCompositingNode::RenderComposition& composition,
+					void* vRenderingImpl
+				);
 
 				PREApplicationContext& applicationContext;
 				Renderer& renderer;
+				PRERendering& rendering;
+				RenderCompositingNode& screenCompositingNode;
+				RenderShaderProgram& screenShaderProgram;
+				RenderMesh& screenMesh;
+				RenderMaterial& screenMaterial;
+				RenderModel& screenModel;
+				RenderCamera& screenCamera;
 
-				Impl(PREApplicationContext& applicationContext, Renderer& renderer);
+				list<PRERenderTexture*> renderPasses;
+				unordered_set<PREPointLightComponent*> pointLights;
+
+				Impl(
+					PREApplicationContext& applicationContext,
+					Renderer& renderer,
+					PRERendering& rendering,
+					RenderShaderProgram& screenShaderProgram,
+					RenderMesh& screenMesh,
+					RenderMaterial& screenMaterial,
+					RenderModel& screenModel,
+					RenderCamera& screenCamera
+				);
 				~Impl();
 			};
 
@@ -141,6 +181,11 @@ namespace PRE
 				PREApplicationContext& applicationContext
 			);
 
+			static void LightPassOnRender(
+				RenderCompositingNode::RenderComposition& composition,
+				void* vLightPassContext
+			);
+
 			Impl& _impl;
 			PRERenderTexture& _screenRenderTexture;
 
@@ -164,7 +209,7 @@ namespace PRE
 
 			void ComposeRenderComposition(
 				RenderCompositingNode::RenderComposition& composition,
-				PRECameraComponent& cameraComponent
+				PRELightRenderPassContext& lightRenderPassContext
 			);
 
 			RenderCamera& AllocateCamera(
@@ -208,6 +253,20 @@ namespace PRE
 			void UnlinkCameraComponentFromSkyBox(
 				PRECameraComponent& cameraComponent,
 				PRESkyBox& skyBox
+			);
+
+			RenderCompositingNode& LinkLightToRenderTargets(
+				PREPointLightComponent& pointLightComponent
+			);
+			void UnlinkLightFromRenderTargets(
+				PREPointLightComponent& pointLightComponent
+			);
+
+			void LinkRenderTextureToLights(
+				PRERenderTexture& renderTexture
+			);
+			void UnlinkRenderTextureFromLights(
+				PRERenderTexture& renderTexture
 			);
 		};
 	} // namespace Core

@@ -6,6 +6,7 @@
 
 #ifdef __PRE_DEBUG__
 #include <assert.h>
+#include <iostream>
 #endif
 
 namespace PRE
@@ -29,6 +30,7 @@ namespace PRE
 			{
 				GLchar infoLog[1024];
 				glGetShaderInfoLog(shaderId, 1024, NULL, infoLog);
+				std::cout << string(infoLog) << std::endl;
 				assert(false);
 			}
 #endif

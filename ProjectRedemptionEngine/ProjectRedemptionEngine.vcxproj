@@ -17,6 +17,7 @@
     <ClCompile Include="src\core\components\preanimatorcomponent.cpp" />
     <ClCompile Include="src\core\components\precameracomponent.cpp" />
     <ClCompile Include="src\core\components\premodelrenderercomponent.cpp" />
+    <ClCompile Include="src\core\components\prepointlightcomponent.cpp" />
     <ClCompile Include="src\core\preapplication.cpp" />
     <ClCompile Include="src\core\components\pretransformcomponent.cpp" />
     <ClCompile Include="src\core\preapplicationconfig.cpp" />
@@ -32,6 +33,8 @@
     <ClCompile Include="src\core\subsystems\rendering\preanimator.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\preanimatorconfig.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\preboneconfig.cpp" />
+    <ClCompile Include="src\core\subsystems\rendering\prelightrenderpasscontext.cpp" />
+    <ClCompile Include="src\core\subsystems\rendering\prelightrenderpassdata.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\prematerial.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\premesh.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\prerendering.cpp" />
@@ -77,6 +80,7 @@
     <ClInclude Include="src\core\components\preanimatorcomponent.h" />
     <ClInclude Include="src\core\components\precameracomponent.h" />
     <ClInclude Include="src\core\components\premodelrenderercomponent.h" />
+    <ClInclude Include="src\core\components\prepointlightcomponent.h" />
     <ClInclude Include="src\core\preapplication.h" />
     <ClInclude Include="src\core\components\pretransformcomponent.h" />
     <ClInclude Include="src\core\preapplicationconfig.h" />
@@ -93,7 +97,8 @@
     <ClInclude Include="src\core\subsystems\rendering\preanimator.h" />
     <ClInclude Include="src\core\subsystems\rendering\preanimatorconfig.h" />
     <ClInclude Include="src\core\subsystems\rendering\preboneconfig.h" />
-    <ClInclude Include="src\core\subsystems\rendering\prelight.h" />
+    <ClInclude Include="src\core\subsystems\rendering\prelightrenderpasscontext.h" />
+    <ClInclude Include="src\core\subsystems\rendering\prelightrenderpassdata.h" />
     <ClInclude Include="src\core\subsystems\rendering\prematerial.h" />
     <ClInclude Include="src\core\subsystems\rendering\premesh.h" />
     <ClInclude Include="src\core\subsystems\rendering\prerendering.h" />

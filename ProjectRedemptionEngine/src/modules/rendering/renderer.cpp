@@ -88,7 +88,7 @@ namespace PRE
 			glCullFace(GL_BACK);
 			glFrontFace(GL_CCW);
 
-			return *(new Renderer(*pWindow, glContext));
+			return *(new Renderer(windowWidth, windowHeight, *pWindow, glContext));
 		}
 
 		void Renderer::SetActiveRenderer(Renderer& renderer)
@@ -174,15 +174,19 @@ namespace PRE
 			return *pCompositingTarget;
 		}
 
-		RenderCompositingTarget& Renderer::DeallocateCompositingTarget(
+		void Renderer::DeallocateCompositingTarget(
 			RenderCompositingTarget& compositingTarget
 		)
 		{
+			auto pCompositingTarget = &compositingTarget;
+
 #ifdef __PRE_DEBUG__
-			assert(_compositingTargets.find(&compositingTarget) != _compositingTargets.end());
+			assert(_compositingTargets.find(pCompositingTarget) != _compositingTargets.end());
 #endif
 
-			_compositingTargets.erase(&compositingTarget);
+			_compositingTargets.erase(pCompositingTarget);
+
+			delete pCompositingTarget;
 		}
 
 		RenderCompositingNode& Renderer::AllocateCompositingNode(
@@ -571,8 +575,10 @@ namespace PRE
 			delete pModel;
 		}
 
-		Renderer::Renderer(SDL_Window& window, SDL_GLContext& glContext)
+		Renderer::Renderer(unsigned int width, unsigned int height, SDL_Window& window, SDL_GLContext& glContext)
 			:
+			width(width),
+			height(height),
 			_window(window),
 			_glContext(glContext) {}
 

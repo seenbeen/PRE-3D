@@ -374,7 +374,13 @@
     <ClInclude Include="src\core\subsystems\rendering\preskybox.h">
       <Filter>Header Files\Core\Subsystems\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\subsystems\rendering\prelight.h">
+    <ClInclude Include="src\core\subsystems\rendering\prelightrenderpassdata.h">
+      <Filter>Header Files\Core\Subsystems\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\components\prepointlightcomponent.h">
+      <Filter>Header Files\Core\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\subsystems\rendering\prelightrenderpasscontext.h">
       <Filter>Header Files\Core\Subsystems\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
@@ -560,6 +566,15 @@
       <Filter>Source Files\Modules\Rendering\Texture</Filter>
     </ClCompile>
     <ClCompile Include="src\core\subsystems\rendering\preskybox.cpp">
+      <Filter>Source Files\Core\Subsystems\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\components\prepointlightcomponent.cpp">
+      <Filter>Source Files\Core\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\rendering\prelightrenderpassdata.cpp">
+      <Filter>Source Files\Core\Subsystems\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\rendering\prelightrenderpasscontext.cpp">
       <Filter>Source Files\Core\Subsystems\Rendering</Filter>
     </ClCompile>
   </ItemGroup>

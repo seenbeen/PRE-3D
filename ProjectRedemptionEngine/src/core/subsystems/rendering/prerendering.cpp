@@ -1,5 +1,6 @@
 #include <core/subsystems/rendering/prerendering.h>
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -13,6 +14,7 @@
 #include <core/components/precameracomponent.h>
 #include <core/components/premodelrenderercomponent.h>
 #include <core/components/pretransformcomponent.h>
+#include <core/components/prepointlightcomponent.h>
 
 #include <core/subsystems/asset/preassetmanager.h>
 
@@ -31,6 +33,9 @@
 
 #include <core/subsystems/rendering/preskybox.h>
 
+#include <core/subsystems/rendering/prelightrenderpassdata.h>
+#include <core/subsystems/rendering/prelightrenderpasscontext.h>
+
 #ifdef __PRE_DEBUG__
 #include <assert.h>
 #endif
@@ -43,29 +48,166 @@ namespace PRE
 		using std::vector;
 
 		using PRE::RenderingModule::Renderer;
+		using PRE::RenderingModule::RenderCompositingNode;
 		using PRE::RenderingModule::RenderCamera;
+		using PRE::RenderingModule::RenderShaderProgram;
+		using PRE::RenderingModule::RenderMesh;
+		using PRE::RenderingModule::RenderMaterial;
 		using PRE::RenderingModule::RenderModel;
 
 		using PRE::AnimationModule::Animation;
 
+#pragma region Screen Display
+		static const string SCREEN_SAMPLER_KEY = "screenSampler";
+		static const int SCREEN_SAMPLER_UNIT = 0;
+		static const string SCREEN_VERTEX_SHADER_SOURCE =
+			"#version 330 core\n"
+			"layout (location = 0) in vec3 iPos;\n"
+			"layout (location = 4) in vec2 iUv;\n"
+			"\n"
+			"out vec2 TexCoord;\n"
+			"\n"
+			"void main()\n"
+			"{\n"
+			"    TexCoord = iUv;\n"
+			"    gl_Position = vec4(iPos, 1.0f);\n"
+			"}\n";
+
+		static const string SCREEN_FRAGMENT_SHADER_SOURCE =
+			"#version 330 core\n"
+			"in vec2 TexCoord;\n"
+			"\n"
+			"out vec4 FragColor;\n"
+			"\n"
+			"uniform sampler2D screenSampler;\n"
+			"\n"
+			"void main()\n"
+			"{\n"
+			"    FragColor = texture(screenSampler, TexCoord);\n"
+			"}\n";
+
+		static const unsigned int SCREEN_VERTEX_COUNT = 4u;
+		static const glm::vec3 SCREEN_VERTICES[]
+		{
+			glm::vec3(-1, -1, 0),
+			glm::vec3(1, -1, 0),
+			glm::vec3(1, 1, 0),
+			glm::vec3(-1, 1, 0)
+		};
+		static const glm::vec2 SCREEN_UVS[]
+		{
+			glm::vec3(0, 0, 0),
+			glm::vec3(1, 0, 0),
+			glm::vec3(1, 1, 0),
+			glm::vec3(0, 1, 0)
+		};
+		static const unsigned int SCREEN_TRIANGLE_ELEMENT_COUNT = 6u;
+		static const unsigned int SCREEN_TRIANGLE_ELEMENTS[]
+		{
+			0u, 1u, 2u, 0u, 2u, 3u
+		};
+#pragma endregion
+
 		PRERendering::Impl& PRERendering::Impl::MakeImpl(
 			PREApplicationContext& applicationContext,
-			Renderer& renderer
+			Renderer& renderer,
+			PRERendering& rendering
 		)
 		{
-			return *(new Impl(applicationContext, renderer));
+			auto& screenVertexShader = renderer.AllocateVertexShader(SCREEN_VERTEX_SHADER_SOURCE);
+			auto& screenFragmentShader = renderer.AllocateFragmentShader(SCREEN_FRAGMENT_SHADER_SOURCE);
+			auto& screenShaderProgram = renderer.AllocateShaderProgram(screenVertexShader, screenFragmentShader);
+			renderer.DeallocateVertexShader(screenVertexShader);
+			renderer.DeallocateFragmentShader(screenFragmentShader);
+			screenShaderProgram.SetInt(SCREEN_SAMPLER_KEY, SCREEN_SAMPLER_UNIT);
+			auto& screenMesh = renderer.AllocateMesh(
+				SCREEN_VERTEX_COUNT,
+				SCREEN_VERTICES,
+				nullptr,
+				nullptr,
+				nullptr,
+				SCREEN_UVS,
+				nullptr,
+				nullptr,
+				SCREEN_TRIANGLE_ELEMENT_COUNT,
+				SCREEN_TRIANGLE_ELEMENTS
+			);
+			auto& screenMaterial = renderer.AllocateMaterial();
+			auto& screenModel = renderer.AllocateModel();
+			screenMaterial.SetShaderProgram(&screenShaderProgram);
+			auto& screenCamera = renderer.AllocateCamera(
+				Renderer::CameraKind::ORTHOGRAPHIC,
+				1,
+				renderer.width / (float)renderer.height,
+				-1,
+				1
+			);
+			renderer.SetModelMesh(screenModel, &screenMesh);
+			renderer.SetModelMaterial(screenModel, &screenMaterial);
+
+			return *(
+				new Impl(
+					applicationContext,
+					renderer,
+					rendering,
+					screenShaderProgram,
+					screenMesh,
+					screenMaterial,
+					screenModel,
+					screenCamera
+				)
+			);
+		}
+
+		void PRERendering::Impl::ScreenOnRender(
+			RenderCompositingNode::RenderComposition& composition,
+			void* vRenderingImpl
+		)
+		{
+			auto& renderingImpl = *static_cast<Impl*>(vRenderingImpl);
+			auto& screenTexture = renderingImpl.rendering._screenRenderTexture;
+			renderingImpl.screenMaterial.SetTextureBinding(
+				screenTexture._accumulatorBufferIsA ?
+						screenTexture._pBufferA :
+						screenTexture._pBufferB
+				,
+				SCREEN_SAMPLER_UNIT
+			);
+
+			composition.SetCompositingTarget(nullptr);
+			composition.AddModel(renderingImpl.screenModel);
+			composition.SetCamera(&renderingImpl.screenCamera);
 		}
 
 		PRERendering::Impl::Impl(
 			PREApplicationContext& applicationContext,
-			Renderer& renderer
+			Renderer& renderer,
+			PRERendering& rendering,
+			RenderShaderProgram& screenShaderProgram,
+			RenderMesh& screenMesh,
+			RenderMaterial& screenMaterial,
+			RenderModel& screenModel,
+			RenderCamera& screenCamera
 		)
 			:
 			applicationContext(applicationContext),
-			renderer(renderer) {}
+			renderer(renderer),
+			rendering(rendering),
+			screenCompositingNode(renderer.AllocateCompositingNode(ScreenOnRender, this)),
+			screenShaderProgram(screenShaderProgram),
+			screenMesh(screenMesh),
+			screenMaterial(screenMaterial),
+			screenModel(screenModel),
+			screenCamera(screenCamera) {}
 
 		PRERendering::Impl::~Impl()
 		{
+			renderer.DeallocateCamera(screenCamera);
+			renderer.DeallocateModel(screenModel);
+			renderer.DeallocateMaterial(screenMaterial);
+			renderer.DeallocateMesh(screenMesh);
+			renderer.DeallocateShaderProgram(screenShaderProgram);
+			renderer.DeallocateCompositingNode(screenCompositingNode);
 			Renderer::ShutdownRenderer(renderer);
 		}
 
@@ -76,23 +218,23 @@ namespace PRE
 
 		PRERenderTexture& PRERendering::CreateRenderTexture(unsigned int width, unsigned int height)
 		{
-			return *(
-				new PRERenderTexture(
-					*this,
-					&_impl.renderer.AllocateCompositingTarget(
-						width,
-						height
-					)
-				)
+			_impl.renderPasses.push_back(nullptr);
+			auto it(--_impl.renderPasses.end());
+			auto pRenderTexture = new PRERenderTexture(
+				it,
+				_impl.renderer.AllocateCompositingTarget(width, height),
+				_impl.renderer.AllocateCompositingTarget(width, height)
 			);
+			*it = pRenderTexture;
+			LinkRenderTextureToLights(*pRenderTexture);
+			return *pRenderTexture;
 		}
 
 		void PRERendering::DestroyRenderTexture(PRERenderTexture& renderTexture)
 		{
-			if (renderTexture._pCompositingTarget != nullptr)
-			{
-				_impl.renderer.DeallocateCompositingTarget(*renderTexture._pCompositingTarget);
-			}
+			UnlinkRenderTextureFromLights(renderTexture);
+			_impl.renderer.DeallocateCompositingTarget(*renderTexture._pBufferA);
+			_impl.renderer.DeallocateCompositingTarget(*renderTexture._pBufferB);
 			delete &renderTexture;
 		}
 
@@ -371,6 +513,33 @@ namespace PRE
 			delete &skyBox;
 		}
 
+		void PRERendering::LightPassOnRender(
+			RenderCompositingNode::RenderComposition& composition,
+			void* vLightPassContext
+		)
+		{
+			auto& lightPassContext = *static_cast<PRELightRenderPassContext*>(vLightPassContext);
+			if (lightPassContext._renderTexture._pAssociatedCameraComponent != nullptr)
+			{
+				composition.SetCamera(
+					lightPassContext._renderTexture._pAssociatedCameraComponent->_pCamera
+				);
+
+				lightPassContext._rendering.ComposeRenderComposition(
+					composition,
+					lightPassContext
+				);
+
+				composition.SetCompositingTarget(
+					lightPassContext._renderTexture._accumulatorBufferIsA ?
+						lightPassContext._renderTexture._pBufferA :
+						lightPassContext._renderTexture._pBufferB
+				);
+
+				lightPassContext._renderTexture._accumulatorBufferIsA = !lightPassContext._renderTexture._accumulatorBufferIsA;
+			}
+		}
+
 		PRERendering& PRERendering::MakePRERendering(
 			const PRERenderingConfig& renderingConfig,
 			PREApplicationContext& applicationContext
@@ -389,12 +558,12 @@ namespace PRE
 			Renderer& renderer
 		)
 			:
-			_impl(Impl::MakeImpl(applicationContext, renderer)),
-			_screenRenderTexture(*(new PRERenderTexture(*this, nullptr))) {}
-		
+			_impl(Impl::MakeImpl(applicationContext, renderer, *this)),
+			_screenRenderTexture(CreateRenderTexture(renderer.width, renderer.height)) {}
+
 		PRERendering::~PRERendering()
 		{
-			delete &_screenRenderTexture;
+			DestroyRenderTexture(_screenRenderTexture);
 			delete &_impl;
 		}
 
@@ -425,27 +594,56 @@ namespace PRE
 
 		void PRERendering::ComposeRenderComposition(
 			RenderCompositingNode::RenderComposition& composition,
-			PRECameraComponent& cameraComponent
+			PRELightRenderPassContext& lightRenderPassContext
 		)
 		{
-			cameraComponent.AllocateIfNotAllocated();
-			composition.SetCamera(cameraComponent._pCamera);
+			auto pCameraComponent = lightRenderPassContext._renderTexture._pAssociatedCameraComponent;
+			if (pCameraComponent == nullptr)
+			{
+				return;
+			}
+			auto pPointLightComponent = lightRenderPassContext._pPointLightComponent;
+
+			pCameraComponent->AllocateIfNotAllocated();
+			composition.SetCamera(pCameraComponent->_pCamera);
 
 			// TODO: Spatial query optimizing to only render visible models
 			for (
-				auto it = cameraComponent._associatedModelComponents.begin();
-				it != cameraComponent._associatedModelComponents.end();
+				auto it = pCameraComponent->_associatedModelComponents.begin();
+				it != pCameraComponent->_associatedModelComponents.end();
 				++it
 			)
 			{
 				auto& modelRendererComponent = **it;
 				modelRendererComponent.AllocateIfNotAllocated();
+				if (modelRendererComponent._pMaterial != nullptr)
+				{
+					modelRendererComponent._pMaterial->BindRenderTextureAccumulatorBindings();
+
+					// TODO: switch on light type
+					if (modelRendererComponent._pMaterial->_pShader != nullptr)
+					{
+						auto pShader = modelRendererComponent._pMaterial->_pShader;
+						pShader->SetInt(
+							"PRE_LIGHT_KIND",
+							0 // 0 for point
+						);
+						pShader->SetFloat(
+							"PRE_LIGHT_LUMINANCE",
+							pPointLightComponent->_luminosity
+						);
+						pShader->SetVec3(
+							"PRE_LIGHT_COLOR",
+							pPointLightComponent->_color
+						);
+					}
+				}
 				composition.AddModel(*modelRendererComponent._pModel);
 			}
 
-			if (cameraComponent._pSkyBox != nullptr)
+			if (pCameraComponent->_pSkyBox != nullptr)
 			{
-				composition.AddModel(cameraComponent._pSkyBox->_model);
+				composition.AddModel(pCameraComponent->_pSkyBox->_model);
 			}
 		}
 
@@ -592,6 +790,297 @@ namespace PRE
 
 			cameraComponent._pSkyBox = nullptr;
 			skyBox._associatedCameraComponents.erase(&cameraComponent);
+		}
+
+		RenderCompositingNode& PRERendering::LinkLightToRenderTargets(
+			PREPointLightComponent& pointLightComponent
+		)
+		{
+			pointLightComponent.AllocateIfNotAllocated();
+			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
+			{
+				auto pCurrent = *it;
+				auto itNext(it);
+				++itNext;
+
+				auto pLightPassContext = new PRELightRenderPassContext(
+					*this,
+					*pCurrent,
+					pointLightComponent
+				);
+				auto pNewLightPassData = new PRELightRenderPassData(
+					_impl.renderer.AllocateCompositingNode(
+						LightPassOnRender,
+						pLightPassContext
+					),
+					*pLightPassContext
+				);
+
+				// attach shadow pass
+				_impl.renderer.AttachCompositingNodeDependency(
+					*pNewLightPassData->pNode,
+					*pointLightComponent._pShadowNode
+				);
+
+				PRELightRenderPassData* pCurrentLastLightPassData = nullptr;
+				if (!pCurrent->_lightPasses.empty())
+				{
+					pCurrentLastLightPassData = pCurrent->_lightPasses.back();
+				}
+
+				PRELightRenderPassData* pNextFirstLightPassData = nullptr;
+				if (itNext != _impl.renderPasses.end())
+				{
+					auto pNextRenderPass = *itNext;
+					if (!pNextRenderPass->_lightPasses.empty())
+					{
+						pNextFirstLightPassData = pNextRenderPass->_lightPasses.front();
+					}
+				}
+
+				// detach next pass
+				if (
+					pCurrentLastLightPassData != nullptr &&
+					pNextFirstLightPassData != nullptr
+				)
+				{
+					_impl.renderer.DetachCompositingNodeDependency(
+						*pCurrentLastLightPassData->pNode,
+						*pNextFirstLightPassData->pNode
+					);
+				}
+
+				// splice in new node
+				if (pCurrentLastLightPassData != nullptr)
+				{
+					_impl.renderer.AttachCompositingNodeDependency(
+						*pCurrentLastLightPassData->pNode,
+						*pNewLightPassData->pNode
+					);
+				}
+
+				// re-attach next pass
+				if (pNextFirstLightPassData != nullptr)
+				{
+					_impl.renderer.AttachCompositingNodeDependency(
+						*pNewLightPassData->pNode,
+						*pNextFirstLightPassData->pNode
+					);
+				}
+
+				// add in new pass data
+				pCurrent->_lightPasses.push_back(pNewLightPassData);
+
+				// link point light
+
+#ifdef __PRE_DEBUG__
+				assert(pointLightComponent._passMap.find(pCurrent) == pointLightComponent._passMap.end());
+#endif
+
+				pointLightComponent._passMap[pCurrent] = --pCurrent->_lightPasses.end();
+			}
+		}
+
+		void PRERendering::UnlinkLightFromRenderTargets(
+			PREPointLightComponent& pointLightComponent
+		)
+		{
+			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
+			{
+				auto pCurrent = *it;
+				auto itPrev(it);
+				--itPrev;
+				auto itNext(it);
+				++itNext;
+
+#ifdef __PRE_DEBUG__
+				assert(pointLightComponent._passMap.find(pCurrent) != pointLightComponent._passMap.end());
+#endif
+
+				auto itLightPassData(pointLightComponent._passMap.find(pCurrent)->second);
+				auto pRemovedLightPassData = *itLightPassData;
+
+				// detach shadow pass
+				_impl.renderer.DetachCompositingNodeDependency(
+					*pRemovedLightPassData->pNode,
+					*pointLightComponent._pShadowNode
+				);
+
+				PRELightRenderPassData* pPrevLightPassData = nullptr;
+				if (itLightPassData == pCurrent->_lightPasses.begin())
+				{
+					if (itPrev != _impl.renderPasses.begin())
+					{
+						auto pPrev = *itPrev;
+						if (!pPrev->_lightPasses.empty())
+						{
+							pPrevLightPassData = pPrev->_lightPasses.back();
+						}
+					}
+				}
+				else
+				{
+					auto itLightPassDataPrev(itLightPassData);
+					pPrevLightPassData = *(--itLightPassDataPrev);
+				}
+
+				PRELightRenderPassData* pNextLightPassData = nullptr;
+				if (itLightPassData == pCurrent->_lightPasses.end())
+				{
+					if (itNext != _impl.renderPasses.end())
+					{
+						auto pNext = *itNext;
+						if (!pNext->_lightPasses.empty())
+						{
+							pNextLightPassData = pNext->_lightPasses.front();
+						}
+					}
+				}
+				else
+				{
+					auto itLightPassDataPrev(itLightPassData);
+					pNextLightPassData = *(++itLightPassDataPrev);
+				}
+
+				// unlink prev
+				if (pPrevLightPassData != nullptr)
+				{
+					_impl.renderer.DetachCompositingNodeDependency(
+						*pPrevLightPassData->pNode,
+						*pRemovedLightPassData->pNode
+					);
+				}
+
+				// unlink next
+				if (pNextLightPassData != nullptr)
+				{
+					_impl.renderer.DetachCompositingNodeDependency(
+						*pRemovedLightPassData->pNode,
+						*pNextLightPassData->pNode
+					);
+				}
+
+				// re-splice if both prev and next exist
+				if (pPrevLightPassData != nullptr && pNextLightPassData != nullptr)
+				{
+					_impl.renderer.AttachCompositingNodeDependency(
+						*pPrevLightPassData->pNode,
+						*pNextLightPassData->pNode
+					);
+				}
+
+				pCurrent->_lightPasses.erase(itLightPassData);
+				pointLightComponent._passMap.erase(pCurrent);
+				_impl.renderer.DeallocateCompositingNode(*pRemovedLightPassData->pNode);
+				delete pRemovedLightPassData->pRenderPassContext;
+				delete pRemovedLightPassData;
+			}
+
+#ifdef __PRE_DEBUG__
+			assert(pointLightComponent._passMap.empty());
+#endif
+
+		}
+
+		void PRERendering::LinkRenderTextureToLights(
+			PRERenderTexture& renderTexture
+		)
+		{
+			auto pRenderTexture = &renderTexture;
+			for (auto it = _impl.pointLights.begin(); it != _impl.pointLights.end(); ++it)
+			{
+				auto& pointLightComponent = **it;
+
+				auto pLightPassContext = new PRELightRenderPassContext(
+					*this,
+					*pRenderTexture,
+					pointLightComponent
+				);
+				auto pNewLightPassData = new PRELightRenderPassData(
+					_impl.renderer.AllocateCompositingNode(
+						LightPassOnRender,
+						pLightPassContext
+					),
+					*pLightPassContext
+				);
+
+				// attach shadow pass
+				_impl.renderer.AttachCompositingNodeDependency(
+					*pNewLightPassData->pNode,
+					*pointLightComponent._pShadowNode
+				);
+
+				PRELightRenderPassData* pCurrentLastLightPassData = nullptr;
+				if (!pRenderTexture->_lightPasses.empty())
+				{
+					pCurrentLastLightPassData = pRenderTexture->_lightPasses.back();
+				}
+
+				// attach new node
+				if (pCurrentLastLightPassData != nullptr)
+				{
+					_impl.renderer.AttachCompositingNodeDependency(
+						*pCurrentLastLightPassData->pNode,
+						*pNewLightPassData->pNode
+					);
+				}
+
+				// add in new pass data
+				renderTexture._lightPasses.push_back(pNewLightPassData);
+
+				// link point light
+
+#ifdef __PRE_DEBUG__
+				assert(pointLightComponent._passMap.find(pRenderTexture) == pointLightComponent._passMap.end());
+#endif
+
+				pointLightComponent._passMap[pRenderTexture] = --pRenderTexture->_lightPasses.end();
+			}
+
+			// link render texture to previous render textures
+			if (
+				!pRenderTexture->_lightPasses.empty() &&
+				!_impl.renderPasses.empty()
+			)
+			{
+				auto pLastRenderPass = _impl.renderPasses.back();
+
+#ifdef __PRE_DEBUG__
+				assert(!pLastRenderPass->_lightPasses.empty());
+#endif
+
+				_impl.renderer.AttachCompositingNodeDependency(
+					*pLastRenderPass->_lightPasses.back()->pNode,
+					*renderTexture._lightPasses.front()->pNode
+				);
+			}
+			_impl.renderPasses.push_back(pRenderTexture);
+		}
+
+		void PRERendering::UnlinkRenderTextureFromLights(
+			PRERenderTexture& renderTexture
+		)
+		{
+			auto pRenderTexture = &renderTexture;
+
+			for (auto it = _impl.pointLights.begin(); it != _impl.pointLights.end(); ++it)
+			{
+				auto& pointLightComponent = **it;
+				auto itLightPassData(pointLightComponent._passMap.find(pRenderTexture)->second);
+
+				auto pRemovedLightPassData = *itLightPassData;
+
+				// detach shadow pass
+				_impl.renderer.DetachCompositingNodeDependency(
+					*pRemovedLightPassData->pNode,
+					*pointLightComponent._pShadowNode
+				);
+
+
+
+				pointLightComponent._passMap.erase(pRenderTexture);
+			}
+			_impl.renderPasses.erase(renderTexture._it);
 		}
 	}
 }

@@ -1,4 +1,6 @@
 #pragma once
+#include <list>
+
 #include <include/modules/rendering.h>
 
 namespace PRE
@@ -9,6 +11,11 @@ namespace PRE
 
 		class PRERendering;
 		class PREMaterial;
+
+		class PRELightComponent;
+		class PRELightRenderPassData;
+
+		using std::list;
 
 		using PRE::RenderingModule::RenderCompositingTarget;
 		using PRE::RenderingModule::RenderCompositingNode;
@@ -22,20 +29,20 @@ namespace PRE
 			friend class PREMaterial;
 
 		private:
-			static void OnRender(
-				RenderCompositingNode::RenderComposition& composition,
-				void* vContext
-			);
-
-			PRERendering& _rendering;
-			RenderCompositingTarget* const _pCompositingTarget;
-			RenderCompositingNode& _compositingNode;
-
 			PRECameraComponent* _pAssociatedCameraComponent;
 
+			const list<PRERenderTexture*>::iterator _it;
+			RenderCompositingTarget* const _pBufferA;
+			RenderCompositingTarget* const _pBufferB;
+
+			bool _accumulatorBufferIsA; // if false, b is accumulator buffer
+
+			list<PRELightRenderPassData*> _lightPasses;
+
 			PRERenderTexture(
-				PRERendering& rendering,
-				RenderCompositingTarget* pCompositingTarget
+				list<PRERenderTexture*>::iterator it,
+				RenderCompositingTarget& bufferA,
+				RenderCompositingTarget& bufferB
 			);
 			~PRERenderTexture();
 		};
