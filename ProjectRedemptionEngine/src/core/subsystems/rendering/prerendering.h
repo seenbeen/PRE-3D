@@ -1,6 +1,7 @@
 #pragma once
 #include <list>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 
 #include <glad/glad.h>
@@ -28,6 +29,7 @@ namespace PRE
 		class PREMaterial;
 
 		class PRELightRenderPassContext;
+		class PRELightRenderPassData;
 
 		class PREAnimation;
 		class PREAnimationConfig;
@@ -38,6 +40,7 @@ namespace PRE
 
 		using std::list;
 		using std::string;
+		using std::unordered_map;
 		using std::unordered_set;
 
 		using PRE::RenderingModule::Renderer;
@@ -87,7 +90,8 @@ namespace PRE
 				RenderModel& screenModel;
 				RenderCamera& screenCamera;
 
-				list<PRERenderTexture*> renderPasses;
+				list<PRELightRenderPassData*> compositingChain;
+				unordered_set<PRERenderTexture*> renderPasses;
 				unordered_set<PREPointLightComponent*> pointLights;
 
 				Impl(
@@ -101,6 +105,18 @@ namespace PRE
 					RenderCamera& screenCamera
 				);
 				~Impl();
+
+				void LinkLightToRenderTarget(
+					PRERenderTexture& renderPass,
+					PRELightRenderPassData& lightData,
+					unordered_map<PRERenderTexture*, list<PRELightRenderPassData*>::iterator>& lightPassMap
+				);
+
+				void UnlinkLightFromRenderTarget(
+					PRERenderTexture& renderPass,
+					list<PRELightRenderPassData*>::iterator itRemovedLightData,
+					unordered_map<PRERenderTexture*, list<PRELightRenderPassData*>::iterator>& lightPassMap
+				);
 			};
 
 		public:
@@ -250,7 +266,7 @@ namespace PRE
 				PRESkyBox& skyBox
 			);
 
-			RenderCompositingNode& LinkLightToRenderTargets(
+			void LinkLightToRenderTargets(
 				PREPointLightComponent& pointLightComponent
 			);
 			void UnlinkLightFromRenderTargets(

@@ -21,6 +21,9 @@ namespace PRE
 			RenderCompositingNode* const pNode;
 			PRELightRenderPassContext* const pRenderPassContext;
 
+			// used for the screen-display compositing node
+			PRELightRenderPassData(RenderCompositingNode& node);
+
 			PRELightRenderPassData(
 				RenderCompositingNode& node,
 				PRELightRenderPassContext& renderPassContext

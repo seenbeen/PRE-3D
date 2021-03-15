@@ -31,16 +31,17 @@ namespace PRE
 		private:
 			PRECameraComponent* _pAssociatedCameraComponent;
 
-			const list<PRERenderTexture*>::iterator _it;
 			RenderCompositingTarget* const _pBufferA;
 			RenderCompositingTarget* const _pBufferB;
 
-			bool _accumulatorBufferIsA; // if false, b is accumulator buffer
+			// accumulator: buffer to be written to
+			// !accumulator: buffer to be read from
+			bool _accumulatorBufferIsA;
 
-			list<PRELightRenderPassData*> _lightPasses;
+			list<PRELightRenderPassData*>::iterator _front;
 
 			PRERenderTexture(
-				list<PRERenderTexture*>::iterator it,
+				list<PRELightRenderPassData*>::iterator front,
 				RenderCompositingTarget& bufferA,
 				RenderCompositingTarget& bufferB
 			);

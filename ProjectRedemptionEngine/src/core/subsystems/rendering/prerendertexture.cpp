@@ -14,16 +14,16 @@ namespace PRE
 		using PRE::RenderingModule::RenderCompositingNode;
 
 		PRERenderTexture::PRERenderTexture(
-			list<PRERenderTexture*>::iterator it,
+			list<PRELightRenderPassData*>::iterator front,
 			RenderCompositingTarget& bufferA,
 			RenderCompositingTarget& bufferB
 		)
 			:
-			_it(it),
 			_pAssociatedCameraComponent(nullptr),
 			_pBufferA(&bufferA),
 			_pBufferB(&bufferB),
-			_accumulatorBufferIsA(false) {}
+			_accumulatorBufferIsA(false),
+			_front(front) {}
 
 		PRERenderTexture::~PRERenderTexture() {}
 	} // namespace Core

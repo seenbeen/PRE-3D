@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -46,6 +48,8 @@ namespace PRE
 	{
 		using std::string;
 		using std::vector;
+		using std::unordered_map;
+		using std::unordered_set;
 
 		using PRE::RenderingModule::Renderer;
 		using PRE::RenderingModule::RenderCompositingNode;
@@ -198,10 +202,14 @@ namespace PRE
 			screenMesh(screenMesh),
 			screenMaterial(screenMaterial),
 			screenModel(screenModel),
-			screenCamera(screenCamera) {}
+			screenCamera(screenCamera)
+		{
+			compositingChain.push_back(new PRELightRenderPassData(screenCompositingNode));
+		}
 
 		PRERendering::Impl::~Impl()
 		{
+			delete compositingChain.front();
 			renderer.DeallocateCamera(screenCamera);
 			renderer.DeallocateModel(screenModel);
 			renderer.DeallocateMaterial(screenMaterial);
@@ -211,6 +219,120 @@ namespace PRE
 			Renderer::ShutdownRenderer(renderer);
 		}
 
+
+		void PRERendering::Impl::LinkLightToRenderTarget(
+			PRERenderTexture& renderPass,
+			PRELightRenderPassData& lightData,
+			unordered_map<PRERenderTexture*, list<PRELightRenderPassData*>::iterator>& lightPassMap
+		)
+		{
+			auto pRenderPass = &renderPass;
+			auto pLightData = &lightData;
+
+			auto itPreviousPassLastLightData(pRenderPass->_front);
+			PRELightRenderPassData* pPreviousPassLastLightData = *(--itPreviousPassLastLightData);
+
+			PRELightRenderPassData* pCurrentPassFirstLightData = nullptr;
+			if (pRenderPass->_front != compositingChain.end())
+			{
+				pCurrentPassFirstLightData = *pRenderPass->_front;
+			}
+
+			// detach next light if exists
+			if (pCurrentPassFirstLightData != nullptr)
+			{
+				renderer.DetachCompositingNodeDependency(
+					*pPreviousPassLastLightData->pNode,
+					*pCurrentPassFirstLightData->pNode
+				);
+			}
+
+			// splice in new light
+			renderer.AttachCompositingNodeDependency(
+				*pPreviousPassLastLightData->pNode,
+				*pLightData->pNode
+			);
+
+			// re-attach next light if exists
+			if (pCurrentPassFirstLightData != nullptr)
+			{
+				renderer.AttachCompositingNodeDependency(
+					*pLightData->pNode,
+					*pCurrentPassFirstLightData->pNode
+				);
+			}
+
+			// insert light render pass data
+			pRenderPass->_front = compositingChain.insert(pRenderPass->_front, pLightData);
+
+			// link point light
+
+#ifdef __PRE_DEBUG__
+			assert(lightPassMap.find(pRenderPass) == lightPassMap.end());
+#endif
+
+			lightPassMap[pRenderPass] = pRenderPass->_front;
+		}
+
+		void PRERendering::Impl::UnlinkLightFromRenderTarget(
+			PRERenderTexture& renderPass,
+			list<PRELightRenderPassData*>::iterator itRemovedLightData,
+			unordered_map<PRERenderTexture*, list<PRELightRenderPassData*>::iterator>& lightPassMap
+		)
+		{
+			auto pRenderPass = &renderPass;
+
+			auto pRemovedLightData = *itRemovedLightData;
+
+			auto itPreviousLightData(itRemovedLightData);
+			PRELightRenderPassData* pPreviousLightData = *(--itPreviousLightData);
+
+			PRELightRenderPassData* pNextLightData = nullptr;
+			auto itNextLightData(itRemovedLightData);
+			++itNextLightData;
+			if (itNextLightData != compositingChain.end())
+			{
+				pNextLightData = *itNextLightData;
+			}
+
+			// unlink previous light
+			renderer.DetachCompositingNodeDependency(
+				*pPreviousLightData->pNode,
+				*pRemovedLightData->pNode
+			);
+
+			// unlink next light if exists
+			if (pNextLightData != nullptr)
+			{
+				renderer.DetachCompositingNodeDependency(
+					*pRemovedLightData->pNode,
+					*pNextLightData->pNode
+				);
+			}
+
+			// re-splice if next exists
+			if (pNextLightData != nullptr)
+			{
+				renderer.AttachCompositingNodeDependency(
+					*pPreviousLightData->pNode,
+					*pNextLightData->pNode
+				);
+			}
+
+			// erase light render pass data
+			if (itRemovedLightData == pRenderPass->_front)
+			{
+				++pRenderPass->_front;
+			}
+			compositingChain.erase(itRemovedLightData);
+
+#ifdef __PRE_DEBUG__
+			assert(lightPassMap.find(pRenderPass) != lightPassMap.end());
+#endif
+
+			lightPassMap.erase(pRenderPass);
+		}
+
 		PRERenderTexture& PRERendering::GetScreenRenderTexture()
 		{
 			return _screenRenderTexture;
@@ -218,21 +340,21 @@ namespace PRE
 
 		PRERenderTexture& PRERendering::CreateRenderTexture(unsigned int width, unsigned int height)
 		{
-			_impl.renderPasses.push_back(nullptr);
-			auto it(--_impl.renderPasses.end());
 			auto pRenderTexture = new PRERenderTexture(
-				it,
+				--_impl.compositingChain.end(),
 				_impl.renderer.AllocateCompositingTarget(width, height),
 				_impl.renderer.AllocateCompositingTarget(width, height)
 			);
-			*it = pRenderTexture;
+			_impl.renderPasses.insert(pRenderTexture);
 			LinkRenderTextureToLights(*pRenderTexture);
 			return *pRenderTexture;
 		}
 
 		void PRERendering::DestroyRenderTexture(PRERenderTexture& renderTexture)
 		{
-			UnlinkRenderTextureFromLights(renderTexture);
+			auto pRenderTexture = &renderTexture;
+			UnlinkRenderTextureFromLights(*pRenderTexture);
+			_impl.renderPasses.erase(pRenderTexture);
 			_impl.renderer.DeallocateCompositingTarget(*renderTexture._pBufferA);
 			_impl.renderer.DeallocateCompositingTarget(*renderTexture._pBufferB);
 			delete &renderTexture;
@@ -527,6 +649,7 @@ namespace PRE
 				composition.SetCamera(pCameraComponent->_pCamera);
 
 				auto pPointLightComponent = lightPassContext._pPointLightComponent;
+				pPointLightComponent->AllocateIfNotAllocated();
 
 				// TODO: Spatial query optimizing to only render visible models
 				for (
@@ -774,92 +897,40 @@ namespace PRE
 			skyBox._associatedCameraComponents.erase(&cameraComponent);
 		}
 
-		RenderCompositingNode& PRERendering::LinkLightToRenderTargets(
+		void PRERendering::LinkLightToRenderTargets(
 			PREPointLightComponent& pointLightComponent
 		)
 		{
-			pointLightComponent.AllocateIfNotAllocated();
 			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
 			{
-				auto pCurrent = *it;
-				auto itNext(it);
-				++itNext;
+				auto pCurrentPass = *it;
 
-				auto pLightPassContext = new PRELightRenderPassContext(
-					*pCurrent,
+				auto pLightContext = new PRELightRenderPassContext(
+					*pCurrentPass,
 					pointLightComponent
 				);
-				auto pNewLightPassData = new PRELightRenderPassData(
+				auto pNewLightData = new PRELightRenderPassData(
 					_impl.renderer.AllocateCompositingNode(
 						LightPassOnRender,
-						pLightPassContext
+						pLightContext
 					),
-					*pLightPassContext
+					*pLightContext
 				);
 
 				// attach shadow pass
-				//_impl.renderer.AttachCompositingNodeDependency(
-				//	*pNewLightPassData->pNode,
-				//	*pointLightComponent._pShadowNode
-				//);
 
-				PRELightRenderPassData* pCurrentLastLightPassData = nullptr;
-				if (!pCurrent->_lightPasses.empty())
-				{
-					pCurrentLastLightPassData = pCurrent->_lightPasses.back();
-				}
-
-				PRELightRenderPassData* pNextFirstLightPassData = nullptr;
-				if (itNext != _impl.renderPasses.end())
-				{
-					auto pNextRenderPass = *itNext;
-					if (!pNextRenderPass->_lightPasses.empty())
-					{
-						pNextFirstLightPassData = pNextRenderPass->_lightPasses.front();
-					}
-				}
-
-				// detach next pass
-				if (
-					pCurrentLastLightPassData != nullptr &&
-					pNextFirstLightPassData != nullptr
-				)
-				{
-					_impl.renderer.DetachCompositingNodeDependency(
-						*pCurrentLastLightPassData->pNode,
-						*pNextFirstLightPassData->pNode
-					);
-				}
-
-				// splice in new node
-				if (pCurrentLastLightPassData != nullptr)
-				{
-					_impl.renderer.AttachCompositingNodeDependency(
-						*pCurrentLastLightPassData->pNode,
-						*pNewLightPassData->pNode
-					);
-				}
-
-				// re-attach next pass
-				if (pNextFirstLightPassData != nullptr)
-				{
-					_impl.renderer.AttachCompositingNodeDependency(
-						*pNewLightPassData->pNode,
-						*pNextFirstLightPassData->pNode
-					);
-				}
-
-				// add in new pass data
-				pCurrent->_lightPasses.push_back(pNewLightPassData);
-
-				// link point light
+				_impl.LinkLightToRenderTarget(
+					*pCurrentPass,
+					*pNewLightData,
+					pointLightComponent._passMap
+				);
+			}
 
 #ifdef __PRE_DEBUG__
-				assert(pointLightComponent._passMap.find(pCurrent) == pointLightComponent._passMap.end());
+			assert(pointLightComponent._passMap.size() == _impl.renderPasses.size());
 #endif
 
-				pointLightComponent._passMap[pCurrent] = --pCurrent->_lightPasses.end();
-			}
+			_impl.pointLights.insert(&pointLightComponent);
 		}
 
 		void PRERendering::UnlinkLightFromRenderTargets(
@@ -868,199 +939,88 @@ namespace PRE
 		{
 			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
 			{
-				auto pCurrent = *it;
-				auto itPrev(it);
-				--itPrev;
-				auto itNext(it);
-				++itNext;
+				auto pRenderPass = *it;
+				auto itRemovedLightData(pointLightComponent._passMap.find(pRenderPass)->second);
+				auto pRemovedLightData = *itRemovedLightData;
 
-#ifdef __PRE_DEBUG__
-				assert(pointLightComponent._passMap.find(pCurrent) != pointLightComponent._passMap.end());
-#endif
-
-				auto itLightPassData(pointLightComponent._passMap.find(pCurrent)->second);
-				auto pRemovedLightPassData = *itLightPassData;
+				_impl.UnlinkLightFromRenderTarget(
+					*pRenderPass,
+					itRemovedLightData,
+					pointLightComponent._passMap
+				);
 
 				// detach shadow pass
-				//_impl.renderer.DetachCompositingNodeDependency(
-				//	*pRemovedLightPassData->pNode,
-				//	*pointLightComponent._pShadowNode
-				//);
 
-				PRELightRenderPassData* pPrevLightPassData = nullptr;
-				if (itLightPassData == pCurrent->_lightPasses.begin())
-				{
-					if (itPrev != _impl.renderPasses.begin())
-					{
-						auto pPrev = *itPrev;
-						if (!pPrev->_lightPasses.empty())
-						{
-							pPrevLightPassData = pPrev->_lightPasses.back();
-						}
-					}
-				}
-				else
-				{
-					auto itLightPassDataPrev(itLightPassData);
-					pPrevLightPassData = *(--itLightPassDataPrev);
-				}
-
-				PRELightRenderPassData* pNextLightPassData = nullptr;
-				if (itLightPassData == pCurrent->_lightPasses.end())
-				{
-					if (itNext != _impl.renderPasses.end())
-					{
-						auto pNext = *itNext;
-						if (!pNext->_lightPasses.empty())
-						{
-							pNextLightPassData = pNext->_lightPasses.front();
-						}
-					}
-				}
-				else
-				{
-					auto itLightPassDataPrev(itLightPassData);
-					pNextLightPassData = *(++itLightPassDataPrev);
-				}
-
-				// unlink prev
-				if (pPrevLightPassData != nullptr)
-				{
-					_impl.renderer.DetachCompositingNodeDependency(
-						*pPrevLightPassData->pNode,
-						*pRemovedLightPassData->pNode
-					);
-				}
-
-				// unlink next
-				if (pNextLightPassData != nullptr)
-				{
-					_impl.renderer.DetachCompositingNodeDependency(
-						*pRemovedLightPassData->pNode,
-						*pNextLightPassData->pNode
-					);
-				}
-
-				// re-splice if both prev and next exist
-				if (pPrevLightPassData != nullptr && pNextLightPassData != nullptr)
-				{
-					_impl.renderer.AttachCompositingNodeDependency(
-						*pPrevLightPassData->pNode,
-						*pNextLightPassData->pNode
-					);
-				}
-
-				pCurrent->_lightPasses.erase(itLightPassData);
-				pointLightComponent._passMap.erase(pCurrent);
-				_impl.renderer.DeallocateCompositingNode(*pRemovedLightPassData->pNode);
-				delete pRemovedLightPassData->pRenderPassContext;
-				delete pRemovedLightPassData;
+				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
+				delete pRemovedLightData->pRenderPassContext;
+				delete pRemovedLightData;
 			}
 
 #ifdef __PRE_DEBUG__
 			assert(pointLightComponent._passMap.empty());
 #endif
 
+			_impl.pointLights.erase(&pointLightComponent);
 		}
 
 		void PRERendering::LinkRenderTextureToLights(
 			PRERenderTexture& renderTexture
 		)
 		{
-			auto pRenderTexture = &renderTexture;
+			auto pRenderPass = &renderTexture;
 			for (auto it = _impl.pointLights.begin(); it != _impl.pointLights.end(); ++it)
 			{
 				auto& pointLightComponent = **it;
 
-				auto pLightPassContext = new PRELightRenderPassContext(
-					*pRenderTexture,
+				auto pLightContext = new PRELightRenderPassContext(
+					*pRenderPass,
 					pointLightComponent
 				);
-				auto pNewLightPassData = new PRELightRenderPassData(
+				auto pNewLightData = new PRELightRenderPassData(
 					_impl.renderer.AllocateCompositingNode(
 						LightPassOnRender,
-						pLightPassContext
+						pLightContext
 					),
-					*pLightPassContext
+					*pLightContext
 				);
 
 				// attach shadow pass
-				//_impl.renderer.AttachCompositingNodeDependency(
-				//	*pNewLightPassData->pNode,
-				//	*pointLightComponent._pShadowNode
-				//);
 
-				PRELightRenderPassData* pCurrentLastLightPassData = nullptr;
-				if (!pRenderTexture->_lightPasses.empty())
-				{
-					pCurrentLastLightPassData = pRenderTexture->_lightPasses.back();
-				}
-
-				// attach new node
-				if (pCurrentLastLightPassData != nullptr)
-				{
-					_impl.renderer.AttachCompositingNodeDependency(
-						*pCurrentLastLightPassData->pNode,
-						*pNewLightPassData->pNode
-					);
-				}
-
-				// add in new pass data
-				renderTexture._lightPasses.push_back(pNewLightPassData);
-
-				// link point light
-
-#ifdef __PRE_DEBUG__
-				assert(pointLightComponent._passMap.find(pRenderTexture) == pointLightComponent._passMap.end());
-#endif
-
-				pointLightComponent._passMap[pRenderTexture] = --pRenderTexture->_lightPasses.end();
-			}
-
-			// link render texture to previous render textures
-			if (
-				!pRenderTexture->_lightPasses.empty() &&
-				!_impl.renderPasses.empty()
-			)
-			{
-				auto pLastRenderPass = _impl.renderPasses.back();
-
-#ifdef __PRE_DEBUG__
-				assert(!pLastRenderPass->_lightPasses.empty());
-#endif
-
-				_impl.renderer.AttachCompositingNodeDependency(
-					*pLastRenderPass->_lightPasses.back()->pNode,
-					*renderTexture._lightPasses.front()->pNode
+				_impl.LinkLightToRenderTarget(
+					*pRenderPass,
+					*pNewLightData,
+					pointLightComponent._passMap
 				);
 			}
-			_impl.renderPasses.push_back(pRenderTexture);
+
+			_impl.renderPasses.insert(pRenderPass);
 		}
 
 		void PRERendering::UnlinkRenderTextureFromLights(
 			PRERenderTexture& renderTexture
 		)
 		{
-			auto pRenderTexture = &renderTexture;
-
+			auto pRenderPass = &renderTexture;
 			for (auto it = _impl.pointLights.begin(); it != _impl.pointLights.end(); ++it)
 			{
 				auto& pointLightComponent = **it;
-				auto itLightPassData(pointLightComponent._passMap.find(pRenderTexture)->second);
+				auto itRemovedLightData(pointLightComponent._passMap.find(pRenderPass)->second);
+				auto pRemovedLightData = *itRemovedLightData;
 
-				auto pRemovedLightPassData = *itLightPassData;
+				_impl.UnlinkLightFromRenderTarget(
+					*pRenderPass,
+					itRemovedLightData,
+					pointLightComponent._passMap
+				);
 
 				// detach shadow pass
-				//_impl.renderer.DetachCompositingNodeDependency(
-				//	*pRemovedLightPassData->pNode,
-				//	*pointLightComponent._pShadowNode
-				//);
 
-
-
-				pointLightComponent._passMap.erase(pRenderTexture);
+				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
+				delete pRemovedLightData->pRenderPassContext;
+				delete pRemovedLightData;
 			}
-			_impl.renderPasses.erase(renderTexture._it);
+
+			_impl.renderPasses.erase(pRenderPass);
 		}
 	}
 }

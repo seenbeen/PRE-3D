@@ -11,6 +11,11 @@ namespace PRE
 	{
 		using PRE::RenderingModule::RenderCompositingNode;
 
+		PRELightRenderPassData::PRELightRenderPassData(RenderCompositingNode& node)
+			:
+			pNode(&node),
+			pRenderPassContext(nullptr) {}
+
 		PRELightRenderPassData::PRELightRenderPassData(
 			RenderCompositingNode& node,
 			PRELightRenderPassContext& renderPassContext
