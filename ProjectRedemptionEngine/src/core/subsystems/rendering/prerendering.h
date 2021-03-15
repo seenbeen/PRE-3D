@@ -207,11 +207,6 @@ namespace PRE
 				RenderCompositingNode& compositingNode
 			);
 
-			void ComposeRenderComposition(
-				RenderCompositingNode::RenderComposition& composition,
-				PRELightRenderPassContext& lightRenderPassContext
-			);
-
 			RenderCamera& AllocateCamera(
 				const CameraKind& kind,
 				float size,

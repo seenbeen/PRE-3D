@@ -20,13 +20,11 @@ namespace PRE
 			friend class PRERendering;
 
 		private:
-			PRERendering& _rendering;
 			PRERenderTexture& _renderTexture;
 
 			PREPointLightComponent* _pPointLightComponent;
 
 			PRELightRenderPassContext(
-				PRERendering& rendering,
 				PRERenderTexture& renderTexture,
 				PREPointLightComponent& pointLightComponent
 			);

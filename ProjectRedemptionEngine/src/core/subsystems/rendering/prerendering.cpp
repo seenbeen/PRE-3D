@@ -521,14 +521,51 @@ namespace PRE
 			auto& lightPassContext = *static_cast<PRELightRenderPassContext*>(vLightPassContext);
 			if (lightPassContext._renderTexture._pAssociatedCameraComponent != nullptr)
 			{
-				composition.SetCamera(
-					lightPassContext._renderTexture._pAssociatedCameraComponent->_pCamera
-				);
+				auto pCameraComponent = lightPassContext._renderTexture._pAssociatedCameraComponent;
 
-				lightPassContext._rendering.ComposeRenderComposition(
-					composition,
-					lightPassContext
-				);
+				pCameraComponent->AllocateIfNotAllocated();
+				composition.SetCamera(pCameraComponent->_pCamera);
+
+				auto pPointLightComponent = lightPassContext._pPointLightComponent;
+
+				// TODO: Spatial query optimizing to only render visible models
+				for (
+					auto it = pCameraComponent->_associatedModelComponents.begin();
+					it != pCameraComponent->_associatedModelComponents.end();
+					++it
+					)
+				{
+					auto& modelRendererComponent = **it;
+					modelRendererComponent.AllocateIfNotAllocated();
+					if (modelRendererComponent._pMaterial != nullptr)
+					{
+						modelRendererComponent._pMaterial->BindRenderTextureAccumulatorBindings();
+
+						// TODO: switch on light type
+						if (modelRendererComponent._pMaterial->_pShader != nullptr)
+						{
+							auto pShader = modelRendererComponent._pMaterial->_pShader;
+							pShader->SetInt(
+								"PRE_LIGHT_KIND",
+								0 // 0 for point
+							);
+							pShader->SetFloat(
+								"PRE_LIGHT_LUMINANCE",
+								pPointLightComponent->_luminosity
+							);
+							pShader->SetVec3(
+								"PRE_LIGHT_COLOR",
+								pPointLightComponent->_color
+							);
+						}
+					}
+					composition.AddModel(*modelRendererComponent._pModel);
+				}
+
+				if (pCameraComponent->_pSkyBox != nullptr)
+				{
+					composition.AddModel(pCameraComponent->_pSkyBox->_model);
+				}
 
 				composition.SetCompositingTarget(
 					lightPassContext._renderTexture._accumulatorBufferIsA ?
@@ -590,61 +627,6 @@ namespace PRE
 		)
 		{
 			_impl.renderer.DeallocateCompositingNode(compositingNode);
-		}
-
-		void PRERendering::ComposeRenderComposition(
-			RenderCompositingNode::RenderComposition& composition,
-			PRELightRenderPassContext& lightRenderPassContext
-		)
-		{
-			auto pCameraComponent = lightRenderPassContext._renderTexture._pAssociatedCameraComponent;
-			if (pCameraComponent == nullptr)
-			{
-				return;
-			}
-			auto pPointLightComponent = lightRenderPassContext._pPointLightComponent;
-
-			pCameraComponent->AllocateIfNotAllocated();
-			composition.SetCamera(pCameraComponent->_pCamera);
-
-			// TODO: Spatial query optimizing to only render visible models
-			for (
-				auto it = pCameraComponent->_associatedModelComponents.begin();
-				it != pCameraComponent->_associatedModelComponents.end();
-				++it
-			)
-			{
-				auto& modelRendererComponent = **it;
-				modelRendererComponent.AllocateIfNotAllocated();
-				if (modelRendererComponent._pMaterial != nullptr)
-				{
-					modelRendererComponent._pMaterial->BindRenderTextureAccumulatorBindings();
-
-					// TODO: switch on light type
-					if (modelRendererComponent._pMaterial->_pShader != nullptr)
-					{
-						auto pShader = modelRendererComponent._pMaterial->_pShader;
-						pShader->SetInt(
-							"PRE_LIGHT_KIND",
-							0 // 0 for point
-						);
-						pShader->SetFloat(
-							"PRE_LIGHT_LUMINANCE",
-							pPointLightComponent->_luminosity
-						);
-						pShader->SetVec3(
-							"PRE_LIGHT_COLOR",
-							pPointLightComponent->_color
-						);
-					}
-				}
-				composition.AddModel(*modelRendererComponent._pModel);
-			}
-
-			if (pCameraComponent->_pSkyBox != nullptr)
-			{
-				composition.AddModel(pCameraComponent->_pSkyBox->_model);
-			}
 		}
 
 		RenderCamera& PRERendering::AllocateCamera(
@@ -804,7 +786,6 @@ namespace PRE
 				++itNext;
 
 				auto pLightPassContext = new PRELightRenderPassContext(
-					*this,
 					*pCurrent,
 					pointLightComponent
 				);
@@ -992,7 +973,6 @@ namespace PRE
 				auto& pointLightComponent = **it;
 
 				auto pLightPassContext = new PRELightRenderPassContext(
-					*this,
 					*pRenderTexture,
 					pointLightComponent
 				);
