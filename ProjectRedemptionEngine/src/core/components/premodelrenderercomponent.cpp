@@ -92,14 +92,9 @@ namespace PRE
 
 		void PREModelRendererComponent::OnDestroy()
 		{
-			if (_pCameraComponent != nullptr)
-			{
-				GetRendering().UnlinkModelRendererComponentFromCameraComponent(
-					*this,
-					*_pCameraComponent
-				);
-			}
-			GetRendering().DeallocateModel(*_pModel);
+			DeallocateIfAllocated();
+			// TODO: you can leak here if you manipulate and blow the object up
+			// before the object has a chance to be added to the world
 		}
 
 		void PREModelRendererComponent::AllocateIfNotAllocated()
@@ -107,6 +102,22 @@ namespace PRE
 			if (_pModel == nullptr)
 			{
 				_pModel = &GetRendering().AllocateModel();
+			}
+		}
+
+		void PREModelRendererComponent::DeallocateIfAllocated()
+		{
+			if (_pModel != nullptr)
+			{
+				if (_pCameraComponent != nullptr)
+				{
+					GetRendering().UnlinkModelRendererComponentFromCameraComponent(
+						*this,
+						*_pCameraComponent
+					);
+				}
+				GetRendering().DeallocateModel(*_pModel);
+				_pModel = nullptr;
 			}
 		}
 	} // namespace Core

@@ -798,10 +798,10 @@ namespace PRE
 				);
 
 				// attach shadow pass
-				_impl.renderer.AttachCompositingNodeDependency(
-					*pNewLightPassData->pNode,
-					*pointLightComponent._pShadowNode
-				);
+				//_impl.renderer.AttachCompositingNodeDependency(
+				//	*pNewLightPassData->pNode,
+				//	*pointLightComponent._pShadowNode
+				//);
 
 				PRELightRenderPassData* pCurrentLastLightPassData = nullptr;
 				if (!pCurrent->_lightPasses.empty())
@@ -882,10 +882,10 @@ namespace PRE
 				auto pRemovedLightPassData = *itLightPassData;
 
 				// detach shadow pass
-				_impl.renderer.DetachCompositingNodeDependency(
-					*pRemovedLightPassData->pNode,
-					*pointLightComponent._pShadowNode
-				);
+				//_impl.renderer.DetachCompositingNodeDependency(
+				//	*pRemovedLightPassData->pNode,
+				//	*pointLightComponent._pShadowNode
+				//);
 
 				PRELightRenderPassData* pPrevLightPassData = nullptr;
 				if (itLightPassData == pCurrent->_lightPasses.begin())
@@ -985,10 +985,10 @@ namespace PRE
 				);
 
 				// attach shadow pass
-				_impl.renderer.AttachCompositingNodeDependency(
-					*pNewLightPassData->pNode,
-					*pointLightComponent._pShadowNode
-				);
+				//_impl.renderer.AttachCompositingNodeDependency(
+				//	*pNewLightPassData->pNode,
+				//	*pointLightComponent._pShadowNode
+				//);
 
 				PRELightRenderPassData* pCurrentLastLightPassData = nullptr;
 				if (!pRenderTexture->_lightPasses.empty())
@@ -1051,10 +1051,10 @@ namespace PRE
 				auto pRemovedLightPassData = *itLightPassData;
 
 				// detach shadow pass
-				_impl.renderer.DetachCompositingNodeDependency(
-					*pRemovedLightPassData->pNode,
-					*pointLightComponent._pShadowNode
-				);
+				//_impl.renderer.DetachCompositingNodeDependency(
+				//	*pRemovedLightPassData->pNode,
+				//	*pointLightComponent._pShadowNode
+				//);
 
 
 

@@ -23,6 +23,7 @@ namespace PRE
 
 		void PREPointLightComponent::OnStart()
 		{
+			AllocateIfNotAllocated();
 		}
 
 		void PREPointLightComponent::OnUpdate()
@@ -31,9 +32,15 @@ namespace PRE
 
 		void PREPointLightComponent::OnDestroy()
 		{
+			// TODO: you can leak here if you manipulate and blow the object up
+			// before the object has a chance to be added to the world
 		}
 
 		void PREPointLightComponent::AllocateIfNotAllocated()
+		{
+		}
+
+		void PREPointLightComponent::DeallocateIfAllocated()
 		{
 		}
 	} // namespace Core

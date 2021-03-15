@@ -44,6 +44,7 @@ namespace PRE
 			glm::vec3 _color = glm::vec3(1.0f);
 
 			void AllocateIfNotAllocated();
+			void DeallocateIfAllocated();
 		};
 	} // namespace Core
 } // namespace PRE

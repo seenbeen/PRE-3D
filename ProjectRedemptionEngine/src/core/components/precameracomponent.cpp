@@ -153,28 +153,9 @@ namespace PRE
 
 		void PRECameraComponent::OnDestroy()
 		{
-			if (_pRenderTexture != nullptr)
-			{
-				GetRendering().UnlinkCameraComponentFromRenderTexture(
-					*this,
-					*_pRenderTexture
-				);
-			}
-
-			// RemoveModelFromTagGroup mutates _associatedModelComponents
-			// so we'll need to make vector copy before unlinking.
-			vector<PREModelRendererComponent*> modelComponents(
-				_associatedModelComponents.begin(),
-				_associatedModelComponents.end()
-			);
-			for (auto it = modelComponents.begin(); it != modelComponents.end(); ++it)
-			{
-				GetRendering().UnlinkModelRendererComponentFromCameraComponent(
-					**it,
-					*this
-				);
-			}
-			GetRendering().DeallocateCamera(*_pCamera);
+			DeallocateIfAllocated();
+			// TODO: you can leak here if you manipulate and blow the object up
+			// before the object has a chance to be added to the world
 		}
 
 		void PRECameraComponent::AllocateIfNotAllocated()
@@ -190,6 +171,36 @@ namespace PRE
 					_nearClippingPlane,
 					_farClippingPlane
 				);
+			}
+		}
+
+		void PRECameraComponent::DeallocateIfAllocated()
+		{
+			if (_pCamera != nullptr)
+			{
+				if (_pRenderTexture != nullptr)
+				{
+					GetRendering().UnlinkCameraComponentFromRenderTexture(
+						*this,
+						*_pRenderTexture
+					);
+				}
+
+				// RemoveModelFromTagGroup mutates _associatedModelComponents
+				// so we'll need to make vector copy before unlinking.
+				vector<PREModelRendererComponent*> modelComponents(
+					_associatedModelComponents.begin(),
+					_associatedModelComponents.end()
+				);
+				for (auto it = modelComponents.begin(); it != modelComponents.end(); ++it)
+				{
+					GetRendering().UnlinkModelRendererComponentFromCameraComponent(
+						**it,
+						*this
+					);
+				}
+				GetRendering().DeallocateCamera(*_pCamera);
+				_pCamera = nullptr;
 			}
 		}
 	} // namespace Core

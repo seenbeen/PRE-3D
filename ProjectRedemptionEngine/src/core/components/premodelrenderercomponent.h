@@ -52,6 +52,7 @@ namespace PRE
 			PRESkeleton* _pSkeleton = nullptr;
 
 			void AllocateIfNotAllocated();
+			void DeallocateIfAllocated();
 		};
 	} // namespace Core
 } // namespace PRE

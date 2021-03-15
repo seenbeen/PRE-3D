@@ -73,6 +73,7 @@ namespace PRE
 			PRESkyBox* _pSkyBox = nullptr;
 
 			void AllocateIfNotAllocated();
+			void DeallocateIfAllocated();
 		};
 	} // namespace Core
 } // namespace PRE
