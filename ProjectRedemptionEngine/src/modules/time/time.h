@@ -19,9 +19,9 @@ namespace PRE
 			float GetDeltaTime();
 
 		private:
-			const long double MILLIS_IN_SECOND = 1000.0l;
+			const long double NANOS_IN_SECOND = 1000000000.0l;
 			float _deltaTime;
-			long long _lastFrameMillis;
+			long long _lastFrameNanos;
 		};
 	}
 }

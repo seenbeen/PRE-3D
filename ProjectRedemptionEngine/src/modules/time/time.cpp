@@ -7,33 +7,33 @@ namespace PRE
 	namespace TimeModule
 	{
 		using std::chrono::duration_cast;
-		using std::chrono::milliseconds;
+		using std::chrono::nanoseconds;
 		using std::chrono::system_clock;
 
 		Time::Time()
 		{
 			_deltaTime = 0.0f;
-			_lastFrameMillis = 0l;
+			_lastFrameNanos = 0l;
 		}
 
 		Time::~Time() {}
 
 		void Time::Update()
 		{
-			if (_lastFrameMillis == 0.0)
+			if (_lastFrameNanos == 0.0)
 			{
-				_lastFrameMillis = duration_cast<milliseconds>(
+				_lastFrameNanos = duration_cast<nanoseconds>(
 					system_clock::now().time_since_epoch()
 				)
 				.count();
 			}
 	
-			auto currentFrameMillis = duration_cast<milliseconds>(
+			auto currentFrameNanos = duration_cast<nanoseconds>(
 				system_clock::now().time_since_epoch()
 			)
 			.count();
-			_deltaTime = (currentFrameMillis - _lastFrameMillis) / Time::MILLIS_IN_SECOND;
-			_lastFrameMillis = currentFrameMillis;
+			_deltaTime = (float)((currentFrameNanos - _lastFrameNanos) / Time::NANOS_IN_SECOND);
+			_lastFrameNanos = currentFrameNanos;
 		}
 
 		float Time::GetDeltaTime()
