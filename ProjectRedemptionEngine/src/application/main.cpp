@@ -386,7 +386,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
     sceneRootTransform.SetEuler(glm::vec3(0, 180, 0));
 
     auto& lightA = applicationContext.world.Instantiate(lightTemplate);
-    //auto& lightB = applicationContext.world.Instantiate(lightTemplate);
+    auto& lightB = applicationContext.world.Instantiate(lightTemplate);
 }
 
 void OnShutdown(PREApplicationContext& applicationContext)

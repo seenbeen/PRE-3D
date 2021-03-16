@@ -124,7 +124,6 @@ namespace PRE
 			renderer.DeallocateVertexShader(screenVertexShader);
 			renderer.DeallocateFragmentShader(screenFragmentShader);
 			screenShaderProgram.SetInt(SCREEN_SAMPLER_KEY, SCREEN_SAMPLER_UNIT);
-			screenShaderProgram.SetDepthFunction(RenderShaderProgram::DepthFunction::ALWAYS);
 			auto& screenMesh = renderer.AllocateMesh(
 				SCREEN_VERTEX_COUNT,
 				SCREEN_VERTICES,
