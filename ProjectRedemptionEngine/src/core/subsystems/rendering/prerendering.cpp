@@ -647,14 +647,11 @@ namespace PRE
 				pCameraComponent->AllocateIfNotAllocated();
 				composition.SetCamera(pCameraComponent->_pCamera);
 
-				auto pPointLightComponent = lightPassContext._pPointLightComponent;
-				pPointLightComponent->AllocateIfNotAllocated();
-
-				auto pAccumulator = lightPassContext._renderTexture._accumulatorBufferIsA ?
+				auto pAccumulatorWrite = lightPassContext._renderTexture._accumulatorBufferIsA ?
 					lightPassContext._renderTexture._pBufferA :
 					lightPassContext._renderTexture._pBufferB;
 
-				auto pReader = lightPassContext._renderTexture._accumulatorBufferIsA ?
+				auto pAccumulatorRead = lightPassContext._renderTexture._accumulatorBufferIsA ?
 					lightPassContext._renderTexture._pBufferB :
 					lightPassContext._renderTexture._pBufferA;
 
@@ -671,34 +668,44 @@ namespace PRE
 					modelRendererComponent.AllocateIfNotAllocated();
 					if (modelRendererComponent._pMaterial != nullptr)
 					{
-						modelRendererComponent._pMaterial->_material.SetTextureBinding(
-							pReader,
-							0 // TODO: const-i-fy
-						);
-						modelRendererComponent._pMaterial->BindRenderTextureAccumulatorBindings();
-
 						// TODO: switch on light type
 						if (modelRendererComponent._pMaterial->_pShader != nullptr)
 						{
+							modelRendererComponent._pMaterial->_material.SetTextureBinding(
+								pAccumulatorRead,
+								PREShader::LIGHT_ACCUMULATOR_BINDING
+							);
+							modelRendererComponent._pMaterial->BindRenderTextureAccumulatorBindings();
+
 							auto pShader = modelRendererComponent._pMaterial->_pShader;
 							pShader->SetInt(
-								"PRE_LIGHT_KIND",
-								0 // 0 for point
+								PREShader::LIGHT_ACCUMULATOR_SAMPLER,
+								PREShader::LIGHT_ACCUMULATOR_BINDING
 							);
-							pShader->SetFloat(
-								"PRE_LIGHT_LUMINANCE",
-								pPointLightComponent->_luminosity
-							);
-							pShader->SetVec3(
-								"PRE_LIGHT_COLOR",
-								pPointLightComponent->_color
-							);
-							pShader->SetInt(
-								"PRE_LIGHT_ACCUMULATOR_SAMPLER",
-								0
-							);
+							pShader->SetInt(PREShader::AMBIENT_LIGHT_FLAG, 0);
+							pShader->SetInt(PREShader::POINT_LIGHT_FLAG, 0);
+							pShader->SetInt(PREShader::SPOT_LIGHT_FLAG, 0);
+							pShader->SetInt(PREShader::DIRECTIONAL_LIGHT_FLAG, 0);
+							if (lightPassContext._pPointLightComponent != nullptr)
+							{
+								auto pPointLightComponent = lightPassContext._pPointLightComponent;
+								pPointLightComponent->AllocateIfNotAllocated();
+								pShader->SetInt(PREShader::POINT_LIGHT_FLAG, 1);
+								pShader->SetVec3(
+									PREShader::LIGHT_POSITION,
+									pPointLightComponent->_pTransform->GetPosition()
+								);
+								pShader->SetVec3(
+									PREShader::LIGHT_COLOR,
+									pPointLightComponent->_color
+								);
+								pShader->SetFloat(
+									PREShader::LIGHT_LUMINOSITY,
+									pPointLightComponent->_luminosity
+								);
+							}
+							// else if
 						}
-
 					}
 					composition.AddModel(*modelRendererComponent._pModel);
 				}
@@ -709,7 +716,7 @@ namespace PRE
 					composition.AddModel(pCameraComponent->_pSkyBox->_model);
 				}
 
-				composition.SetCompositingTarget(pAccumulator);
+				composition.SetCompositingTarget(pAccumulatorWrite);
 
 				// TODO: only clear depth if first light node
 				composition.Clear();

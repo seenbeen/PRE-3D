@@ -22,6 +22,22 @@ namespace PRE
 			friend class PREMaterial;
 
 		public:
+			// this is the accumulated light buffer from previous light passes
+			static const string LIGHT_ACCUMULATOR_SAMPLER;
+			static const int LIGHT_ACCUMULATOR_BINDING;
+
+			// mutually exclusive, to be used as part of lighting equation
+			static const string AMBIENT_LIGHT_FLAG;
+			static const string POINT_LIGHT_FLAG;
+			static const string SPOT_LIGHT_FLAG;
+			static const string DIRECTIONAL_LIGHT_FLAG;
+
+			static const string LIGHT_POSITION;
+			static const string LIGHT_DIRECTION; // spot lights + directional lights
+			static const string LIGHT_COLOR;
+			static const string LIGHT_LUMINOSITY;
+			static const string LIGHT_SIZE; // spot lights
+
 			enum class DepthFunction {
 				NEVER,
 				LESS_THAN, LESS_THAN_OR_EQUAL,

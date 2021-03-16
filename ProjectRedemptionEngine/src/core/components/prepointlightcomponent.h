@@ -35,7 +35,8 @@ namespace PRE
 			void OnDestroy() override;
 
 		private:
-			bool initialized = false;
+			PRETransformComponent* _pTransform = nullptr;
+
 			/*RenderCompositingNode* _pShadowNode = nullptr;
 			RenderCompositingTarget* _pShadowTarget = nullptr;*/
 

@@ -10,6 +10,21 @@ namespace PRE
 		using std::string;
 		using PRE::RenderingModule::RenderShaderProgram;
 
+		const string PREShader::LIGHT_ACCUMULATOR_SAMPLER = "PRE_LIGHT_ACCUMULATOR_SAMPLER";
+		const int PREShader::LIGHT_ACCUMULATOR_BINDING = 0;
+
+		const string PREShader::AMBIENT_LIGHT_FLAG = "PRE_AMBIENT_LIGHT_FLAG";
+		const string PREShader::POINT_LIGHT_FLAG = "PRE_POINT_LIGHT_FLAG";
+		const string PREShader::SPOT_LIGHT_FLAG = "PRE_SPOT_LIGHT_FLAG";
+		const string PREShader::DIRECTIONAL_LIGHT_FLAG = "PRE_DIRECTIONAL_LIGHT_FLAG";
+
+		const string PREShader::LIGHT_POSITION = "PRE_LIGHT_POSITION";
+		const string PREShader::LIGHT_DIRECTION = "PRE_LIGHT_DIRECTION";
+		const string PREShader::LIGHT_COLOR = "PRE_AMBIENT_LIGHT_COLOR";
+		const string PREShader::LIGHT_LUMINOSITY = "PRE_LIGHT_LUMINOSITY";
+		const string PREShader::LIGHT_SIZE = "PRE_LIGHT_SIZE";
+
+
 		void PREShader::SetBackFaceCulling(bool enabled)
 		{
 			_shaderProgram.SetBackFaceCulling(enabled);

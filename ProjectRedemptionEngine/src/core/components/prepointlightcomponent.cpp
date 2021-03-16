@@ -5,6 +5,8 @@
 
 #include <include/modules/rendering.h>
 
+#include <core/components/pretransformcomponent.h>
+
 #include <core/subsystems/world/pregameobjectcomponent.h>
 
 #include <core/subsystems/rendering/prerendering.h>
@@ -41,19 +43,19 @@ namespace PRE
 
 		void PREPointLightComponent::AllocateIfNotAllocated()
 		{
-			if (!initialized)
+			if (_pTransform == nullptr)
 			{
 				GetRendering().LinkLightToRenderTargets(*this);
-				initialized = true;
+				_pTransform = gameObject().GetComponent<PRETransformComponent>();
 			}
 		}
 
 		void PREPointLightComponent::DeallocateIfAllocated()
 		{
-			if (initialized)
+			if (_pTransform != nullptr)
 			{
+				_pTransform = nullptr;
 				GetRendering().UnlinkLightFromRenderTargets(*this);
-				initialized = false;
 			}
 		}
 	} // namespace Core

@@ -3,6 +3,8 @@ out vec4 FragColor;
 
 in vec2 TexCoord;
 
+uniform sampler2D PRE_LIGHT_ACCUMULATOR_SAMPLER;
+
 uniform sampler2D diffuseSampler;
 uniform sampler2D emissionSampler;
 uniform sampler2D normalSampler;
