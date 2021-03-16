@@ -65,7 +65,8 @@ namespace PRE
 					vector<glm::mat4> result;
 					_impl.pSkeleton->GetCurrentState(result);
 					_impl.pMaterial->Bind(
-						viewMatrix * modelMatrix,
+						modelMatrix,
+						viewMatrix,
 						projectionMatrix,
 						result
 					);
@@ -73,7 +74,8 @@ namespace PRE
 				else
 				{
 					_impl.pMaterial->Bind(
-						viewMatrix * modelMatrix,
+						modelMatrix,
+						viewMatrix,
 						projectionMatrix
 					);
 				}

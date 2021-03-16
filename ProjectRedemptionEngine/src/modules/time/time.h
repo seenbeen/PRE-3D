@@ -16,11 +16,11 @@ namespace PRE
 
 			void Update();
 
-			float GetDeltaTime();
+			long double GetDeltaTime();
 
 		private:
 			const long double NANOS_IN_SECOND = 1000000000.0l;
-			float _deltaTime;
+			long double _deltaTime;
 			long long _lastFrameNanos;
 		};
 	}

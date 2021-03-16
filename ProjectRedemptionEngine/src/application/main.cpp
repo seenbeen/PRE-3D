@@ -158,7 +158,7 @@ class FlyCamControllerComponent : public PREGameObjectComponent
 {
 public:
     float speed = 5.0f;
-    float rotationSpeed = 30.0f;
+    float rotationSpeed = 60.0f;
 
 protected:
     void OnStart() override
@@ -213,6 +213,7 @@ protected:
             auto dx = (float)mdx / HALF_WINDOW_WIDTH;
             auto dy = -(float)mdy / HALF_WINDOW_HEIGHT;
 
+            // TODO: framerate and viewport independent rotation
             _pTransform->SetEuler(
                 _pTransform->GetEuler() + glm::vec3(dy, dx, 0) * rotationSpeed
             );
@@ -351,6 +352,7 @@ protected:
 void OnInitialize(PREApplicationContext& applicationContext)
 {
     std::cout << "ON INITIALIZE" << std::endl;
+    applicationContext.time.SetFrameLimit(60);
 
     VampireTemplate capoeiraTemplate, thrillerTemplate;
     capoeiraTemplate.animationPath = "/animations/mixamo/Capoeira.dae";

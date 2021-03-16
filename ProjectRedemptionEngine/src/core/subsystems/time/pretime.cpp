@@ -1,7 +1,8 @@
+#include <core/subsystems/time/pretime.h>
+
+#include <algorithm>
 #include <chrono>
 #include <thread>
-
-#include <core/subsystems/time/pretime.h>
 
 #include <include/modules/time.h>
 
@@ -11,6 +12,8 @@ namespace PRE
 {
 	namespace Core
 	{
+		using std::chrono::nanoseconds;
+
 		PRETime& PRETime::MakePRETime(
 			const PRETimeConfig& timeConfig,
 			PREApplicationContext& applicationContext
@@ -23,6 +26,10 @@ namespace PRE
 		void PRETime::SetFrameLimit(unsigned int frameLimit)
 		{
 			_frameLimit = frameLimit;
+			if (_frameLimit != 0)
+			{
+				_secondsPerFrame = 1.0l / _frameLimit;
+			}
 		}
 
 		unsigned int PRETime::GetFrameLimit()
@@ -32,16 +39,20 @@ namespace PRE
 
 		float PRETime::GetDeltaTime()
 		{
-			return _time.GetDeltaTime();
+			return _deltaTime;
 		}
 
-		const float PRETime::MILLIS_IN_SECOND = 1000;
+		const long long PRETime::NANOS_IN_SECOND = 1000000000l;
+		const int PRETime::FRAME_DELAY_SAMPLES = 120;
 
 		PRETime::PRETime(PREApplicationContext& applicationContext, Time& time)
 			:
+			_deltaTime(0),
 			_applicationContext(applicationContext),
 			_time(time),
-			_frameLimit(0) {}
+			_frameLimit(0),
+			_secondsPerFrame(0),
+			_priorFramesTimesSum(0) {}
 
 		PRETime::~PRETime()
 		{
@@ -53,15 +64,28 @@ namespace PRE
 		void PRETime::Update()
 		{
 			_time.Update();
+			auto frameTime = _time.GetDeltaTime();
 			if (_frameLimit != 0)
 			{
-				auto secondsPerFrame = 1.0f / _frameLimit;
+				_priorFramesTimesSum += frameTime;
+				_priorFramesTimes.push_back(frameTime);
+				if (_priorFramesTimes.size() > FRAME_DELAY_SAMPLES)
+				{
+					_priorFramesTimesSum -= _priorFramesTimes.front();
+					_priorFramesTimes.pop_front();
+				}
+				auto waitTimeSeconds = _secondsPerFrame - _priorFramesTimesSum / _priorFramesTimes.size();
 				std::this_thread::sleep_for(
-					std::chrono::milliseconds((long)(
-						(secondsPerFrame - _time.GetDeltaTime()) * MILLIS_IN_SECOND)
+					std::chrono::nanoseconds((long long)(
+						std::max(0.0l , waitTimeSeconds) * NANOS_IN_SECOND)
 					)
 				);
 			}
+
+			_time.Update();
+			auto sleepTime = _time.GetDeltaTime();
+
+			_deltaTime = (float)(frameTime + sleepTime);
 		}
 
 		void PRETime::Shutdown() {}

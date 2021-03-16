@@ -12,7 +12,7 @@ namespace PRE
 
 		Time::Time()
 		{
-			_deltaTime = 0.0f;
+			_deltaTime = 0.0l;
 			_lastFrameNanos = 0l;
 		}
 
@@ -20,7 +20,7 @@ namespace PRE
 
 		void Time::Update()
 		{
-			if (_lastFrameNanos == 0.0)
+			if (_lastFrameNanos == 0l)
 			{
 				_lastFrameNanos = duration_cast<nanoseconds>(
 					system_clock::now().time_since_epoch()
@@ -32,11 +32,11 @@ namespace PRE
 				system_clock::now().time_since_epoch()
 			)
 			.count();
-			_deltaTime = (float)((currentFrameNanos - _lastFrameNanos) / Time::NANOS_IN_SECOND);
+			_deltaTime = (currentFrameNanos - _lastFrameNanos) / Time::NANOS_IN_SECOND;
 			_lastFrameNanos = currentFrameNanos;
 		}
 
-		float Time::GetDeltaTime()
+		long double Time::GetDeltaTime()
 		{
 			return _deltaTime;
 		}

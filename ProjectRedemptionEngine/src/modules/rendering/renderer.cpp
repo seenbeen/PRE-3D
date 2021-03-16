@@ -597,13 +597,11 @@ namespace PRE
 		}
 
 		void Renderer::UpdateRecurse(
-#ifdef __PRE_DEBUG__
-			RenderCompositingNode& currentNode,
-			unordered_set<RenderCompositingNode*>& rendered,
-			unordered_set<RenderCompositingNode*>& visited
-#else
 			RenderCompositingNode& currentNode,
 			unordered_set<RenderCompositingNode*>& rendered
+#ifdef __PRE_DEBUG__
+			,
+			unordered_set<RenderCompositingNode*>& visited
 #endif
 		)
 		{

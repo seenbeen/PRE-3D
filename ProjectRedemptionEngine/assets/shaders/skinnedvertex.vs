@@ -10,10 +10,11 @@ layout (location = 6) in vec4 iBoneWeights;
 const int MAX_BONES = 100;
 const int MAX_BONE_INFLUENCE = 4;
 
-uniform mat4 PRE_MODEL_VIEW_MATRIX;
+uniform mat4 PRE_MODEL_MATRIX;
+uniform mat4 PRE_VIEW_MATRIX;
 uniform mat4 PRE_PROJECTION_MATRIX;
 
-uniform mat4 PRE_BONETRANSFORMS[MAX_BONES];
+uniform mat4 PRE_BONE_TRANSFORMS[MAX_BONES];
 
 uniform int PRE_AMBIENT_LIGHT_FLAG;
 uniform int PRE_POINT_LIGHT_FLAG;
@@ -42,9 +43,9 @@ void main()
             boneInfluence = mat4(1.0);
             break;
         }
-        boneInfluence += PRE_BONETRANSFORMS[iBoneIndices[i]] * iBoneWeights[i];
+        boneInfluence += PRE_BONE_TRANSFORMS[iBoneIndices[i]] * iBoneWeights[i];
     }
     
-    gl_Position = PRE_PROJECTION_MATRIX * PRE_MODEL_VIEW_MATRIX * boneInfluence * vec4(iPos, 1.0);
+    gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * boneInfluence * vec4(iPos, 1.0);
     TexCoord = iUV;
 }

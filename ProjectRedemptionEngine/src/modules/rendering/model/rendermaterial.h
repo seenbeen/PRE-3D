@@ -56,12 +56,14 @@ namespace PRE
 			~RenderMaterial();
 
 			void Bind(
-				const glm::mat4& modelViewMatrix,
+				const glm::mat4& modelMatrix,
+				const glm::mat4& viewMatrix,
 				const glm::mat4& projectionMatrix
 			);
 
 			void Bind(
 				const glm::mat4& modelViewMatrix,
+				const glm::mat4& viewMatrix,
 				const glm::mat4& projectionMatrix,
 				const vector<glm::mat4> boneTransforms
 			);

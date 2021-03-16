@@ -69,7 +69,8 @@ namespace PRE
 		}
 
 		void RenderMaterial::Bind(
-			const glm::mat4& modelViewMatrix,
+			const glm::mat4& modelMatrix,
+			const glm::mat4& viewMatrix,
 			const glm::mat4& projectionMatrix
 		)
 		{
@@ -83,20 +84,22 @@ namespace PRE
 				it->second->Bind();
 			}
 			_impl.pShaderProgram->Bind();
-			_impl.pShaderProgram->SetMat4("PRE_MODEL_VIEW_MATRIX", modelViewMatrix);
+			_impl.pShaderProgram->SetMat4("PRE_MODEL_MATRIX", modelMatrix);
+			_impl.pShaderProgram->SetMat4("PRE_VIEW_MATRIX", viewMatrix);
 			_impl.pShaderProgram->SetMat4("PRE_PROJECTION_MATRIX", projectionMatrix);
 		}
 
 		void RenderMaterial::Bind(
-			const glm::mat4& modelViewMatrix,
+			const glm::mat4& modelMatrix,
+			const glm::mat4& viewMatrix,
 			const glm::mat4& projectionMatrix,
 			const vector<glm::mat4> boneTransforms
 		)
 		{
-			Bind(modelViewMatrix, projectionMatrix);
+			Bind(modelMatrix, viewMatrix, projectionMatrix);
 
 			_impl.pShaderProgram->SetMat4(
-				"PRE_BONETRANSFORMS",
+				"PRE_BONE_TRANSFORMS",
 				&boneTransforms[0],
 				(unsigned int)boneTransforms.size()
 			);

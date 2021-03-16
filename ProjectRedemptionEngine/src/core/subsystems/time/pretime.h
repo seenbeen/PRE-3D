@@ -1,4 +1,6 @@
 #pragma once
+#include <list>
+
 #include <include/modules/time.h>
 
 namespace PRE
@@ -8,6 +10,8 @@ namespace PRE
 		struct PRETimeConfig;
 
 		class PREApplicationContext;
+
+		using std::list;
 
 		using PRE::TimeModule::Time;
 
@@ -25,7 +29,8 @@ namespace PRE
 			float GetDeltaTime();
 
 		private:
-			static const float MILLIS_IN_SECOND;
+			static const long long NANOS_IN_SECOND;
+			static const int FRAME_DELAY_SAMPLES;
 
 			static PRETime& MakePRETime(
 				const PRETimeConfig& timeConfig,
@@ -34,7 +39,12 @@ namespace PRE
 
 			PREApplicationContext& _applicationContext;
 			Time& _time;
+			float _deltaTime;
 			unsigned int _frameLimit;
+			long double _secondsPerFrame;
+
+			long double _priorFramesTimesSum;
+			list<long double> _priorFramesTimes;
 
 			PRETime(PREApplicationContext& applicationContext, Time& time);
 			~PRETime();

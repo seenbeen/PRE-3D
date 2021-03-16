@@ -191,17 +191,14 @@ namespace PRE
 			Renderer(unsigned int width, unsigned int height, SDL_Window& window, SDL_GLContext& glContext);
 			~Renderer();
 
-#ifdef __PRE_DEBUG__
-			void UpdateRecurse(
-				RenderCompositingNode& currentNode,
-				unordered_set<RenderCompositingNode*>& rendered,
-				unordered_set<RenderCompositingNode*>& visited);
-#else
 			void UpdateRecurse(
 				RenderCompositingNode& currentNode,
 				unordered_set<RenderCompositingNode*>& rendered
-			);
+#ifdef __PRE_DEBUG__
+				,
+				unordered_set<RenderCompositingNode*>& visited
 #endif
+			);
 		};
 	} // namespace RenderingModule
 } // namespace PRE
