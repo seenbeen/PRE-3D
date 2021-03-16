@@ -6,6 +6,8 @@
 #include <iostream>
 #include <string>
 
+#include <glm/glm.hpp>
+
 #include <include/core.h>
 
 using std::string;
@@ -28,7 +30,6 @@ public:
 protected:
     void OnStart() override
     {
-        std::cout << "Start!" << std::endl;
         _transform = gameObject().GetComponent<PRETransformComponent>();
 
         _pShader = &GetAssetManager().LoadShader(
@@ -117,7 +118,6 @@ protected:
 
     void OnDestroy() override
     {
-        std::cout << "Destroy!" << std::endl;
         GetRendering().DestroyShader(*_pShader);
         GetRendering().DestroyMesh(*_pMesh);
         if (_pSkeleton != nullptr)
@@ -151,6 +151,91 @@ private:
     PREMaterial* _pMaterial = nullptr;
     PREAnimation* _pAnim = nullptr;
     PREAnimator* _pAnimator = nullptr;
+};
+
+class LightCubeComponent : public PREGameObjectComponent
+{
+public:
+    glm::vec3 color = glm::vec3(1);
+
+protected:
+    void OnStart() override
+    {
+        const string VERT_SHADER =
+            "#version 330 core\n"
+            "layout (location = 0) in vec3 iPos;\n"
+            "\n"
+            "uniform mat4 PRE_MODEL_MATRIX;\n"
+            "uniform mat4 PRE_VIEW_MATRIX;\n"
+            "uniform mat4 PRE_PROJECTION_MATRIX;\n"
+            "\n"
+            "void main()\n"
+            "{\n"
+            "    vec4 pos = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * vec4(iPos, 1.0f);\n"
+            "    gl_Position = pos;\n"
+            "}\n";
+        const string FRAG_SHADER =
+            "#version 330 core\n"
+            "\n"
+            "out vec4 FragColor;\n"
+            "\n"
+            "uniform vec3 LightColor;\n"
+            "\n"
+            "void main()\n"
+            "{\n"
+            "    FragColor = vec4(LightColor, 1.0f);\n"
+            "}\n";
+        const unsigned int N_VERTS = 8;
+        const glm::vec3 VERTS[] {
+            glm::vec3(-1, -1, 1),
+            glm::vec3(1, -1, 1),
+            glm::vec3(1, 1, 1),
+            glm::vec3(-1, 1, 1),
+            glm::vec3(-1, -1, -1),
+            glm::vec3(1, -1, -1),
+            glm::vec3(1, 1, -1),
+            glm::vec3(-1, 1, -1),
+        };
+        static const unsigned int N_ELEMS = 36;
+        const unsigned int ELEMS[]{
+            6u, 2u, 5u, 2u, 1u, 5u, // right
+            3u, 7u, 0u, 7u, 4u, 0u, // left
+            3u, 2u, 7u, 2u, 6u, 7u, // top
+            1u, 0u, 5u, 0u, 4u, 5u, // bottom
+            7u, 6u, 4u, 6u, 5u, 4u, // front
+            2u, 3u, 1u, 3u, 0u, 1u // back
+        };
+
+        _pShader = &GetRendering().CreateShader(VERT_SHADER, FRAG_SHADER);
+
+        _pMesh = &GetRendering().CreateMesh(N_VERTS, VERTS, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, N_ELEMS, ELEMS);
+
+        _pMaterial = &GetRendering().CreateMaterial();
+        _pMaterial->SetShader(_pShader);
+
+        auto& modelRendererComponent = *gameObject().GetComponent<PREModelRendererComponent>();
+        modelRendererComponent.SetMesh(_pMesh);
+        modelRendererComponent.SetMaterial(_pMaterial);
+
+        gameObject().GetComponent<PRETransformComponent>()->SetScale(glm::vec3(0.1));
+    }
+
+    void OnUpdate() override
+    {
+        _pShader->SetVec3("LightColor", color);
+    }
+
+    void OnDestroy() override
+    {
+        GetRendering().DestroyShader(*_pShader);
+        GetRendering().DestroyMesh(*_pMesh);
+        GetRendering().DestroyMaterial(*_pMaterial);
+    }
+
+private:
+    PREShader* _pShader = nullptr;
+    PREMesh* _pMesh = nullptr;
+    PREMaterial* _pMaterial = nullptr;
 };
 
 class FlyCamControllerComponent : public PREGameObjectComponent
@@ -324,7 +409,9 @@ class LightTemplate : public PREGameObjectTemplate
 protected:
     void OnInstantiateTemplate() override
     {
-        auto& lightComponent = *AddPREComponent<PREPointLightComponent>();
+        AddPREComponent<PREModelRendererComponent>();
+        AddPREComponent<PREPointLightComponent>();
+        AddPREComponent<LightCubeComponent>();
     }
 };
 
@@ -371,7 +458,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
     auto& vampireA = applicationContext.world.Instantiate(capoeiraTemplate);
     auto& vampireATransform = *vampireA.GetComponent<PRETransformComponent>();
     vampireATransform.SetPosition(
-        vampireATransform.GetPosition() + glm::vec3(-1, 0, -2)
+        vampireATransform.GetPosition() + glm::vec3(-1, 0, 0)
     );
     vampireATransform.SetParent(&sceneRootTransform, true);
     vampireA.GetComponent<PREModelRendererComponent>()->SetCameraComponent(&cameraComponent);
@@ -379,23 +466,28 @@ void OnInitialize(PREApplicationContext& applicationContext)
     auto& vampireB = applicationContext.world.Instantiate(thrillerTemplate);
     auto& vampireBTransform = *vampireB.GetComponent<PRETransformComponent>();
     vampireBTransform.SetPosition(
-        vampireBTransform.GetPosition() + glm::vec3(1, 0, -2)
+        vampireBTransform.GetPosition() + glm::vec3(1, 0, 0)
     );
     vampireBTransform.SetParent(&sceneRootTransform, true);
     vampireB.GetComponent<PREModelRendererComponent>()->SetCameraComponent(&cameraComponent);
     
     sceneRootTransform.SetEuler(glm::vec3(0, 180, 0));
 
-    glm::vec3 lightPositions[] { glm::vec3(-2.5, 2, 0) };
-    float lightLuminosities[]{ 2.0f };
+    glm::vec3 lightPositions[] { glm::vec3(-2.5, 2, 1), glm::vec3(2.5, 2, 1), glm::vec3(0, 2, -2.5) };
+    glm::vec3 lightColors[]{ glm::vec3(0, 0, 1), glm::vec3(0, 1, 0), glm::vec3(1, 0, 0) };
+    float lightLuminosities[]{ 0.5f, 0.5f, 0.5f };
 
-    for (auto i = 0; i < 1; ++i)
+    for (auto i = 0; i < 3; ++i)
     {
         auto& light = applicationContext.world.Instantiate(lightTemplate);
         auto& lightTransform = *light.GetComponent<PRETransformComponent>();
         lightTransform.SetPosition(lightPositions[i]);
         auto& lightComponent = *light.GetComponent<PREPointLightComponent>();
         lightComponent.SetLuminosity(lightLuminosities[i]);
+        lightComponent.SetColor(lightColors[i]);
+        auto& lightCube = *light.GetComponent<LightCubeComponent>();
+        lightCube.color = lightColors[i];
+        light.GetComponent<PREModelRendererComponent>()->SetCameraComponent(&cameraComponent);
     }
 }
 
