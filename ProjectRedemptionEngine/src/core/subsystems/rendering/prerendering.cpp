@@ -691,6 +691,10 @@ namespace PRE
 							pShader->SetInt(PREShader::POINT_LIGHT_FLAG, 0);
 							pShader->SetInt(PREShader::SPOT_LIGHT_FLAG, 0);
 							pShader->SetInt(PREShader::DIRECTIONAL_LIGHT_FLAG, 0);
+							pShader->SetVec3(
+								PREShader::VIEW_POSITION,
+								pCameraComponent->_pTransformComponent->GetPosition()
+							);
 							if (lightPassContext._pPointLightComponent != nullptr)
 							{
 								auto pPointLightComponent = lightPassContext._pPointLightComponent;

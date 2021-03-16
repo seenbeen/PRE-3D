@@ -4,14 +4,10 @@ layout (location = 1) in vec3 iNorm;
 layout (location = 2) in vec3 iTangent;
 layout (location = 3) in vec3 iBiTangent;
 layout (location = 4) in vec2 iUV;
-layout (location = 5) in ivec4 iBoneIndices;
-layout (location = 6) in vec4 iBoneWeights;
 
 uniform mat4 PRE_MODEL_MATRIX;
 uniform mat4 PRE_VIEW_MATRIX;
 uniform mat4 PRE_PROJECTION_MATRIX;
-
-uniform mat4 PRE_BONE_TRANSFORMS[MAX_BONES];
 
 out vec3 iFragNorm;
 out vec3 iFragPos;
@@ -23,7 +19,7 @@ void main()
 {
     gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * vec4(iPos, 1.0f);
 
-    iFragNorm = normalize(mat3(transpose(inverse(PRE_MODEL_MATRIX))) * iNorm);
+    iFragNorm = mat3(transpose(inverse(PRE_MODEL_MATRIX))) * iNorm;
     iFragPos = vec3(PRE_MODEL_MATRIX * vec4(iPos, 1.0));
 
     iTexCoord = iUV;

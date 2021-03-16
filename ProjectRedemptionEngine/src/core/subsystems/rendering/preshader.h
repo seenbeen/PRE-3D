@@ -33,6 +33,8 @@ namespace PRE
 			static const string SPOT_LIGHT_FLAG;
 			static const string DIRECTIONAL_LIGHT_FLAG;
 
+			static const string VIEW_POSITION;
+
 			static const string LIGHT_POSITION;
 			static const string LIGHT_DIRECTION; // spot lights + directional lights
 			static const string LIGHT_COLOR;

@@ -19,6 +19,8 @@ namespace PRE
 		const string PREShader::SPOT_LIGHT_FLAG = "PRE_SPOT_LIGHT_FLAG";
 		const string PREShader::DIRECTIONAL_LIGHT_FLAG = "PRE_DIRECTIONAL_LIGHT_FLAG";
 
+		const string PREShader::VIEW_POSITION = "PRE_VIEW_POSITION";
+
 		const string PREShader::LIGHT_POSITION = "PRE_LIGHT_POSITION";
 		const string PREShader::LIGHT_DIRECTION = "PRE_LIGHT_DIRECTION";
 		const string PREShader::LIGHT_COLOR = "PRE_LIGHT_COLOR";

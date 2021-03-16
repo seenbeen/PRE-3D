@@ -41,7 +41,7 @@ void main()
     
     gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * boneInfluence * vec4(iPos, 1.0f);
 
-    iFragNorm = normalize(mat3(transpose(inverse(PRE_MODEL_MATRIX * boneInfluence))) * iNorm);
+    iFragNorm = mat3(transpose(inverse(PRE_MODEL_MATRIX * boneInfluence))) * iNorm;
     iFragPos = vec3(PRE_MODEL_MATRIX * boneInfluence * vec4(iPos, 1.0));
 
     iTexCoord = iUV;
