@@ -35,11 +35,13 @@ namespace PRE
 				void SetCamera(RenderCamera* pCamera);
 				void SetCompositingTarget(RenderCompositingTarget* pCompositingTarget);
 				void AddModel(RenderModel& model);
+				void Clear();
 
 			private:
 				RenderCamera* pCamera;
 				RenderCompositingTarget* pCompositingTarget;
 				vector<RenderModel*> models;
+				bool clear;
 
 				RenderComposition();
 				~RenderComposition();

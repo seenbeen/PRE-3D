@@ -7,6 +7,8 @@
 
 #include <core/subsystems/world/pregameobjectcomponent.h>
 
+#include <core/subsystems/rendering/prerendering.h>
+
 namespace PRE
 {
 	namespace Core
@@ -34,14 +36,25 @@ namespace PRE
 		{
 			// TODO: you can leak here if you manipulate and blow the object up
 			// before the object has a chance to be added to the world
+			DeallocateIfAllocated();
 		}
 
 		void PREPointLightComponent::AllocateIfNotAllocated()
 		{
+			if (!initialized)
+			{
+				GetRendering().LinkLightToRenderTargets(*this);
+				initialized = true;
+			}
 		}
 
 		void PREPointLightComponent::DeallocateIfAllocated()
 		{
+			if (initialized)
+			{
+				GetRendering().UnlinkLightFromRenderTargets(*this);
+				initialized = false;
+			}
 		}
 	} // namespace Core
 } // namespace PRE

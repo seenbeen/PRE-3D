@@ -48,7 +48,7 @@ namespace PRE
 			}
 
 			SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 			SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 			SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -88,6 +88,8 @@ namespace PRE
 			glCullFace(GL_BACK);
 			glFrontFace(GL_CCW);
 
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
 			return *(new Renderer(windowWidth, windowHeight, *pWindow, glContext));
 		}
 
@@ -107,10 +109,6 @@ namespace PRE
 		// TODO: spatial query optimization
 		void Renderer::Update()
 		{
-			glDepthMask(GL_TRUE);
-			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 #ifdef __PRE_DEBUG__
 			unordered_set<RenderCompositingNode*> visited;
 #endif
@@ -182,9 +180,8 @@ namespace PRE
 
 #ifdef __PRE_DEBUG__
 			assert(_compositingTargets.find(pCompositingTarget) != _compositingTargets.end());
-#endif
-
 			_compositingTargets.erase(pCompositingTarget);
+#endif
 
 			delete pCompositingTarget;
 		}
@@ -653,6 +650,12 @@ namespace PRE
 
 				RenderCompositingTarget::Bind(composition.pCompositingTarget);
 				auto& models = composition.models;
+
+				if (composition.clear)
+				{
+					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				}
+
 				for (auto it = models.begin(); it != models.end(); ++it)
 				{
 					auto pModel = *it;
@@ -663,6 +666,7 @@ namespace PRE
 
 					pModel->Render(viewMatrix, projectionMatrix);
 				}
+
 				RenderCompositingTarget::Bind(nullptr);
 			}
 

@@ -12,7 +12,6 @@ namespace PRE
 		class PRERendering;
 		class PREMaterial;
 
-		class PRELightComponent;
 		class PRELightRenderPassData;
 
 		using std::list;
@@ -41,9 +40,9 @@ namespace PRE
 			list<PRELightRenderPassData*>::iterator _front;
 
 			PRERenderTexture(
-				list<PRELightRenderPassData*>::iterator front,
 				RenderCompositingTarget& bufferA,
-				RenderCompositingTarget& bufferB
+				RenderCompositingTarget& bufferB,
+				list<PRELightRenderPassData*>::iterator front
 			);
 			~PRERenderTexture();
 		};

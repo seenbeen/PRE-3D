@@ -61,6 +61,8 @@ namespace PRE
 			friend class PRECameraComponent;
 			friend class PRERenderTexture;
 
+			friend class PREPointLightComponent;
+
 			class Impl
 			{
 				Impl& operator=(const Impl&) = delete;
@@ -91,7 +93,7 @@ namespace PRE
 				RenderCamera& screenCamera;
 
 				list<PRELightRenderPassData*> compositingChain;
-				unordered_set<PRERenderTexture*> renderPasses;
+				list<PRERenderTexture*> renderPasses;
 				unordered_set<PREPointLightComponent*> pointLights;
 
 				Impl(

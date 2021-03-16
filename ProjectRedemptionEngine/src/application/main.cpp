@@ -65,15 +65,16 @@ protected:
 
         _pMaterial = &GetRendering().CreateMaterial();
         _pMaterial->SetShader(_pShader);
-        _pMaterial->SetTextureBinding(_pDiffuseTexture, 0);
-        _pMaterial->SetTextureBinding(_pEmissionTexture, 1);
-        _pMaterial->SetTextureBinding(_pNormalTexture, 2);
-        _pMaterial->SetTextureBinding(_pSpecularTexture, 3);
+        _pMaterial->SetTextureBinding(_pDiffuseTexture, 1);
+        _pMaterial->SetTextureBinding(_pEmissionTexture, 2);
+        _pMaterial->SetTextureBinding(_pNormalTexture, 3);
+        _pMaterial->SetTextureBinding(_pSpecularTexture, 4);
 
-        _pShader->SetInt("diffuseSampler", 0);
-        _pShader->SetInt("emissionSampler", 1);
-        _pShader->SetInt("normalSampler", 2);
-        _pShader->SetInt("specularSampler", 3);
+        _pShader->SetInt("diffuseSampler", 1);
+        _pShader->SetInt("emissionSampler", 2);
+        _pShader->SetInt("normalSampler", 3);
+        _pShader->SetInt("specularSampler", 4);
+        _pShader->SetBackFaceCulling(false);
 
         auto& modelRendererComponent = *gameObject().GetComponent<PREModelRendererComponent>();
         modelRendererComponent.SetMesh(_pMesh);
@@ -316,7 +317,16 @@ protected:
         modelComponent.normalPath = "/models/vampire_a_lusth/textures/Vampire_normal.png";
         modelComponent.specularPath = "/models/vampire_a_lusth/textures/Vampire_specular.png";
     }
-} ;
+};
+
+class LightTemplate : public PREGameObjectTemplate
+{
+protected:
+    void OnInstantiateTemplate() override
+    {
+        AddPREComponent<PREPointLightComponent>();
+    }
+};
 
 class CameraTemplate : public PREGameObjectTemplate
 {
@@ -347,6 +357,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
     thrillerTemplate.animationPath = "/animations/mixamo/Thriller Part 4.dae";
 
     CameraTemplate cameraTemplate;
+    LightTemplate lightTemplate;
 
     auto& sceneRoot = applicationContext.world.Instantiate();
     auto& sceneRootTransform = *sceneRoot.GetComponent<PRETransformComponent>();
@@ -373,6 +384,9 @@ void OnInitialize(PREApplicationContext& applicationContext)
     vampireB.GetComponent<PREModelRendererComponent>()->SetCameraComponent(&cameraComponent);
     
     sceneRootTransform.SetEuler(glm::vec3(0, 180, 0));
+
+    auto& lightA = applicationContext.world.Instantiate(lightTemplate);
+    //auto& lightB = applicationContext.world.Instantiate(lightTemplate);
 }
 
 void OnShutdown(PREApplicationContext& applicationContext)

@@ -17,21 +17,20 @@ namespace PRE
 			unsigned int height
 		)
 		{
-			GLuint gBufferId;
-			glGenFramebuffers(1, &gBufferId);
-			glBindFramebuffer(GL_FRAMEBUFFER, gBufferId);
+			GLuint bufferId;
+			glGenFramebuffers(1, &bufferId);
+			glBindFramebuffer(GL_FRAMEBUFFER, bufferId);
 
 			auto target = new RenderTexture(width, height, nullptr);
 			target->Bind();
 			target->BindTarget(GL_COLOR_ATTACHMENT0);
 
-			glDrawBuffer(GL_COLOR_ATTACHMENT0);
-
-			unsigned int rboDepth;
-			glGenRenderbuffers(1, &rboDepth);
-			glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+			// TODO: rbo leaks
+			unsigned int rbo;
+			glGenRenderbuffers(1, &rbo);
+			glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
 #ifdef __PRE_DEBUG__
 			assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
@@ -39,7 +38,7 @@ namespace PRE
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-			return *(new Impl(gBufferId, *target));
+			return *(new Impl(bufferId, *target));
 		}
 
 		RenderCompositingTarget::Impl& RenderCompositingTarget::Impl::MakeImpl(

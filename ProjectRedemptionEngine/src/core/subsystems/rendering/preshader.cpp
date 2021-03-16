@@ -10,6 +10,47 @@ namespace PRE
 		using std::string;
 		using PRE::RenderingModule::RenderShaderProgram;
 
+		void PREShader::SetBackFaceCulling(bool enabled)
+		{
+			_shaderProgram.SetBackFaceCulling(enabled);
+		}
+
+		void PREShader::SetDepthWrite(bool enabled)
+		{
+			_shaderProgram.SetDepthWrite(enabled);
+		}
+
+		void PREShader::SetDepthFunction(const DepthFunction& depthFunction)
+		{
+			switch (depthFunction)
+			{
+			case DepthFunction::NEVER:
+				_shaderProgram.SetDepthFunction(RenderShaderProgram::DepthFunction::NEVER);
+				break;
+			case DepthFunction::LESS_THAN:
+				_shaderProgram.SetDepthFunction(RenderShaderProgram::DepthFunction::LESS_THAN);
+				break;
+			case DepthFunction::LESS_THAN_OR_EQUAL:
+				_shaderProgram.SetDepthFunction(RenderShaderProgram::DepthFunction::LESS_THAN_OR_EQUAL);
+				break;
+			case DepthFunction::EQUAL:
+				_shaderProgram.SetDepthFunction(RenderShaderProgram::DepthFunction::EQUAL);
+				break;
+			case DepthFunction::NOT_EQUAL:
+				_shaderProgram.SetDepthFunction(RenderShaderProgram::DepthFunction::NOT_EQUAL);
+				break;
+			case DepthFunction::GREATER_THAN:
+				_shaderProgram.SetDepthFunction(RenderShaderProgram::DepthFunction::GREATER_THAN);
+				break;
+			case DepthFunction::GREATER_THAN_OR_EQUAL:
+				_shaderProgram.SetDepthFunction(RenderShaderProgram::DepthFunction::GREATER_THAN_OR_EQUAL);
+				break;
+			case DepthFunction::ALWAYS:
+				_shaderProgram.SetDepthFunction(RenderShaderProgram::DepthFunction::ALWAYS);
+				break;
+			}
+		}
+
 		void PREShader::SetBool(const string& name, bool value)
 		{
 			_shaderProgram.SetBool(name, value);

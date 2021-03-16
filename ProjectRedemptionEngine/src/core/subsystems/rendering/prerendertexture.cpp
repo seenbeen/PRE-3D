@@ -14,9 +14,9 @@ namespace PRE
 		using PRE::RenderingModule::RenderCompositingNode;
 
 		PRERenderTexture::PRERenderTexture(
-			list<PRELightRenderPassData*>::iterator front,
 			RenderCompositingTarget& bufferA,
-			RenderCompositingTarget& bufferB
+			RenderCompositingTarget& bufferB,
+			list<PRELightRenderPassData*>::iterator front
 		)
 			:
 			_pAssociatedCameraComponent(nullptr),

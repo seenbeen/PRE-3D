@@ -35,8 +35,9 @@ namespace PRE
 			void OnDestroy() override;
 
 		private:
-			RenderCompositingNode* _pShadowNode = nullptr;
-			RenderCompositingTarget* _pShadowTarget = nullptr;
+			bool initialized = false;
+			/*RenderCompositingNode* _pShadowNode = nullptr;
+			RenderCompositingTarget* _pShadowTarget = nullptr;*/
 
 			unordered_map<PRERenderTexture*, list<PRELightRenderPassData*>::iterator> _passMap;
 

@@ -33,10 +33,16 @@ namespace PRE
 			models.push_back(&model);
 		}
 
+		void RenderCompositingNode::RenderComposition::Clear()
+		{
+			clear = true;
+		}
+
 		RenderCompositingNode::RenderComposition::RenderComposition()
 			:
 			pCamera(nullptr),
-			pCompositingTarget(nullptr) {}
+			pCompositingTarget(nullptr),
+			clear(false) {}
 
 		RenderCompositingNode::RenderComposition::~RenderComposition() {}
 
@@ -111,6 +117,7 @@ namespace PRE
 			_impl.composition.models.clear();
 			_impl.composition.pCamera = nullptr;
 			_impl.composition.pCompositingTarget = nullptr;
+			_impl.composition.clear = false;
 			_impl.onRender(_impl.composition, _impl.vContext);
 
 			return _impl.composition;

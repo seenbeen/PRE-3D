@@ -100,10 +100,10 @@ namespace PRE
 		};
 		static const glm::vec2 SCREEN_UVS[]
 		{
-			glm::vec3(0, 0, 0),
-			glm::vec3(1, 0, 0),
-			glm::vec3(1, 1, 0),
-			glm::vec3(0, 1, 0)
+			glm::vec2(0, 0),
+			glm::vec2(1, 0),
+			glm::vec2(1, 1),
+			glm::vec2(0, 1)
 		};
 		static const unsigned int SCREEN_TRIANGLE_ELEMENT_COUNT = 6u;
 		static const unsigned int SCREEN_TRIANGLE_ELEMENTS[]
@@ -124,6 +124,7 @@ namespace PRE
 			renderer.DeallocateVertexShader(screenVertexShader);
 			renderer.DeallocateFragmentShader(screenFragmentShader);
 			screenShaderProgram.SetInt(SCREEN_SAMPLER_KEY, SCREEN_SAMPLER_UNIT);
+			screenShaderProgram.SetDepthFunction(RenderShaderProgram::DepthFunction::ALWAYS);
 			auto& screenMesh = renderer.AllocateMesh(
 				SCREEN_VERTEX_COUNT,
 				SCREEN_VERTICES,
@@ -172,8 +173,8 @@ namespace PRE
 			auto& screenTexture = renderingImpl.rendering._screenRenderTexture;
 			renderingImpl.screenMaterial.SetTextureBinding(
 				screenTexture._accumulatorBufferIsA ?
-						screenTexture._pBufferA :
-						screenTexture._pBufferB
+						screenTexture._pBufferB :
+						screenTexture._pBufferA
 				,
 				SCREEN_SAMPLER_UNIT
 			);
@@ -181,6 +182,7 @@ namespace PRE
 			composition.SetCompositingTarget(nullptr);
 			composition.AddModel(renderingImpl.screenModel);
 			composition.SetCamera(&renderingImpl.screenCamera);
+			composition.Clear();
 		}
 
 		PRERendering::Impl::Impl(
@@ -341,11 +343,10 @@ namespace PRE
 		PRERenderTexture& PRERendering::CreateRenderTexture(unsigned int width, unsigned int height)
 		{
 			auto pRenderTexture = new PRERenderTexture(
-				--_impl.compositingChain.end(),
 				_impl.renderer.AllocateCompositingTarget(width, height),
-				_impl.renderer.AllocateCompositingTarget(width, height)
+				_impl.renderer.AllocateCompositingTarget(width, height),
+				_impl.compositingChain.end()
 			);
-			_impl.renderPasses.insert(pRenderTexture);
 			LinkRenderTextureToLights(*pRenderTexture);
 			return *pRenderTexture;
 		}
@@ -354,7 +355,6 @@ namespace PRE
 		{
 			auto pRenderTexture = &renderTexture;
 			UnlinkRenderTextureFromLights(*pRenderTexture);
-			_impl.renderPasses.erase(pRenderTexture);
 			_impl.renderer.DeallocateCompositingTarget(*renderTexture._pBufferA);
 			_impl.renderer.DeallocateCompositingTarget(*renderTexture._pBufferB);
 			delete &renderTexture;
@@ -651,6 +651,16 @@ namespace PRE
 				auto pPointLightComponent = lightPassContext._pPointLightComponent;
 				pPointLightComponent->AllocateIfNotAllocated();
 
+				auto pAccumulator = lightPassContext._renderTexture._accumulatorBufferIsA ?
+					lightPassContext._renderTexture._pBufferA :
+					lightPassContext._renderTexture._pBufferB;
+
+				auto pReader = lightPassContext._renderTexture._accumulatorBufferIsA ?
+					lightPassContext._renderTexture._pBufferB :
+					lightPassContext._renderTexture._pBufferA;
+
+				lightPassContext._renderTexture._accumulatorBufferIsA = !lightPassContext._renderTexture._accumulatorBufferIsA;
+
 				// TODO: Spatial query optimizing to only render visible models
 				for (
 					auto it = pCameraComponent->_associatedModelComponents.begin();
@@ -662,6 +672,10 @@ namespace PRE
 					modelRendererComponent.AllocateIfNotAllocated();
 					if (modelRendererComponent._pMaterial != nullptr)
 					{
+						modelRendererComponent._pMaterial->_material.SetTextureBinding(
+							pReader,
+							0 // TODO: const-i-fy
+						);
 						modelRendererComponent._pMaterial->BindRenderTextureAccumulatorBindings();
 
 						// TODO: switch on light type
@@ -680,23 +694,26 @@ namespace PRE
 								"PRE_LIGHT_COLOR",
 								pPointLightComponent->_color
 							);
+							pShader->SetInt(
+								"PRE_LIGHT_ACCUMULATOR_SAMPLER",
+								0
+							);
 						}
+
 					}
 					composition.AddModel(*modelRendererComponent._pModel);
 				}
 
+				// TODO: only render skybox on first light node
 				if (pCameraComponent->_pSkyBox != nullptr)
 				{
 					composition.AddModel(pCameraComponent->_pSkyBox->_model);
 				}
 
-				composition.SetCompositingTarget(
-					lightPassContext._renderTexture._accumulatorBufferIsA ?
-						lightPassContext._renderTexture._pBufferA :
-						lightPassContext._renderTexture._pBufferB
-				);
+				composition.SetCompositingTarget(pAccumulator);
 
-				lightPassContext._renderTexture._accumulatorBufferIsA = !lightPassContext._renderTexture._accumulatorBufferIsA;
+				// TODO: only clear depth if first light node
+				composition.Clear();
 			}
 		}
 
@@ -993,7 +1010,7 @@ namespace PRE
 				);
 			}
 
-			_impl.renderPasses.insert(pRenderPass);
+			_impl.renderPasses.push_back(pRenderPass);
 		}
 
 		void PRERendering::UnlinkRenderTextureFromLights(
@@ -1020,7 +1037,13 @@ namespace PRE
 				delete pRemovedLightData;
 			}
 
-			_impl.renderPasses.erase(pRenderPass);
+			_impl.renderPasses.erase(
+				std::find(
+					_impl.renderPasses.begin(),
+					_impl.renderPasses.end(),
+					pRenderPass
+				)
+			);
 		}
 	}
 }
