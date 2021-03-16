@@ -23,6 +23,7 @@ namespace PRE
 
 		public:
 			// this is the accumulated light buffer from previous light passes
+			static const string IS_FIRST_LIGHT_PASS;
 			static const string LIGHT_ACCUMULATOR_SAMPLER;
 			static const int LIGHT_ACCUMULATOR_BINDING;
 
@@ -38,17 +39,7 @@ namespace PRE
 			static const string LIGHT_LUMINOSITY;
 			static const string LIGHT_SIZE; // spot lights
 
-			enum class DepthFunction {
-				NEVER,
-				LESS_THAN, LESS_THAN_OR_EQUAL,
-				EQUAL, NOT_EQUAL,
-				GREATER_THAN, GREATER_THAN_OR_EQUAL,
-				ALWAYS
-			};
-
 			void SetBackFaceCulling(bool enabled);
-			void SetDepthWrite(bool enabled);
-			void SetDepthFunction(const DepthFunction& depthFunction);
 
 			void SetBool(const string& name, bool value);
 			void SetInt(const string& name, int value);

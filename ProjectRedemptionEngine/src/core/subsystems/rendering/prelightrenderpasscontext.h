@@ -20,11 +20,13 @@ namespace PRE
 			friend class PRERendering;
 
 		private:
+			const bool _isFirstPass;
 			PRERenderTexture& _renderTexture;
 
 			PREPointLightComponent* _pPointLightComponent;
 
 			PRELightRenderPassContext(
+				bool isFirstPass,
 				PRERenderTexture& renderTexture,
 				PREPointLightComponent& pointLightComponent
 			);

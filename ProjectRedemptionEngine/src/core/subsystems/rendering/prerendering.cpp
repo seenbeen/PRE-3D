@@ -680,6 +680,10 @@ namespace PRE
 
 							auto pShader = modelRendererComponent._pMaterial->_pShader;
 							pShader->SetInt(
+								PREShader::IS_FIRST_LIGHT_PASS,
+								lightPassContext._isFirstPass ? 1 : 0
+							);
+							pShader->SetInt(
 								PREShader::LIGHT_ACCUMULATOR_SAMPLER,
 								PREShader::LIGHT_ACCUMULATOR_BINDING
 							);
@@ -711,7 +715,6 @@ namespace PRE
 					composition.AddModel(*modelRendererComponent._pModel);
 				}
 
-				// TODO: only render skybox on first light node
 				if (pCameraComponent->_pSkyBox != nullptr)
 				{
 					composition.AddModel(pCameraComponent->_pSkyBox->_model);
@@ -719,7 +722,9 @@ namespace PRE
 
 				composition.SetCompositingTarget(pAccumulatorWrite);
 
-				// TODO: only clear depth if first light node
+				// TODO: take advantage of depth buffer early z test
+				// by setting depth test leq and not clearing depth buffer
+				// unless first pass.
 				composition.Clear();
 			}
 		}
@@ -927,10 +932,11 @@ namespace PRE
 		{
 			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
 			{
-				auto pCurrentPass = *it;
+				auto pRenderPass = *it;
 
 				auto pLightContext = new PRELightRenderPassContext(
-					*pCurrentPass,
+					pRenderPass->_front == _impl.compositingChain.end(),
+					*pRenderPass,
 					pointLightComponent
 				);
 				auto pNewLightData = new PRELightRenderPassData(
@@ -944,7 +950,7 @@ namespace PRE
 				// attach shadow pass
 
 				_impl.LinkLightToRenderTarget(
-					*pCurrentPass,
+					*pRenderPass,
 					*pNewLightData,
 					pointLightComponent._passMap
 				);
@@ -997,6 +1003,7 @@ namespace PRE
 				auto& pointLightComponent = **it;
 
 				auto pLightContext = new PRELightRenderPassContext(
+					pRenderPass->_front == _impl.compositingChain.end(),
 					*pRenderPass,
 					pointLightComponent
 				);

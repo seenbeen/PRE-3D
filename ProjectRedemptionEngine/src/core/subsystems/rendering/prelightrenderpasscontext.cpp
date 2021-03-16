@@ -8,10 +8,12 @@ namespace PRE
 	namespace Core
 	{
 		PRELightRenderPassContext::PRELightRenderPassContext(
+			bool isFirstPass,
 			PRERenderTexture& renderTexture,
 			PREPointLightComponent& pointLightComponent
 		)
 			:
+			_isFirstPass(isFirstPass),
 			_renderTexture(renderTexture),
 			_pPointLightComponent(&pointLightComponent) {}
 

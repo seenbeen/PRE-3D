@@ -28,10 +28,11 @@ uniform float PRE_LIGHT_LUMINOSITY;
 uniform float PRE_LIGHT_SIZE;
 
 out vec2 TexCoord;
+out vec2 AccumCoord;
 
 void main()
 {
-    mat4 boneInfluence = mat4(0.0);
+    mat4 boneInfluence = mat4(0.0f);
     for (int i = 0; i < MAX_BONE_INFLUENCE; ++i)
     {
         if (iBoneIndices[i] == -1)
@@ -40,12 +41,13 @@ void main()
         }
         if (iBoneIndices[i] >= MAX_BONES) 
         {
-            boneInfluence = mat4(1.0);
+            boneInfluence = mat4(1.0f);
             break;
         }
         boneInfluence += PRE_BONE_TRANSFORMS[iBoneIndices[i]] * iBoneWeights[i];
     }
     
-    gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * boneInfluence * vec4(iPos, 1.0);
+    gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * boneInfluence * vec4(iPos, 1.0f);
     TexCoord = iUV;
+    AccumCoord = (gl_Position.xy / gl_Position.w  + vec2(1.0f, 1.0f)) / 2.0f;
 }

@@ -25,9 +25,11 @@ uniform float PRE_LIGHT_LUMINOSITY;
 uniform float PRE_LIGHT_SIZE;
 
 out vec2 TexCoord;
+out vec2 AccumCoord;
 
 void main()
 {
-    gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * vec4(iPos, 1.0);
+    gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * vec4(iPos, 1.0f);
     TexCoord = iUV;
+    AccumCoord = (gl_Position.xy / gl_Position.w + vec2(1.0f, 1.0f)) / 2.0f;
 }

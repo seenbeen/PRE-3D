@@ -389,6 +389,8 @@ void OnInitialize(PREApplicationContext& applicationContext)
 
     auto& lightA = applicationContext.world.Instantiate(lightTemplate);
     auto& lightB = applicationContext.world.Instantiate(lightTemplate);
+    auto& lightC = applicationContext.world.Instantiate(lightTemplate);
+    auto& lightD = applicationContext.world.Instantiate(lightTemplate);
 }
 
 void OnShutdown(PREApplicationContext& applicationContext)
