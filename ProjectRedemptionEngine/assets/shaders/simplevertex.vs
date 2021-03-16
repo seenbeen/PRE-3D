@@ -9,18 +9,30 @@ uniform mat4 PRE_MODEL_MATRIX;
 uniform mat4 PRE_VIEW_MATRIX;
 uniform mat4 PRE_PROJECTION_MATRIX;
 
-out vec3 iFragNorm;
-out vec3 iFragPos;
+uniform vec3 PRE_VIEW_POSITION;
+uniform vec3 PRE_LIGHT_POSITION;
+
+out vec3 iTangentViewPos;
+out vec3 iTangentFragPos;
+out vec3 iTangentLightPos;
 
 out vec2 iTexCoord;
 out vec2 iAccumCoord;
 
 void main()
 {
-    gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * vec4(iPos, 1.0f);
+    mat3 normalMatrix = mat3(transpose(inverse(PRE_MODEL_MATRIX)));
 
-    iFragNorm = mat3(transpose(inverse(PRE_MODEL_MATRIX))) * iNorm;
-    iFragPos = vec3(PRE_MODEL_MATRIX * vec4(iPos, 1.0));
+    vec3 T = normalize(normalMatrix * iTangent);
+    vec3 B = normalize(normalMatrix * iBiTangent);
+    vec3 N = normalize(normalMatrix * iNorm);
+    mat3 TBN = transpose(mat3(T, B, N));
+
+    iTangentViewPos = TBN * PRE_VIEW_POSITION;
+    iTangentFragPos = TBN * vec3(PRE_MODEL_MATRIX * vec4(iPos, 1.0));
+    iTangentLightPos = TBN * PRE_LIGHT_POSITION;
+
+    gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * vec4(iPos, 1.0f);
 
     iTexCoord = iUV;
     iAccumCoord = (gl_Position.xy / gl_Position.w + vec2(1.0f, 1.0f)) / 2.0f;

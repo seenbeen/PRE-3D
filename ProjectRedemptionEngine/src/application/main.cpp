@@ -75,6 +75,7 @@ protected:
         _pShader->SetInt("emissionSampler", 2);
         _pShader->SetInt("normalSampler", 3);
         _pShader->SetInt("specularSampler", 4);
+        _pShader->SetBackFaceCulling(false);
 
         auto& modelRendererComponent = *gameObject().GetComponent<PREModelRendererComponent>();
         modelRendererComponent.SetMesh(_pMesh);

@@ -1,4 +1,5 @@
 #version 330 core
+
 layout (location = 0) in vec3 iPos;
 layout (location = 1) in vec3 iNorm;
 layout (location = 2) in vec3 iTangent;
@@ -16,8 +17,12 @@ uniform mat4 PRE_PROJECTION_MATRIX;
 
 uniform mat4 PRE_BONE_TRANSFORMS[MAX_BONES];
 
-out vec3 iFragNorm;
-out vec3 iFragPos;
+uniform vec3 PRE_VIEW_POSITION;
+uniform vec3 PRE_LIGHT_POSITION;
+
+out vec3 iTangentViewPos;
+out vec3 iTangentFragPos;
+out vec3 iTangentLightPos;
 
 out vec2 iTexCoord;
 out vec2 iAccumCoord;
@@ -38,11 +43,19 @@ void main()
         }
         boneInfluence += PRE_BONE_TRANSFORMS[iBoneIndices[i]] * iBoneWeights[i];
     }
-    
-    gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * boneInfluence * vec4(iPos, 1.0f);
 
-    iFragNorm = mat3(transpose(inverse(PRE_MODEL_MATRIX * boneInfluence))) * iNorm;
-    iFragPos = vec3(PRE_MODEL_MATRIX * boneInfluence * vec4(iPos, 1.0));
+    mat3 normalMatrix = mat3(transpose(inverse(PRE_MODEL_MATRIX * boneInfluence)));
+
+    vec3 T = normalize(normalMatrix * iTangent);
+    vec3 B = normalize(normalMatrix * iBiTangent);
+    vec3 N = normalize(normalMatrix * iNorm);
+    mat3 TBN = transpose(mat3(T, B, N));
+
+    iTangentViewPos = TBN * PRE_VIEW_POSITION;
+    iTangentFragPos = TBN * vec3(PRE_MODEL_MATRIX * boneInfluence * vec4(iPos, 1.0));
+    iTangentLightPos = TBN * PRE_LIGHT_POSITION;
+
+    gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * boneInfluence * vec4(iPos, 1.0);
 
     iTexCoord = iUV;
     iAccumCoord = (gl_Position.xy / gl_Position.w + vec2(1.0f, 1.0f)) / 2.0f;
