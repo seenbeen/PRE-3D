@@ -13,23 +13,19 @@ uniform mat4 PRE_PROJECTION_MATRIX;
 
 uniform mat4 PRE_BONE_TRANSFORMS[MAX_BONES];
 
-uniform int PRE_AMBIENT_LIGHT_FLAG;
-uniform int PRE_POINT_LIGHT_FLAG;
-uniform int PRE_SPOT_LIGHT_FLAG;
-uniform int PRE_DIRECTIONAL_LIGHT_FLAG;
+out vec3 iFragNorm;
+out vec3 iFragPos;
 
-uniform vec3 PRE_LIGHT_POSITION;
-uniform vec3 PRE_LIGHT_DIRECTION;
-uniform vec3 PRE_LIGHT_COLOR;
-uniform float PRE_LIGHT_LUMINOSITY;
-uniform float PRE_LIGHT_SIZE;
-
-out vec2 TexCoord;
-out vec2 AccumCoord;
+out vec2 iTexCoord;
+out vec2 iAccumCoord;
 
 void main()
 {
     gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * vec4(iPos, 1.0f);
-    TexCoord = iUV;
-    AccumCoord = (gl_Position.xy / gl_Position.w + vec2(1.0f, 1.0f)) / 2.0f;
+
+    iFragNorm = normalize(mat3(transpose(inverse(PRE_MODEL_MATRIX))) * iNorm);
+    iFragPos = vec3(PRE_MODEL_MATRIX * vec4(iPos, 1.0));
+
+    iTexCoord = iUV;
+    iAccumCoord = (gl_Position.xy / gl_Position.w + vec2(1.0f, 1.0f)) / 2.0f;
 }

@@ -21,7 +21,7 @@ namespace PRE
 
 		const string PREShader::LIGHT_POSITION = "PRE_LIGHT_POSITION";
 		const string PREShader::LIGHT_DIRECTION = "PRE_LIGHT_DIRECTION";
-		const string PREShader::LIGHT_COLOR = "PRE_AMBIENT_LIGHT_COLOR";
+		const string PREShader::LIGHT_COLOR = "PRE_LIGHT_COLOR";
 		const string PREShader::LIGHT_LUMINOSITY = "PRE_LIGHT_LUMINOSITY";
 		const string PREShader::LIGHT_SIZE = "PRE_LIGHT_SIZE";
 

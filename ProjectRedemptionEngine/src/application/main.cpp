@@ -74,7 +74,6 @@ protected:
         _pShader->SetInt("emissionSampler", 2);
         _pShader->SetInt("normalSampler", 3);
         _pShader->SetInt("specularSampler", 4);
-        _pShader->SetBackFaceCulling(false);
 
         auto& modelRendererComponent = *gameObject().GetComponent<PREModelRendererComponent>();
         modelRendererComponent.SetMesh(_pMesh);
@@ -112,7 +111,7 @@ protected:
 
     void OnUpdate() override
     {
-         auto euler = _transform->GetLocalEuler() + glm::vec3(0, 60, 0) * GetTime().GetDeltaTime();
+         //auto euler = _transform->GetLocalEuler() + glm::vec3(0, 60, 0) * GetTime().GetDeltaTime();
          //_transform->SetLocalEuler(euler);
     }
 
@@ -325,7 +324,7 @@ class LightTemplate : public PREGameObjectTemplate
 protected:
     void OnInstantiateTemplate() override
     {
-        AddPREComponent<PREPointLightComponent>();
+        auto& lightComponent = *AddPREComponent<PREPointLightComponent>();
     }
 };
 
@@ -355,7 +354,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
     applicationContext.time.SetFrameLimit(60);
 
     VampireTemplate capoeiraTemplate, thrillerTemplate;
-    capoeiraTemplate.animationPath = "/animations/mixamo/Capoeira.dae";
+    capoeiraTemplate.animationPath = "/animations/mixamo/Breathing Idle.dae";
     thrillerTemplate.animationPath = "/animations/mixamo/Thriller Part 4.dae";
 
     CameraTemplate cameraTemplate;
@@ -372,7 +371,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
     auto& vampireA = applicationContext.world.Instantiate(capoeiraTemplate);
     auto& vampireATransform = *vampireA.GetComponent<PRETransformComponent>();
     vampireATransform.SetPosition(
-        vampireATransform.GetPosition() + glm::vec3(-1, 0, 0)
+        vampireATransform.GetPosition() + glm::vec3(-1, 0, -2)
     );
     vampireATransform.SetParent(&sceneRootTransform, true);
     vampireA.GetComponent<PREModelRendererComponent>()->SetCameraComponent(&cameraComponent);
@@ -387,10 +386,17 @@ void OnInitialize(PREApplicationContext& applicationContext)
     
     sceneRootTransform.SetEuler(glm::vec3(0, 180, 0));
 
-    auto& lightA = applicationContext.world.Instantiate(lightTemplate);
-    auto& lightB = applicationContext.world.Instantiate(lightTemplate);
-    auto& lightC = applicationContext.world.Instantiate(lightTemplate);
-    auto& lightD = applicationContext.world.Instantiate(lightTemplate);
+    glm::vec3 lightPositions[] { glm::vec3(-2.5, 2, 0) };
+    float lightLuminosities[]{ 2.0f };
+
+    for (auto i = 0; i < 1; ++i)
+    {
+        auto& light = applicationContext.world.Instantiate(lightTemplate);
+        auto& lightTransform = *light.GetComponent<PRETransformComponent>();
+        lightTransform.SetPosition(lightPositions[i]);
+        auto& lightComponent = *light.GetComponent<PREPointLightComponent>();
+        lightComponent.SetLuminosity(lightLuminosities[i]);
+    }
 }
 
 void OnShutdown(PREApplicationContext& applicationContext)
