@@ -19,6 +19,7 @@
     <ClCompile Include="src\core\components\precameracomponent.cpp" />
     <ClCompile Include="src\core\components\premodelrenderercomponent.cpp" />
     <ClCompile Include="src\core\components\prepointlightcomponent.cpp" />
+    <ClCompile Include="src\core\components\prespotlightcomponent.cpp" />
     <ClCompile Include="src\core\preapplication.cpp" />
     <ClCompile Include="src\core\components\pretransformcomponent.cpp" />
     <ClCompile Include="src\core\preapplicationconfig.cpp" />
@@ -83,6 +84,7 @@
     <ClInclude Include="src\core\components\precameracomponent.h" />
     <ClInclude Include="src\core\components\premodelrenderercomponent.h" />
     <ClInclude Include="src\core\components\prepointlightcomponent.h" />
+    <ClInclude Include="src\core\components\prespotlightcomponent.h" />
     <ClInclude Include="src\core\preapplication.h" />
     <ClInclude Include="src\core\components\pretransformcomponent.h" />
     <ClInclude Include="src\core\preapplicationconfig.h" />

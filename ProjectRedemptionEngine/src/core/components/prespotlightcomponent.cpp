@@ -1,9 +1,9 @@
-#include <core/components/prepointlightcomponent.h>
+#include <core/components/prespotlightcomponent.h>
+
+#include <glm/glm.hpp>
 
 #include <list>
 #include <unordered_map>
-
-#include <glm/glm.hpp>
 
 #include <include/modules/rendering.h>
 
@@ -17,38 +17,49 @@ namespace PRE
 {
 	namespace Core
 	{
-		void PREPointLightComponent::SetAttentuationLinear(float attenuationLinear)
+		void PRESpotLightComponent::SetAttentuationLinear(float attenuationLinear)
 		{
 			_attenuationLinear = attenuationLinear;
 		}
 
-		void PREPointLightComponent::SetAttentuationQuadratic(float attenuationQuadratic)
+		void PRESpotLightComponent::SetAttentuationQuadratic(float attenuationQuadratic)
 		{
 			_attenuationQuadratic = attenuationQuadratic;
 		}
 
-		void PREPointLightComponent::SetColor(const glm::vec3& color)
+		void PRESpotLightComponent::SetSize(float innerRadius, float outerRadius)
+		{
+			_innerRadius = glm::cos(glm::radians(innerRadius));
+			_outerRadius = glm::cos(glm::radians(outerRadius));
+		}
+
+		void PRESpotLightComponent::SetColor(const glm::vec3& color)
 		{
 			_color = color;
 		}
 
-		void PREPointLightComponent::OnStart()
+		void PRESpotLightComponent::SetDirection(const glm::vec3& direction)
+		{
+			_direction = direction;
+		}
+
+		void PRESpotLightComponent::OnStart()
 		{
 			AllocateIfNotAllocated();
 		}
 
-		void PREPointLightComponent::OnUpdate()
+		void PRESpotLightComponent::OnUpdate()
 		{
 		}
 
-		void PREPointLightComponent::OnDestroy()
+		void PRESpotLightComponent::OnDestroy()
 		{
 			// TODO: you can leak here if you manipulate and blow the object up
 			// before the object has a chance to be added to the world
 			DeallocateIfAllocated();
 		}
 
-		void PREPointLightComponent::AllocateIfNotAllocated()
+		void PRESpotLightComponent::AllocateIfNotAllocated()
 		{
 			if (_pTransform == nullptr)
 			{
@@ -57,7 +68,7 @@ namespace PRE
 			}
 		}
 
-		void PREPointLightComponent::DeallocateIfAllocated()
+		void PRESpotLightComponent::DeallocateIfAllocated()
 		{
 			if (_pTransform != nullptr)
 			{

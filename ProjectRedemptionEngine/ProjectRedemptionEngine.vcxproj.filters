@@ -386,6 +386,9 @@
     <ClInclude Include="src\core\components\preambientlightcomponent.h">
       <Filter>Header Files\Core\Components</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\components\prespotlightcomponent.h">
+      <Filter>Header Files\Core\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\modules\gameobject\gameobject.cpp">
@@ -581,6 +584,9 @@
       <Filter>Source Files\Core\Subsystems\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="src\core\components\preambientlightcomponent.cpp">
+      <Filter>Source Files\Core\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\components\prespotlightcomponent.cpp">
       <Filter>Source Files\Core\Components</Filter>
     </ClCompile>
   </ItemGroup>

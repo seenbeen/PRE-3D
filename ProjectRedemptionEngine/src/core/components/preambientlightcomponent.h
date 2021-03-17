@@ -2,6 +2,8 @@
 #include <list>
 #include <unordered_map>
 
+#include <glm/glm.hpp>
+
 #include <include/modules/rendering.h>
 
 #include <core/subsystems/world/pregameobjectcomponent.h>

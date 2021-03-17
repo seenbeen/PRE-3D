@@ -343,6 +343,7 @@ protected:
         cameraComponent.SetSkyBox(_pSkybox);
         _pTransform = gameObject().GetComponent<PRETransformComponent>();
         _pInput = &GetInput();
+        _pSpotLightComponent = gameObject().GetComponent<PRESpotLightComponent>();
     }
 
     void OnUpdate() override
@@ -368,6 +369,15 @@ protected:
         {
             std::cout << "~" << 1 / GetTime().GetDeltaTime() << " FPS." << std::endl;
         }
+        if (_pInput->KeyPressed(PREKeyCode::O))
+        {
+            _pSpotLightComponent->SetColor(glm::vec3(1.0f));
+        }
+        if (_pInput->KeyPressed(PREKeyCode::P))
+        {
+            _pSpotLightComponent->SetColor(glm::vec3(0.0f));
+        }
+        _pSpotLightComponent->SetDirection(_pTransform->GetForward());
     }
 
     void OnDestroy() override
@@ -379,6 +389,7 @@ private:
     PRESkyBox* _pSkybox = nullptr;
     PRETransformComponent* _pTransform = nullptr;
     PREInput* _pInput = nullptr;
+    PRESpotLightComponent* _pSpotLightComponent = nullptr;
 };
 
 class VampireTemplate : public PREGameObjectTemplate
@@ -432,6 +443,10 @@ protected:
     {
         AddPREComponent<PRECameraComponent>();
         AddPREComponent<FlyCamControllerComponent>();
+        auto& spotLightComponent = *AddPREComponent<PRESpotLightComponent>();
+        spotLightComponent.SetAttentuationLinear(0.0f);
+        spotLightComponent.SetAttentuationQuadratic(0.15f);
+        spotLightComponent.SetColor(glm::vec3(0.0f));
         auto& cameraComponent = *AddPREComponent<CameraControllerComponent>();
         cameraComponent.skyBoxRightPath = "/skyboxes/Night MoonBurst/Right+X.png";
         cameraComponent.skyBoxLeftPath = "/skyboxes/Night MoonBurst/Left-X.png";
@@ -440,7 +455,7 @@ protected:
         cameraComponent.skyBoxFrontPath = "/skyboxes/Night MoonBurst/Front+Z.png";
         cameraComponent.skyBoxBackPath = "/skyboxes/Night MoonBurst/Back-Z.png";
         GetPREComponent<PRETransformComponent>()->SetPosition(
-            glm::vec3(0, 1, 2.5)
+            glm::vec3(0.0f, 1.0f, 2.5f)
         );
     }
 };
@@ -484,15 +499,16 @@ void OnInitialize(PREApplicationContext& applicationContext)
     
     sceneRootTransform.SetEuler(glm::vec3(0, 180, 0));
 
-    glm::vec3 lightPositions[] { glm::vec3(-2.5, 2, 1), glm::vec3(2.5, 2, 1), glm::vec3(0, 2, -2.5) };
+    glm::vec3 lightPositions[] { glm::vec3(-2.5f, 2, 1), glm::vec3(2.5f, 2, 1), glm::vec3(0, 2, -2.5f) };
     glm::vec3 lightColors[]{ glm::vec3(0, 0, 1), glm::vec3(0, 1, 0), glm::vec3(1, 0, 0) };
     float linearLightLuminosities[]{ 0.3f, 0.3f, 0.3f };
     float quadraticLightLuminosities[]{ 0.3f, 0.3f, 0.3f };
 
     auto& ambientLight = applicationContext.world.Instantiate(ambientLightTemplate);
     auto& ambientLightComponent = *ambientLight.GetComponent<PREAmbientLightComponent>();
-    ambientLightComponent.SetAttentuationLinear(0);
-    ambientLightComponent.SetAttentuationQuadratic(0.25f);
+    ambientLightComponent.SetAttentuationLinear(0.2f);
+    ambientLightComponent.SetAttentuationQuadratic(0.45f);
+    ambientLightComponent.SetColor(glm::vec3(0.5f));
     for (auto i = 0; i < 3; ++i)
     {
         auto& light = applicationContext.world.Instantiate(pointLightTemplate);

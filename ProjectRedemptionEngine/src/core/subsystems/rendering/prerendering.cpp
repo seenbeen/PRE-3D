@@ -18,6 +18,7 @@
 #include <core/components/pretransformcomponent.h>
 #include <core/components/preambientlightcomponent.h>
 #include <core/components/prepointlightcomponent.h>
+#include <core/components/prespotlightcomponent.h>
 
 #include <core/subsystems/asset/preassetmanager.h>
 
@@ -740,7 +741,40 @@ namespace PRE
 									pPointLightComponent->_attenuationQuadratic
 								);
 							}
-							// else if
+							else if (lightPassContext._pSpotLightComponent != nullptr)
+							{
+								auto pSpotLightComponent = lightPassContext._pSpotLightComponent;
+								pSpotLightComponent->AllocateIfNotAllocated();
+								pShader->SetInt(PREShader::SPOT_LIGHT_FLAG, 1);
+								pShader->SetVec3(
+									PREShader::LIGHT_POSITION,
+									pSpotLightComponent->_pTransform->GetPosition()
+								);
+								pShader->SetVec3(
+									PREShader::LIGHT_COLOR,
+									pSpotLightComponent->_color
+								);
+								pShader->SetVec3(
+									PREShader::LIGHT_DIRECTION,
+									pSpotLightComponent->_direction
+								);
+								pShader->SetFloat(
+									PREShader::LIGHT_ATTENUATION_LINEAR,
+									pSpotLightComponent->_attenuationLinear
+								);
+								pShader->SetFloat(
+									PREShader::LIGHT_ATTENUATION_QUADRATIC,
+									pSpotLightComponent->_attenuationQuadratic
+								);
+								pShader->SetFloat(
+									PREShader::LIGHT_INNER_RADIUS,
+									pSpotLightComponent->_innerRadius
+								);
+								pShader->SetFloat(
+									PREShader::LIGHT_OUTER_RADIUS,
+									pSpotLightComponent->_outerRadius
+								);
+							}
 						}
 					}
 					composition.AddModel(*modelRendererComponent._pModel);
@@ -1091,6 +1125,75 @@ namespace PRE
 		}
 #pragma endregion
 
+#pragma region Spot Light
+		void PRERendering::LinkLightToRenderTargets(
+			PRESpotLightComponent& spotLightComponent
+		)
+		{
+			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
+			{
+				auto pRenderPass = *it;
+
+				auto pLightContext = new PRELightRenderPassContext(
+					pRenderPass->_front == _impl.compositingChain.end(),
+					*pRenderPass,
+					spotLightComponent
+				);
+				auto pNewLightData = new PRELightRenderPassData(
+					_impl.renderer.AllocateCompositingNode(
+						LightPassOnRender,
+						pLightContext
+					),
+					*pLightContext
+				);
+
+				// attach shadow pass
+
+				_impl.LinkLightToRenderTarget(
+					*pRenderPass,
+					*pNewLightData,
+					spotLightComponent._passMap
+				);
+			}
+
+#ifdef __PRE_DEBUG__
+			assert(spotLightComponent._passMap.size() == _impl.renderPasses.size());
+#endif
+
+			_impl.spotLights.insert(&spotLightComponent);
+		}
+
+		void PRERendering::UnlinkLightFromRenderTargets(
+			PRESpotLightComponent& spotLightComponent
+		)
+		{
+			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
+			{
+				auto pRenderPass = *it;
+				auto itRemovedLightData(spotLightComponent._passMap.find(pRenderPass)->second);
+				auto pRemovedLightData = *itRemovedLightData;
+
+				_impl.UnlinkLightFromRenderTarget(
+					*pRenderPass,
+					itRemovedLightData,
+					spotLightComponent._passMap
+				);
+
+				// detach shadow pass
+
+				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
+				delete pRemovedLightData->pRenderPassContext;
+				delete pRemovedLightData;
+			}
+
+#ifdef __PRE_DEBUG__
+			assert(spotLightComponent._passMap.empty());
+#endif
+
+			_impl.spotLights.erase(&spotLightComponent);
+		}
+#pragma endregion
+
 		void PRERendering::LinkRenderTextureToLights(
 			PRERenderTexture& renderTexture
 		)
@@ -1150,6 +1253,34 @@ namespace PRE
 			}
 #pragma endregion
 
+#pragma region Spot Lights
+			for (auto it = _impl.spotLights.begin(); it != _impl.spotLights.end(); ++it)
+			{
+				auto& spotLightComponent = **it;
+
+				auto pLightContext = new PRELightRenderPassContext(
+					pRenderPass->_front == _impl.compositingChain.end(),
+					*pRenderPass,
+					spotLightComponent
+				);
+				auto pNewLightData = new PRELightRenderPassData(
+					_impl.renderer.AllocateCompositingNode(
+						LightPassOnRender,
+						pLightContext
+					),
+					*pLightContext
+				);
+
+				// attach shadow pass
+
+				_impl.LinkLightToRenderTarget(
+					*pRenderPass,
+					*pNewLightData,
+					spotLightComponent._passMap
+				);
+			}
+#pragma endregion
+
 			_impl.renderPasses.push_back(pRenderPass);
 		}
 
@@ -1191,6 +1322,25 @@ namespace PRE
 				);
 
 				// detach shadow pass
+
+				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
+				delete pRemovedLightData->pRenderPassContext;
+				delete pRemovedLightData;
+			}
+#pragma endregion
+
+#pragma region Spot Lights
+			for (auto it = _impl.spotLights.begin(); it != _impl.spotLights.end(); ++it)
+			{
+				auto& spotLightComponent = **it;
+				auto itRemovedLightData(spotLightComponent._passMap.find(pRenderPass)->second);
+				auto pRemovedLightData = *itRemovedLightData;
+
+				_impl.UnlinkLightFromRenderTarget(
+					*pRenderPass,
+					itRemovedLightData,
+					spotLightComponent._passMap
+				);
 
 				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
 				delete pRemovedLightData->pRenderPassContext;

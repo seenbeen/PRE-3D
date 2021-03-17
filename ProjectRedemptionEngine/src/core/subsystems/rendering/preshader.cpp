@@ -26,7 +26,8 @@ namespace PRE
 		const string PREShader::LIGHT_COLOR = "PRE_LIGHT_COLOR";
 		const string PREShader::LIGHT_ATTENUATION_LINEAR = "PRE_LIGHT_ATTENUATION_LINEAR";
 		const string PREShader::LIGHT_ATTENUATION_QUADRATIC = "PRE_LIGHT_ATTENUATION_QUADRATIC";
-		const string PREShader::LIGHT_SIZE = "PRE_LIGHT_SIZE";
+		const string PREShader::LIGHT_INNER_RADIUS = "PRE_LIGHT_INNER_RADIUS";
+		const string PREShader::LIGHT_OUTER_RADIUS = "PRE_LIGHT_OUTER_RADIUS";
 
 
 		void PREShader::SetBackFaceCulling(bool enabled)

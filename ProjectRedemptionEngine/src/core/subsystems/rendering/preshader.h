@@ -40,7 +40,8 @@ namespace PRE
 			static const string LIGHT_COLOR;
 			static const string LIGHT_ATTENUATION_LINEAR;
 			static const string LIGHT_ATTENUATION_QUADRATIC;
-			static const string LIGHT_SIZE; // spot lights
+			static const string LIGHT_INNER_RADIUS; // spot lights
+			static const string LIGHT_OUTER_RADIUS; // spot lights
 
 			void SetBackFaceCulling(bool enabled);
 

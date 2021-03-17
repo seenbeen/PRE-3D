@@ -17,7 +17,8 @@ namespace PRE
 			_isFirstPass(isFirstPass),
 			_renderTexture(renderTexture),
 			_pAmbientLightComponent(&ambientLightComponent),
-			_pPointLightComponent(nullptr) {}
+			_pPointLightComponent(nullptr),
+			_pSpotLightComponent(nullptr) {}
 
 		PRELightRenderPassContext::PRELightRenderPassContext(
 			bool isFirstPass,
@@ -28,7 +29,20 @@ namespace PRE
 			_isFirstPass(isFirstPass),
 			_renderTexture(renderTexture),
 			_pAmbientLightComponent(nullptr),
-			_pPointLightComponent(&pointLightComponent) {}
+			_pPointLightComponent(&pointLightComponent),
+			_pSpotLightComponent(nullptr) {}
+
+		PRELightRenderPassContext::PRELightRenderPassContext(
+			bool isFirstPass,
+			PRERenderTexture& renderTexture,
+			PRESpotLightComponent& spotLightComponent
+		)
+			:
+			_isFirstPass(isFirstPass),
+			_renderTexture(renderTexture),
+			_pAmbientLightComponent(nullptr),
+			_pPointLightComponent(nullptr),
+			_pSpotLightComponent(&spotLightComponent) {}
 
 		PRELightRenderPassContext::~PRELightRenderPassContext() {}
 	} // namespace Core
