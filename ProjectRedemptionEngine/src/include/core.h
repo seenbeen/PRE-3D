@@ -45,6 +45,7 @@
 
 // components
 #include <core/components/precameracomponent.h>
+#include <core/components/preambientlightcomponent.h>
 #include <core/components/prepointlightcomponent.h>
 #include <core/components/premodelrenderercomponent.h>
 #include <core/components/preanimatorcomponent.h>

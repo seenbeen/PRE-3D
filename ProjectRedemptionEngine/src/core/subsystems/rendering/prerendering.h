@@ -18,6 +18,7 @@ namespace PRE
 
 		class PREModelRendererComponent;
 		class PRECameraComponent;
+		class PREAmbientLightComponent;
 		class PREPointLightComponent;
 
 		class PRERenderTexture;
@@ -61,6 +62,7 @@ namespace PRE
 			friend class PRECameraComponent;
 			friend class PRERenderTexture;
 
+			friend class PREAmbientLightComponent;
 			friend class PREPointLightComponent;
 
 			class Impl
@@ -94,6 +96,7 @@ namespace PRE
 
 				list<PRELightRenderPassData*> compositingChain;
 				list<PRERenderTexture*> renderPasses;
+				unordered_set<PREAmbientLightComponent*> ambientLights;
 				unordered_set<PREPointLightComponent*> pointLights;
 
 				Impl(
@@ -268,6 +271,15 @@ namespace PRE
 				PRESkyBox& skyBox
 			);
 
+			// ambient light
+			void LinkLightToRenderTargets(
+				PREAmbientLightComponent& pointLightComponent
+			);
+			void UnlinkLightFromRenderTargets(
+				PREAmbientLightComponent& pointLightComponent
+			);
+
+			// point light
 			void LinkLightToRenderTargets(
 				PREPointLightComponent& pointLightComponent
 			);

@@ -14,6 +14,7 @@
     <ClCompile Include="..\Deps\glad\src\glad.c" />
     <ClCompile Include="..\Deps\stb\stb_image.cpp" />
     <ClCompile Include="src\application\main.cpp" />
+    <ClCompile Include="src\core\components\preambientlightcomponent.cpp" />
     <ClCompile Include="src\core\components\preanimatorcomponent.cpp" />
     <ClCompile Include="src\core\components\precameracomponent.cpp" />
     <ClCompile Include="src\core\components\premodelrenderercomponent.cpp" />
@@ -77,6 +78,7 @@
     <ClCompile Include="src\utility\math.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\core\components\preambientlightcomponent.h" />
     <ClInclude Include="src\core\components\preanimatorcomponent.h" />
     <ClInclude Include="src\core\components\precameracomponent.h" />
     <ClInclude Include="src\core\components\premodelrenderercomponent.h" />

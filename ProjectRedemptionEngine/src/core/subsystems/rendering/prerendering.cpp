@@ -16,6 +16,7 @@
 #include <core/components/precameracomponent.h>
 #include <core/components/premodelrenderercomponent.h>
 #include <core/components/pretransformcomponent.h>
+#include <core/components/preambientlightcomponent.h>
 #include <core/components/prepointlightcomponent.h>
 
 #include <core/subsystems/asset/preassetmanager.h>
@@ -669,7 +670,6 @@ namespace PRE
 					modelRendererComponent.AllocateIfNotAllocated();
 					if (modelRendererComponent._pMaterial != nullptr)
 					{
-						// TODO: switch on light type
 						if (modelRendererComponent._pMaterial->_pShader != nullptr)
 						{
 							modelRendererComponent._pMaterial->_material.SetTextureBinding(
@@ -695,7 +695,30 @@ namespace PRE
 								PREShader::VIEW_POSITION,
 								pCameraComponent->_pTransformComponent->GetPosition()
 							);
-							if (lightPassContext._pPointLightComponent != nullptr)
+
+							if (lightPassContext._pAmbientLightComponent != nullptr)
+							{
+								auto pAmbientLightComponent = lightPassContext._pAmbientLightComponent;
+								pAmbientLightComponent->AllocateIfNotAllocated();
+								pShader->SetInt(PREShader::AMBIENT_LIGHT_FLAG, 1);
+								pShader->SetVec3(
+									PREShader::LIGHT_POSITION,
+									pAmbientLightComponent->_pTransform->GetPosition()
+								);
+								pShader->SetVec3(
+									PREShader::LIGHT_COLOR,
+									pAmbientLightComponent->_color
+								);
+								pShader->SetFloat(
+									PREShader::LIGHT_ATTENUATION_LINEAR,
+									pAmbientLightComponent->_attenuationLinear
+								);
+								pShader->SetFloat(
+									PREShader::LIGHT_ATTENUATION_QUADRATIC,
+									pAmbientLightComponent->_attenuationQuadratic
+								);
+							}
+							else if (lightPassContext._pPointLightComponent != nullptr)
 							{
 								auto pPointLightComponent = lightPassContext._pPointLightComponent;
 								pPointLightComponent->AllocateIfNotAllocated();
@@ -934,6 +957,72 @@ namespace PRE
 			skyBox._associatedCameraComponents.erase(&cameraComponent);
 		}
 
+#pragma region Ambient Light
+		void PRERendering::LinkLightToRenderTargets(
+			PREAmbientLightComponent& ambientLightComponent
+		)
+		{
+			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
+			{
+				auto pRenderPass = *it;
+
+				auto pLightContext = new PRELightRenderPassContext(
+					pRenderPass->_front == _impl.compositingChain.end(),
+					*pRenderPass,
+					ambientLightComponent
+				);
+				auto pNewLightData = new PRELightRenderPassData(
+					_impl.renderer.AllocateCompositingNode(
+						LightPassOnRender,
+						pLightContext
+					),
+					*pLightContext
+				);
+
+				_impl.LinkLightToRenderTarget(
+					*pRenderPass,
+					*pNewLightData,
+					ambientLightComponent._passMap
+				);
+			}
+
+#ifdef __PRE_DEBUG__
+			assert(ambientLightComponent._passMap.size() == _impl.renderPasses.size());
+#endif
+
+			_impl.ambientLights.insert(&ambientLightComponent);
+		}
+
+		void PRERendering::UnlinkLightFromRenderTargets(
+			PREAmbientLightComponent& ambientLightComponent
+		)
+		{
+			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
+			{
+				auto pRenderPass = *it;
+				auto itRemovedLightData(ambientLightComponent._passMap.find(pRenderPass)->second);
+				auto pRemovedLightData = *itRemovedLightData;
+
+				_impl.UnlinkLightFromRenderTarget(
+					*pRenderPass,
+					itRemovedLightData,
+					ambientLightComponent._passMap
+				);
+
+				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
+				delete pRemovedLightData->pRenderPassContext;
+				delete pRemovedLightData;
+			}
+
+#ifdef __PRE_DEBUG__
+			assert(ambientLightComponent._passMap.empty());
+#endif
+
+			_impl.ambientLights.erase(&ambientLightComponent);
+		}
+#pragma endregion
+
+#pragma region Point Light
 		void PRERendering::LinkLightToRenderTargets(
 			PREPointLightComponent& pointLightComponent
 		)
@@ -1000,12 +1089,40 @@ namespace PRE
 
 			_impl.pointLights.erase(&pointLightComponent);
 		}
+#pragma endregion
 
 		void PRERendering::LinkRenderTextureToLights(
 			PRERenderTexture& renderTexture
 		)
 		{
 			auto pRenderPass = &renderTexture;
+#pragma region Ambient Lights
+			for (auto it = _impl.ambientLights.begin(); it != _impl.ambientLights.end(); ++it)
+			{
+				auto& ambientLightComponent = **it;
+
+				auto pLightContext = new PRELightRenderPassContext(
+					pRenderPass->_front == _impl.compositingChain.end(),
+					*pRenderPass,
+					ambientLightComponent
+				);
+				auto pNewLightData = new PRELightRenderPassData(
+					_impl.renderer.AllocateCompositingNode(
+						LightPassOnRender,
+						pLightContext
+					),
+					*pLightContext
+				);
+
+				_impl.LinkLightToRenderTarget(
+					*pRenderPass,
+					*pNewLightData,
+					ambientLightComponent._passMap
+				);
+			}
+#pragma endregion
+
+#pragma region Point Lights
 			for (auto it = _impl.pointLights.begin(); it != _impl.pointLights.end(); ++it)
 			{
 				auto& pointLightComponent = **it;
@@ -1031,6 +1148,7 @@ namespace PRE
 					pointLightComponent._passMap
 				);
 			}
+#pragma endregion
 
 			_impl.renderPasses.push_back(pRenderPass);
 		}
@@ -1040,6 +1158,26 @@ namespace PRE
 		)
 		{
 			auto pRenderPass = &renderTexture;
+#pragma region Ambient Lights
+			for (auto it = _impl.ambientLights.begin(); it != _impl.ambientLights.end(); ++it)
+			{
+				auto& ambientLightComponent = **it;
+				auto itRemovedLightData(ambientLightComponent._passMap.find(pRenderPass)->second);
+				auto pRemovedLightData = *itRemovedLightData;
+
+				_impl.UnlinkLightFromRenderTarget(
+					*pRenderPass,
+					itRemovedLightData,
+					ambientLightComponent._passMap
+				);
+
+				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
+				delete pRemovedLightData->pRenderPassContext;
+				delete pRemovedLightData;
+			}
+#pragma endregion
+
+#pragma region Point Lights
 			for (auto it = _impl.pointLights.begin(); it != _impl.pointLights.end(); ++it)
 			{
 				auto& pointLightComponent = **it;
@@ -1058,6 +1196,7 @@ namespace PRE
 				delete pRemovedLightData->pRenderPassContext;
 				delete pRemovedLightData;
 			}
+#pragma endregion
 
 			_impl.renderPasses.erase(
 				std::find(

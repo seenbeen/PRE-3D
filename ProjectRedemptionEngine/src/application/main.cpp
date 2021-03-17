@@ -405,7 +405,16 @@ protected:
     }
 };
 
-class LightTemplate : public PREGameObjectTemplate
+class AmbientLightTemplate : public PREGameObjectTemplate
+{
+protected:
+    void OnInstantiateTemplate() override
+    {
+        AddPREComponent<PREAmbientLightComponent>();
+    }
+};
+
+class PointLightTemplate : public PREGameObjectTemplate
 {
 protected:
     void OnInstantiateTemplate() override
@@ -446,7 +455,8 @@ void OnInitialize(PREApplicationContext& applicationContext)
     thrillerTemplate.animationPath = "/animations/mixamo/Thriller Part 4.dae";
 
     CameraTemplate cameraTemplate;
-    LightTemplate lightTemplate;
+    AmbientLightTemplate ambientLightTemplate;
+    PointLightTemplate pointLightTemplate;
 
     auto& sceneRoot = applicationContext.world.Instantiate();
     auto& sceneRootTransform = *sceneRoot.GetComponent<PRETransformComponent>();
@@ -479,9 +489,13 @@ void OnInitialize(PREApplicationContext& applicationContext)
     float linearLightLuminosities[]{ 0.3f, 0.3f, 0.3f };
     float quadraticLightLuminosities[]{ 0.3f, 0.3f, 0.3f };
 
+    auto& ambientLight = applicationContext.world.Instantiate(ambientLightTemplate);
+    auto& ambientLightComponent = *ambientLight.GetComponent<PREAmbientLightComponent>();
+    ambientLightComponent.SetAttentuationLinear(0);
+    ambientLightComponent.SetAttentuationQuadratic(0.25f);
     for (auto i = 0; i < 3; ++i)
     {
-        auto& light = applicationContext.world.Instantiate(lightTemplate);
+        auto& light = applicationContext.world.Instantiate(pointLightTemplate);
         auto& lightTransform = *light.GetComponent<PRETransformComponent>();
         lightTransform.SetPosition(lightPositions[i]);
         auto& lightComponent = *light.GetComponent<PREPointLightComponent>();

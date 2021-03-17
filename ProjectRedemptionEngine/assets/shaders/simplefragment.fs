@@ -42,13 +42,15 @@ void main()
 	vec4 specularColor = texture(specularSampler, iTexCoord);
 	vec4 emissionColor = texture(emissionSampler, iTexCoord);
 
-	vec3 fragNormal = normalize(vec3(texture(normalSampler, iTexCoord)) * 2.0 - 1.0);
+	vec3 fragNormal = normalize(vec3(texture(normalSampler, iTexCoord)) * 2.0f - 1.0f);
 	vec3 viewDirection = normalize(iTangentViewPos - iTangentFragPos);
 
-	float pointLightDistance = length(PRE_LIGHT_POSITION - iFragPos);
-	float attenuation = 1.0f / (1.0f + PRE_LIGHT_ATTENUATION_LINEAR * pointLightDistance + PRE_LIGHT_ATTENUATION_QUADRATIC * (pointLightDistance * pointLightDistance));
+	float lightDistance = length(PRE_LIGHT_POSITION - iFragPos);
+	float attenuation = 1.0f / (1.0f + PRE_LIGHT_ATTENUATION_LINEAR * lightDistance + PRE_LIGHT_ATTENUATION_QUADRATIC * (lightDistance * lightDistance));
 
 	// ambient light
+	vec4 ambientDiffuse = emissionColor;
+	vec4 ambientLight = PRE_AMBIENT_LIGHT_FLAG * ambientDiffuse * attenuation;
 
 	// point light
     vec3 pointLightDirection = normalize(iTangentLightPos - iTangentFragPos);
@@ -56,7 +58,7 @@ void main()
     vec4 pointDiffuse = pointDiffuseIntensity * diffuseColor;
 
     vec3 reflectDirection = reflect(-pointLightDirection, fragNormal);
-    vec4 pointSpecular = pow(max(dot(viewDirection, reflectDirection), 0.0), MATERIAL_SHININESS) * specularColor;
+    vec4 pointSpecular = pow(max(dot(viewDirection, reflectDirection), 0.0f), MATERIAL_SHININESS) * specularColor;
 
     vec4 pointLight = PRE_POINT_LIGHT_FLAG * (pointDiffuse + pointSpecular) * attenuation;
 
@@ -64,7 +66,7 @@ void main()
 
     // spot light
 
-    vec4 litColor = (pointLight) * vec4(PRE_LIGHT_COLOR, 1.0f);
+    vec4 litColor = (ambientLight + pointLight) * vec4(PRE_LIGHT_COLOR, 1.0f);
 
-    FragColor = PRE_IS_FIRST_LIGHT_PASS * emissionColor + accumulatorColor + litColor;
+    FragColor = accumulatorColor + litColor;
 }
