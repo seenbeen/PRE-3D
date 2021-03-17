@@ -1,10 +1,9 @@
 #include <modules/rendering/renderer.h>
 
+#include <algorithm>
+#include <list>
 #include <string>
-#include <unordered_map>
 #include <unordered_set>
-#include <utility>
-#include <vector>
 
 #include <SDL.h>
 
@@ -32,10 +31,9 @@ namespace PRE
 {
 	namespace RenderingModule
 	{
+		using std::list;
 		using std::string;
-		using std::unordered_map;
 		using std::unordered_set;
-		using std::vector;
 
 		Renderer& Renderer::MakeRenderer(
 			const string& windowTitle,
@@ -193,7 +191,7 @@ namespace PRE
 		{
 			auto pCompositingNode = new RenderCompositingNode(onRender, vContext);
 
-			_compositingNodes.insert(pCompositingNode);
+			_compositingNodes.push_back(pCompositingNode);
 
 			return *pCompositingNode;
 		}
@@ -204,8 +202,20 @@ namespace PRE
 		)
 		{
 #ifdef __PRE_DEBUG__
-			assert(_compositingNodes.find(&dependent) != _compositingNodes.end());
-			assert(_compositingNodes.find(&dependency) != _compositingNodes.end());
+			assert(
+				std::find(
+					_compositingNodes.begin(),
+					_compositingNodes.end(),
+					&dependent
+				) != _compositingNodes.end()
+			);
+			assert(
+				std::find(
+					_compositingNodes.begin(),
+					_compositingNodes.end(),
+					&dependency
+				) != _compositingNodes.end()
+			);
 #endif
 
 			dependent.AddDependency(dependency);
@@ -217,8 +227,20 @@ namespace PRE
 		)
 		{
 #ifdef __PRE_DEBUG__
-			assert(_compositingNodes.find(&dependent) != _compositingNodes.end());
-			assert(_compositingNodes.find(&dependency) != _compositingNodes.end());
+			assert(
+				std::find(
+					_compositingNodes.begin(),
+					_compositingNodes.end(),
+					&dependent
+				) != _compositingNodes.end()
+			);
+			assert(
+				std::find(
+					_compositingNodes.begin(),
+					_compositingNodes.end(),
+					&dependency
+				) != _compositingNodes.end()
+			);
 #endif
 
 			dependent.RemoveDependency(dependency);
@@ -227,12 +249,17 @@ namespace PRE
 		void Renderer::DeallocateCompositingNode(RenderCompositingNode& compositingNode)
 		{
 			auto pCompositingNode = &compositingNode;
+			auto itCompositingNode = std::find(
+				_compositingNodes.begin(),
+				_compositingNodes.end(),
+				pCompositingNode
+			);
 
 #ifdef __PRE_DEBUG__
-			assert(_compositingNodes.find(pCompositingNode) != _compositingNodes.end());
+			assert(itCompositingNode != _compositingNodes.end());
 #endif
 
-			_compositingNodes.erase(pCompositingNode);
+			_compositingNodes.erase(itCompositingNode);
 
 			delete pCompositingNode;
 		}

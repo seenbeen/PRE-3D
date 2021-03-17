@@ -1,7 +1,7 @@
 #include <modules/rendering/compositing/rendercompositingnode.h>
 
 #include <algorithm>
-#include <unordered_set>
+#include <list>
 #include <vector>
 
 #include <modules/rendering/compositing/rendercompositingtarget.h>
@@ -14,6 +14,9 @@ namespace PRE
 {
 	namespace RenderingModule
 	{
+		using std::list;
+		using std::vector;
+
 		void RenderCompositingNode::RenderComposition::SetCamera(RenderCamera* pCamera)
 		{
 			this->pCamera = pCamera;
@@ -93,17 +96,25 @@ namespace PRE
 			auto pCompositingNode = &compositingNode;
 
 #ifdef __PRE_DEBUG__
-			auto it = _impl.compositingNodeDependencies.find(pCompositingNode);
+			auto it = std::find(
+				_impl.compositingNodeDependencies.begin(),
+				_impl.compositingNodeDependencies.end(),
+				pCompositingNode
+			);
 			assert(it == _impl.compositingNodeDependencies.end());
 #endif
 
-			_impl.compositingNodeDependencies.insert(pCompositingNode);
+			_impl.compositingNodeDependencies.push_back(pCompositingNode);
 		}
 
 		void RenderCompositingNode::RemoveDependency(RenderCompositingNode& compositingNode)
 		{
 			auto pCompositingNode = &compositingNode;
-			auto it = _impl.compositingNodeDependencies.find(pCompositingNode);
+			auto it = std::find(
+				_impl.compositingNodeDependencies.begin(),
+				_impl.compositingNodeDependencies.end(),
+				pCompositingNode
+			);
 
 #ifdef __PRE_DEBUG__
 			assert(it != _impl.compositingNodeDependencies.end());
@@ -123,7 +134,7 @@ namespace PRE
 			return _impl.composition;
 		}
 
-		const unordered_set<RenderCompositingNode*>& RenderCompositingNode::GetDependencies()
+		const list<RenderCompositingNode*>& RenderCompositingNode::GetDependencies()
 		{
 			return _impl.compositingNodeDependencies;
 		}

@@ -1,8 +1,7 @@
 #pragma once
+#include <list>
 #include <string>
-#include <unordered_map>
 #include <unordered_set>
-#include <vector>
 
 // TODO: migrate SDL to its own namespace to reduce global clutter
 struct SDL_Window;
@@ -28,10 +27,9 @@ namespace PRE
 		class RenderMaterial;
 		class RenderModel;
 
+		using std::list;
 		using std::string;
-		using std::unordered_map;
 		using std::unordered_set;
-		using std::vector;
 
 		class Renderer
 		{
@@ -171,7 +169,9 @@ namespace PRE
 			unordered_set<RenderCompositingTarget*> _compositingTargets;
 #endif
 
-			unordered_set<RenderCompositingNode*> _compositingNodes;
+			// TODO: these shouldn't change that often but, in the case
+			// mutation becomes a bottleneck, can map to iterator
+			list<RenderCompositingNode*> _compositingNodes;
 
 #ifdef __PRE_DEBUG__
 			unordered_set<const RenderCamera*> _cameras;

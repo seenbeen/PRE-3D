@@ -1,5 +1,5 @@
 #pragma once
-#include <unordered_set>
+#include <list>
 #include <vector>
 
 namespace PRE
@@ -12,7 +12,7 @@ namespace PRE
 		class RenderTexture;
 		class RenderModel;
 
-		using std::unordered_set;
+		using std::list;
 		using std::vector;
 
 		class RenderCompositingNode
@@ -58,7 +58,11 @@ namespace PRE
 				friend class RenderCompositingNode;
 
 			private:
-				unordered_set<RenderCompositingNode*> compositingNodeDependencies;
+				// shouldn't impact performance as these shouldn't
+				// mutate too much; if it becomes a bottleneck,
+				// a relatively quickfix would be to
+				// map iterators to pointers
+				list<RenderCompositingNode*> compositingNodeDependencies;
 
 				RenderComposition& composition;
 				OnRender const onRender;
@@ -87,7 +91,7 @@ namespace PRE
 			void RemoveDependency(RenderCompositingNode& compositingNode);
 
 			const RenderComposition& GetRenderComposition();
-			const unordered_set<RenderCompositingNode*>& GetDependencies();
+			const list<RenderCompositingNode*>& GetDependencies();
 		};
 	} // namespace RenderingModule
 } // namespace PRE
