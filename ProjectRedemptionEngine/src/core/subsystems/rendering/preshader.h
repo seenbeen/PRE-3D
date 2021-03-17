@@ -38,7 +38,8 @@ namespace PRE
 			static const string LIGHT_POSITION;
 			static const string LIGHT_DIRECTION; // spot lights + directional lights
 			static const string LIGHT_COLOR;
-			static const string LIGHT_LUMINOSITY;
+			static const string LIGHT_ATTENUATION_LINEAR;
+			static const string LIGHT_ATTENUATION_QUADRATIC;
 			static const string LIGHT_SIZE; // spot lights
 
 			void SetBackFaceCulling(bool enabled);

@@ -1,5 +1,7 @@
 #version 330 core
 
+in vec3 iFragPos;
+
 in vec3 iTangentViewPos;
 in vec3 iTangentFragPos;
 in vec3 iTangentLightPos;
@@ -18,9 +20,11 @@ uniform int PRE_POINT_LIGHT_FLAG;
 uniform int PRE_SPOT_LIGHT_FLAG;
 uniform int PRE_DIRECTIONAL_LIGHT_FLAG;
 
+uniform vec3 PRE_LIGHT_POSITION;
 uniform vec3 PRE_LIGHT_DIRECTION;
 uniform vec3 PRE_LIGHT_COLOR;
-uniform float PRE_LIGHT_LUMINOSITY;
+uniform float PRE_LIGHT_ATTENUATION_LINEAR;
+uniform float PRE_LIGHT_ATTENUATION_QUADRATIC;
 uniform float PRE_LIGHT_SIZE;
 
 uniform sampler2D diffuseSampler;
@@ -41,17 +45,20 @@ void main()
 	vec3 fragNormal = normalize(vec3(texture(normalSampler, iTexCoord)) * 2.0 - 1.0);
 	vec3 viewDirection = normalize(iTangentViewPos - iTangentFragPos);
 
+	float pointLightDistance = length(PRE_LIGHT_POSITION - iFragPos);
+	float attenuation = 1.0f / (1.0f + PRE_LIGHT_ATTENUATION_LINEAR * pointLightDistance + PRE_LIGHT_ATTENUATION_QUADRATIC * (pointLightDistance * pointLightDistance));
+
 	// ambient light
 
 	// point light
     vec3 pointLightDirection = normalize(iTangentLightPos - iTangentFragPos);
-    float pointDiffuseIntensity = max(dot(fragNormal, pointLightDirection), 0.0f) *  PRE_LIGHT_LUMINOSITY;
+    float pointDiffuseIntensity = max(dot(fragNormal, pointLightDirection), 0.0f);
     vec4 pointDiffuse = pointDiffuseIntensity * diffuseColor;
 
     vec3 reflectDirection = reflect(-pointLightDirection, fragNormal);
     vec4 pointSpecular = pow(max(dot(viewDirection, reflectDirection), 0.0), MATERIAL_SHININESS) * specularColor;
 
-    vec4 pointLight = PRE_POINT_LIGHT_FLAG * (pointDiffuse + pointSpecular);
+    vec4 pointLight = PRE_POINT_LIGHT_FLAG * (pointDiffuse + pointSpecular) * attenuation;
 
     // directional light
 

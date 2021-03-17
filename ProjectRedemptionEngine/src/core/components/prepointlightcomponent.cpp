@@ -15,9 +15,14 @@ namespace PRE
 {
 	namespace Core
 	{
-		void PREPointLightComponent::SetLuminosity(float luminosity)
+		void PREPointLightComponent::SetAttentuationLinear(float attenuationLinear)
 		{
-			_luminosity = luminosity;
+			_attenuationLinear = attenuationLinear;
+		}
+
+		void PREPointLightComponent::SetAttentuationQuadratic(float attenuationQuadratic)
+		{
+			_attenuationQuadratic = attenuationQuadratic;
 		}
 
 		void PREPointLightComponent::SetColor(const glm::vec3& color)

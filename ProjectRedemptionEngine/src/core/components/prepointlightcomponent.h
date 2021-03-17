@@ -26,7 +26,8 @@ namespace PRE
 			friend class PRERendering;
 
 		public:
-			void SetLuminosity(float luminosity);
+			void SetAttentuationLinear(float attenuationLinear);
+			void SetAttentuationQuadratic(float attenuationQuadratic);
 			void SetColor(const glm::vec3& color);
 
 		protected:
@@ -42,7 +43,10 @@ namespace PRE
 
 			unordered_map<PRERenderTexture*, list<PRELightRenderPassData*>::iterator> _passMap;
 
-			float _luminosity = 1.0f;
+			// numbers courtesy of ogre3d wiki
+			float _attenuationLinear = 0.7f;
+			float _attenuationQuadratic = 1.8f;
+
 			glm::vec3 _color = glm::vec3(1.0f);
 
 			void AllocateIfNotAllocated();

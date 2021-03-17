@@ -12,6 +12,8 @@ uniform mat4 PRE_PROJECTION_MATRIX;
 uniform vec3 PRE_VIEW_POSITION;
 uniform vec3 PRE_LIGHT_POSITION;
 
+out vec3 iFragPos;
+
 out vec3 iTangentViewPos;
 out vec3 iTangentFragPos;
 out vec3 iTangentLightPos;
@@ -29,7 +31,8 @@ void main()
     mat3 TBN = transpose(mat3(T, B, N));
 
     iTangentViewPos = TBN * PRE_VIEW_POSITION;
-    iTangentFragPos = TBN * vec3(PRE_MODEL_MATRIX * vec4(iPos, 1.0));
+    iFragPos = vec3(PRE_MODEL_MATRIX * vec4(iPos, 1.0));
+    iTangentFragPos = TBN * iFragPos;
     iTangentLightPos = TBN * PRE_LIGHT_POSITION;
 
     gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * vec4(iPos, 1.0f);

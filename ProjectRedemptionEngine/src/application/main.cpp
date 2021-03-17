@@ -218,7 +218,7 @@ protected:
         modelRendererComponent.SetMesh(_pMesh);
         modelRendererComponent.SetMaterial(_pMaterial);
 
-        gameObject().GetComponent<PRETransformComponent>()->SetScale(glm::vec3(0.1));
+        gameObject().GetComponent<PRETransformComponent>()->SetScale(glm::vec3(0.1f));
     }
 
     void OnUpdate() override
@@ -476,7 +476,8 @@ void OnInitialize(PREApplicationContext& applicationContext)
 
     glm::vec3 lightPositions[] { glm::vec3(-2.5, 2, 1), glm::vec3(2.5, 2, 1), glm::vec3(0, 2, -2.5) };
     glm::vec3 lightColors[]{ glm::vec3(0, 0, 1), glm::vec3(0, 1, 0), glm::vec3(1, 0, 0) };
-    float lightLuminosities[]{ 0.5f, 0.5f, 0.5f };
+    float linearLightLuminosities[]{ 0.3f, 0.3f, 0.3f };
+    float quadraticLightLuminosities[]{ 0.3f, 0.3f, 0.3f };
 
     for (auto i = 0; i < 3; ++i)
     {
@@ -484,7 +485,8 @@ void OnInitialize(PREApplicationContext& applicationContext)
         auto& lightTransform = *light.GetComponent<PRETransformComponent>();
         lightTransform.SetPosition(lightPositions[i]);
         auto& lightComponent = *light.GetComponent<PREPointLightComponent>();
-        lightComponent.SetLuminosity(lightLuminosities[i]);
+        lightComponent.SetAttentuationLinear(linearLightLuminosities[i]);
+        lightComponent.SetAttentuationQuadratic(quadraticLightLuminosities[i]);
         lightComponent.SetColor(lightColors[i]);
         auto& lightCube = *light.GetComponent<LightCubeComponent>();
         lightCube.color = lightColors[i];

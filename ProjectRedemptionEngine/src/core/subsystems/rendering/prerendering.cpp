@@ -709,8 +709,12 @@ namespace PRE
 									pPointLightComponent->_color
 								);
 								pShader->SetFloat(
-									PREShader::LIGHT_LUMINOSITY,
-									pPointLightComponent->_luminosity
+									PREShader::LIGHT_ATTENUATION_LINEAR,
+									pPointLightComponent->_attenuationLinear
+								);
+								pShader->SetFloat(
+									PREShader::LIGHT_ATTENUATION_QUADRATIC,
+									pPointLightComponent->_attenuationQuadratic
 								);
 							}
 							// else if
