@@ -19,12 +19,14 @@ uniform mat4 PRE_BONE_TRANSFORMS[MAX_BONES];
 
 uniform vec3 PRE_VIEW_POSITION;
 uniform vec3 PRE_LIGHT_POSITION;
+uniform vec3 PRE_LIGHT_DIRECTION;
 
 out vec3 iFragPos;
 
 out vec3 iTangentViewPos;
 out vec3 iTangentFragPos;
 out vec3 iTangentLightPos;
+out vec3 iTangentLightDirection;
 
 out vec2 iTexCoord;
 out vec2 iAccumCoord;
@@ -57,6 +59,7 @@ void main()
     iFragPos = vec3(PRE_MODEL_MATRIX * boneInfluence * vec4(iPos, 1.0));
     iTangentFragPos = TBN * iFragPos;
     iTangentLightPos = TBN * PRE_LIGHT_POSITION;
+    iTangentLightDirection = TBN * PRE_LIGHT_DIRECTION;
 
     gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * boneInfluence * vec4(iPos, 1.0);
 

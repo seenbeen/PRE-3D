@@ -19,6 +19,7 @@
 #include <core/components/preambientlightcomponent.h>
 #include <core/components/prepointlightcomponent.h>
 #include <core/components/prespotlightcomponent.h>
+#include <core/components/predirectionallightcomponent.h>
 
 #include <core/subsystems/asset/preassetmanager.h>
 
@@ -756,7 +757,7 @@ namespace PRE
 								);
 								pShader->SetVec3(
 									PREShader::LIGHT_DIRECTION,
-									pSpotLightComponent->_direction
+									pSpotLightComponent->_pTransform->GetForward()
 								);
 								pShader->SetFloat(
 									PREShader::LIGHT_ATTENUATION_LINEAR,
@@ -773,6 +774,20 @@ namespace PRE
 								pShader->SetFloat(
 									PREShader::LIGHT_OUTER_RADIUS,
 									pSpotLightComponent->_outerRadius
+								);
+							}
+							else if (lightPassContext._pDirectionalLightComponent != nullptr)
+							{
+								auto pDirectionalLightComponent = lightPassContext._pDirectionalLightComponent;
+								pDirectionalLightComponent->AllocateIfNotAllocated();
+								pShader->SetInt(PREShader::DIRECTIONAL_LIGHT_FLAG, 1);
+								pShader->SetVec3(
+									PREShader::LIGHT_COLOR,
+									pDirectionalLightComponent->_color
+								);
+								pShader->SetVec3(
+									PREShader::LIGHT_DIRECTION,
+									pDirectionalLightComponent->_pTransform->GetForward()
 								);
 							}
 						}
@@ -1194,6 +1209,75 @@ namespace PRE
 		}
 #pragma endregion
 
+#pragma region Directional Light
+		void PRERendering::LinkLightToRenderTargets(
+			PREDirectionalLightComponent& directionalLightComponent
+		)
+		{
+			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
+			{
+				auto pRenderPass = *it;
+
+				auto pLightContext = new PRELightRenderPassContext(
+					pRenderPass->_front == _impl.compositingChain.end(),
+					*pRenderPass,
+					directionalLightComponent
+				);
+				auto pNewLightData = new PRELightRenderPassData(
+					_impl.renderer.AllocateCompositingNode(
+						LightPassOnRender,
+						pLightContext
+					),
+					*pLightContext
+				);
+
+				// attach shadow pass
+
+				_impl.LinkLightToRenderTarget(
+					*pRenderPass,
+					*pNewLightData,
+					directionalLightComponent._passMap
+				);
+			}
+
+#ifdef __PRE_DEBUG__
+			assert(directionalLightComponent._passMap.size() == _impl.renderPasses.size());
+#endif
+
+			_impl.directionalLights.insert(&directionalLightComponent);
+		}
+
+		void PRERendering::UnlinkLightFromRenderTargets(
+			PREDirectionalLightComponent& directionalLightComponent
+		)
+		{
+			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
+			{
+				auto pRenderPass = *it;
+				auto itRemovedLightData(directionalLightComponent._passMap.find(pRenderPass)->second);
+				auto pRemovedLightData = *itRemovedLightData;
+
+				_impl.UnlinkLightFromRenderTarget(
+					*pRenderPass,
+					itRemovedLightData,
+					directionalLightComponent._passMap
+				);
+
+				// detach shadow pass
+
+				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
+				delete pRemovedLightData->pRenderPassContext;
+				delete pRemovedLightData;
+			}
+
+#ifdef __PRE_DEBUG__
+			assert(directionalLightComponent._passMap.empty());
+#endif
+
+			_impl.directionalLights.erase(&directionalLightComponent);
+		}
+#pragma endregion
+
 		void PRERendering::LinkRenderTextureToLights(
 			PRERenderTexture& renderTexture
 		)
@@ -1281,6 +1365,34 @@ namespace PRE
 			}
 #pragma endregion
 
+#pragma region Directional Lights
+			for (auto it = _impl.directionalLights.begin(); it != _impl.directionalLights.end(); ++it)
+			{
+				auto& directionalLightComponent = **it;
+
+				auto pLightContext = new PRELightRenderPassContext(
+					pRenderPass->_front == _impl.compositingChain.end(),
+					*pRenderPass,
+					directionalLightComponent
+				);
+				auto pNewLightData = new PRELightRenderPassData(
+					_impl.renderer.AllocateCompositingNode(
+						LightPassOnRender,
+						pLightContext
+					),
+					*pLightContext
+				);
+
+				// attach shadow pass
+
+				_impl.LinkLightToRenderTarget(
+					*pRenderPass,
+					*pNewLightData,
+					directionalLightComponent._passMap
+				);
+			}
+#pragma endregion
+
 			_impl.renderPasses.push_back(pRenderPass);
 		}
 
@@ -1340,6 +1452,25 @@ namespace PRE
 					*pRenderPass,
 					itRemovedLightData,
 					spotLightComponent._passMap
+				);
+
+				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
+				delete pRemovedLightData->pRenderPassContext;
+				delete pRemovedLightData;
+			}
+#pragma endregion
+
+#pragma region Directional Lights
+			for (auto it = _impl.directionalLights.begin(); it != _impl.directionalLights.end(); ++it)
+			{
+				auto& directionalLightComponent = **it;
+				auto itRemovedLightData(directionalLightComponent._passMap.find(pRenderPass)->second);
+				auto pRemovedLightData = *itRemovedLightData;
+
+				_impl.UnlinkLightFromRenderTarget(
+					*pRenderPass,
+					itRemovedLightData,
+					directionalLightComponent._passMap
 				);
 
 				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);

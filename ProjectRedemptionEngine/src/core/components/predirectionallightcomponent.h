@@ -23,15 +23,11 @@ namespace PRE
 		using PRE::RenderingModule::RenderCompositingTarget;
 		using PRE::RenderingModule::RenderCompositingNode;
 
-		class PRESpotLightComponent : public PREGameObjectComponent
+		class PREDirectionalLightComponent : public PREGameObjectComponent
 		{
 			friend class PRERendering;
 
 		public:
-			void SetAttentuationLinear(float attenuationLinear);
-			void SetAttentuationQuadratic(float attenuationQuadratic);
-			// angle subtending center to radius of cone in degrees
-			void SetSize(float innerRadius, float outerRadius);
 			void SetColor(const glm::vec3& color);
 
 		protected:
@@ -47,11 +43,6 @@ namespace PRE
 
 			unordered_map<PRERenderTexture*, list<PRELightRenderPassData*>::iterator> _passMap;
 
-			// numbers courtesy of ogre3d wiki
-			float _attenuationLinear = 0.7f;
-			float _attenuationQuadratic = 1.8f;
-			float _innerRadius = glm::cos(glm::radians(12.5f));
-			float _outerRadius = glm::cos(glm::radians(17.5f));
 			glm::vec3 _color = glm::vec3(1.0f);
 
 			void AllocateIfNotAllocated();

@@ -5,11 +5,12 @@ in vec3 iFragPos;
 in vec3 iTangentViewPos;
 in vec3 iTangentFragPos;
 in vec3 iTangentLightPos;
+in vec3 iTangentLightDirection;
 
 in vec2 iTexCoord;
 in vec2 iAccumCoord;
 
-const float MATERIAL_SHININESS = 64.0f;
+const float MATERIAL_SHININESS = 32.0f;
 
 uniform int PRE_IS_FIRST_LIGHT_PASS;
 
@@ -74,8 +75,13 @@ void main()
     vec4 spotLight = PRE_SPOT_LIGHT_FLAG * pointLightTotal * spotLightIntensity;
 
     // directional light
+    vec4 directionalDiffuse = max(dot(fragNormal, -iTangentLightDirection), 0.0f) * diffuseColor;
+    vec3 directionalReflectDirection = reflect(iTangentLightDirection, fragNormal);
+    vec4 directionalSpecular = pow(max(dot(viewDirection, directionalReflectDirection), 0.0f), MATERIAL_SHININESS) * specularColor;
 
-    vec4 litColor = (ambientLight + pointLight + spotLight) * vec4(PRE_LIGHT_COLOR, 1.0f);
+    vec4 directionalLight = PRE_DIRECTIONAL_LIGHT_FLAG * (directionalDiffuse + directionalSpecular);
+
+    vec4 litColor = (ambientLight + pointLight + spotLight + directionalLight) * vec4(PRE_LIGHT_COLOR, 1.0f);
 
     FragColor = accumulatorColor + litColor;
 }

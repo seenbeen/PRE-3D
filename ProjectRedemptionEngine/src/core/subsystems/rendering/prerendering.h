@@ -21,6 +21,7 @@ namespace PRE
 		class PREAmbientLightComponent;
 		class PREPointLightComponent;
 		class PRESpotLightComponent;
+		class PREDirectionalLightComponent;
 
 		class PRERenderTexture;
 		class PREShader;
@@ -66,6 +67,7 @@ namespace PRE
 			friend class PREAmbientLightComponent;
 			friend class PREPointLightComponent;
 			friend class PRESpotLightComponent;
+			friend class PREDirectionalLightComponent;
 
 			class Impl
 			{
@@ -101,6 +103,7 @@ namespace PRE
 				unordered_set<PREAmbientLightComponent*> ambientLights;
 				unordered_set<PREPointLightComponent*> pointLights;
 				unordered_set<PRESpotLightComponent*> spotLights;
+				unordered_set<PREDirectionalLightComponent*> directionalLights;
 
 				Impl(
 					PREApplicationContext& applicationContext,
@@ -296,6 +299,14 @@ namespace PRE
 			);
 			void UnlinkLightFromRenderTargets(
 				PRESpotLightComponent& spotLightComponent
+			);
+
+			// directional light
+			void LinkLightToRenderTargets(
+				PREDirectionalLightComponent& directionalLightComponent
+			);
+			void UnlinkLightFromRenderTargets(
+				PREDirectionalLightComponent& directionalLightComponent
 			);
 
 			void LinkRenderTextureToLights(

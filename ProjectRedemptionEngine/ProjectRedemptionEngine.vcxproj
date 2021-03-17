@@ -17,6 +17,7 @@
     <ClCompile Include="src\core\components\preambientlightcomponent.cpp" />
     <ClCompile Include="src\core\components\preanimatorcomponent.cpp" />
     <ClCompile Include="src\core\components\precameracomponent.cpp" />
+    <ClCompile Include="src\core\components\predirectionallightcomponent.cpp" />
     <ClCompile Include="src\core\components\premodelrenderercomponent.cpp" />
     <ClCompile Include="src\core\components\prepointlightcomponent.cpp" />
     <ClCompile Include="src\core\components\prespotlightcomponent.cpp" />
@@ -82,6 +83,7 @@
     <ClInclude Include="src\core\components\preambientlightcomponent.h" />
     <ClInclude Include="src\core\components\preanimatorcomponent.h" />
     <ClInclude Include="src\core\components\precameracomponent.h" />
+    <ClInclude Include="src\core\components\predirectionallightcomponent.h" />
     <ClInclude Include="src\core\components\premodelrenderercomponent.h" />
     <ClInclude Include="src\core\components\prepointlightcomponent.h" />
     <ClInclude Include="src\core\components\prespotlightcomponent.h" />

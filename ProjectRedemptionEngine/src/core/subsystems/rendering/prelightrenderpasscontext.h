@@ -9,6 +9,7 @@ namespace PRE
 		class PREAmbientLightComponent;
 		class PREPointLightComponent;
 		class PRESpotLightComponent;
+		class PREDirectionalLightComponent;
 
 		class PRELightRenderPassContext
 		{
@@ -24,6 +25,7 @@ namespace PRE
 			PREAmbientLightComponent* const _pAmbientLightComponent;
 			PREPointLightComponent* const _pPointLightComponent;
 			PRESpotLightComponent* const _pSpotLightComponent;
+			PREDirectionalLightComponent* const _pDirectionalLightComponent;
 
 			PRELightRenderPassContext(
 				bool isFirstPass,
@@ -41,6 +43,12 @@ namespace PRE
 				bool isFirstPass,
 				PRERenderTexture& renderTexture,
 				PRESpotLightComponent& spotLightComponent
+			);
+
+			PRELightRenderPassContext(
+				bool isFirstPass,
+				PRERenderTexture& renderTexture,
+				PREDirectionalLightComponent& directionalLightComponent
 			);
 
 			~PRELightRenderPassContext();

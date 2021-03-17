@@ -242,7 +242,7 @@ private:
 class FlyCamControllerComponent : public PREGameObjectComponent
 {
 public:
-    float speed = 5.0f;
+    float speed = 3.5f;
     float rotationSpeed = 60.0f;
 
 protected:
@@ -377,7 +377,6 @@ protected:
         {
             _pSpotLightComponent->SetColor(glm::vec3(0.0f));
         }
-        _pSpotLightComponent->SetDirection(_pTransform->GetForward());
     }
 
     void OnDestroy() override
@@ -436,6 +435,15 @@ protected:
     }
 };
 
+class DirectionalLightTemplate : public PREGameObjectTemplate
+{
+    void OnInstantiateTemplate() override
+    {
+        auto& directionalLightComponent = *AddPREComponent<PREDirectionalLightComponent>();
+        directionalLightComponent.SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+    }
+};
+
 class CameraTemplate : public PREGameObjectTemplate
 {
 protected:
@@ -472,6 +480,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
     CameraTemplate cameraTemplate;
     AmbientLightTemplate ambientLightTemplate;
     PointLightTemplate pointLightTemplate;
+    DirectionalLightTemplate directionalLightTemplate;
 
     auto& sceneRoot = applicationContext.world.Instantiate();
     auto& sceneRootTransform = *sceneRoot.GetComponent<PRETransformComponent>();
@@ -509,6 +518,11 @@ void OnInitialize(PREApplicationContext& applicationContext)
     ambientLightComponent.SetAttentuationLinear(0.2f);
     ambientLightComponent.SetAttentuationQuadratic(0.45f);
     ambientLightComponent.SetColor(glm::vec3(0.5f));
+
+    auto& directionalLight = applicationContext.world.Instantiate(directionalLightTemplate);
+    auto& directionalLightTransform = *directionalLight.GetComponent<PRETransformComponent>();
+    directionalLightTransform.SetEuler(glm::vec3(-45.f, 0.0f, 0.0f));
+
     for (auto i = 0; i < 3; ++i)
     {
         auto& light = applicationContext.world.Instantiate(pointLightTemplate);

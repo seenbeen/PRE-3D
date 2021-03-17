@@ -1,4 +1,4 @@
-#include <core/components/prespotlightcomponent.h>
+#include <core/components/predirectionallightcomponent.h>
 
 #include <glm/glm.hpp>
 
@@ -17,44 +17,28 @@ namespace PRE
 {
 	namespace Core
 	{
-		void PRESpotLightComponent::SetAttentuationLinear(float attenuationLinear)
-		{
-			_attenuationLinear = attenuationLinear;
-		}
-
-		void PRESpotLightComponent::SetAttentuationQuadratic(float attenuationQuadratic)
-		{
-			_attenuationQuadratic = attenuationQuadratic;
-		}
-
-		void PRESpotLightComponent::SetSize(float innerRadius, float outerRadius)
-		{
-			_innerRadius = glm::cos(glm::radians(innerRadius));
-			_outerRadius = glm::cos(glm::radians(outerRadius));
-		}
-
-		void PRESpotLightComponent::SetColor(const glm::vec3& color)
+		void PREDirectionalLightComponent::SetColor(const glm::vec3& color)
 		{
 			_color = color;
 		}
 
-		void PRESpotLightComponent::OnStart()
+		void PREDirectionalLightComponent::OnStart()
 		{
 			AllocateIfNotAllocated();
 		}
 
-		void PRESpotLightComponent::OnUpdate()
+		void PREDirectionalLightComponent::OnUpdate()
 		{
 		}
 
-		void PRESpotLightComponent::OnDestroy()
+		void PREDirectionalLightComponent::OnDestroy()
 		{
 			// TODO: you can leak here if you manipulate and blow the object up
 			// before the object has a chance to be added to the world
 			DeallocateIfAllocated();
 		}
 
-		void PRESpotLightComponent::AllocateIfNotAllocated()
+		void PREDirectionalLightComponent::AllocateIfNotAllocated()
 		{
 			if (_pTransform == nullptr)
 			{
@@ -63,7 +47,7 @@ namespace PRE
 			}
 		}
 
-		void PRESpotLightComponent::DeallocateIfAllocated()
+		void PREDirectionalLightComponent::DeallocateIfAllocated()
 		{
 			if (_pTransform != nullptr)
 			{
