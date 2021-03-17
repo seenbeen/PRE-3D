@@ -553,7 +553,7 @@ int main(int argc, char *argv[])
             PREApplicationConfig(
                 PREInputConfig(),
                 PRERenderingConfig(
-                    "Yes hi.",
+                    "PRE v0.34 DEV",
                     1024,
                     768
                 ),
