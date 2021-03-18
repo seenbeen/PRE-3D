@@ -1,6 +1,5 @@
 #pragma once
 #include <list>
-#include <unordered_map>
 
 #include <glm/glm.hpp>
 
@@ -14,14 +13,9 @@ namespace PRE
 	{
 		class PRETransformComponent;
 		class PRERendering;
-		class PRERenderTexture;
 		class PRELightRenderPassData;
 
 		using std::list;
-		using std::unordered_map;
-
-		using PRE::RenderingModule::RenderCompositingTarget;
-		using PRE::RenderingModule::RenderCompositingNode;
 
 		class PREAmbientLightComponent : public PREGameObjectComponent
 		{
@@ -39,7 +33,7 @@ namespace PRE
 
 		private:
 			PRETransformComponent* _pTransform = nullptr;
-			unordered_map<PRERenderTexture*, list<PRELightRenderPassData*>::iterator> _passMap;
+			list<PRELightRenderPassData*>::iterator _front;
 
 			// numbers courtesy of ogre3d wiki
 			float _attenuationLinear = 0.7f;

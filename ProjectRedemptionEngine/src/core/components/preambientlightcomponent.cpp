@@ -1,7 +1,6 @@
 #include <core/components/preambientlightcomponent.h>
 
 #include <list>
-#include <unordered_map>
 
 #include <glm/glm.hpp>
 
@@ -17,6 +16,8 @@ namespace PRE
 {
 	namespace Core
 	{
+		using std::list;
+
 		void PREAmbientLightComponent::SetAttentuationLinear(float attenuationLinear)
 		{
 			_attenuationLinear = attenuationLinear;

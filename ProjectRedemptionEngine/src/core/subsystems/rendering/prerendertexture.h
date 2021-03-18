@@ -1,5 +1,6 @@
 #pragma once
 #include <list>
+#include <unordered_map>
 
 #include <include/modules/rendering.h>
 
@@ -8,6 +9,10 @@ namespace PRE
 	namespace Core
 	{
 		class PRECameraComponent;
+		class PREAmbientLightComponent;
+		class PREPointLightComponent;
+		class PRESpotLightComponent;
+		class PREDirectionalLightComponent;
 
 		class PRERendering;
 		class PREMaterial;
@@ -15,6 +20,7 @@ namespace PRE
 		class PRELightRenderPassData;
 
 		using std::list;
+		using std::unordered_map;
 
 		using PRE::RenderingModule::RenderCompositingTarget;
 		using PRE::RenderingModule::RenderCompositingNode;
@@ -37,12 +43,12 @@ namespace PRE
 			// !accumulator: buffer to be read from
 			bool _accumulatorBufferIsA;
 
-			list<PRELightRenderPassData*>::iterator _front;
+			// "shortcut" to avoid making a map per light type
+			unordered_map<void*, list<PRELightRenderPassData*>::iterator> _lightMap;
 
 			PRERenderTexture(
 				RenderCompositingTarget& bufferA,
-				RenderCompositingTarget& bufferB,
-				list<PRELightRenderPassData*>::iterator front
+				RenderCompositingTarget& bufferB
 			);
 			~PRERenderTexture();
 		};

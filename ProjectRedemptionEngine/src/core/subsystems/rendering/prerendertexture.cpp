@@ -3,7 +3,6 @@
 #include <list>
 #include <include/modules/rendering.h>
 
-
 namespace PRE
 {
 	namespace Core
@@ -15,15 +14,13 @@ namespace PRE
 
 		PRERenderTexture::PRERenderTexture(
 			RenderCompositingTarget& bufferA,
-			RenderCompositingTarget& bufferB,
-			list<PRELightRenderPassData*>::iterator front
+			RenderCompositingTarget& bufferB
 		)
 			:
 			_pAssociatedCameraComponent(nullptr),
 			_pBufferA(&bufferA),
 			_pBufferB(&bufferB),
-			_accumulatorBufferIsA(false),
-			_front(front) {}
+			_accumulatorBufferIsA(false) {}
 
 		PRERenderTexture::~PRERenderTexture() {}
 	} // namespace Core

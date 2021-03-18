@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 
 #include <list>
-#include <unordered_map>
 
 #include <include/modules/rendering.h>
 
@@ -17,6 +16,8 @@ namespace PRE
 {
 	namespace Core
 	{
+		using std::list;
+
 		void PRESpotLightComponent::SetAttentuationLinear(float attenuationLinear)
 		{
 			_attenuationLinear = attenuationLinear;

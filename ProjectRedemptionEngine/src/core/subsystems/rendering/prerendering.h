@@ -98,8 +98,14 @@ namespace PRE
 				RenderModel& screenModel;
 				RenderCamera& screenCamera;
 
+				//list<PRELightRenderPassData*> mainRenderPassCompositingChain;
+				//list<PRELightRenderPassData*> additionalRenderPassesCompositingChain;
 				list<PRELightRenderPassData*> compositingChain;
-				list<PRERenderTexture*> renderPasses;
+
+				//PRERenderTexture* mainRenderPass;
+				//unordered_set<PRERenderTexture*> additionalRenderPasses;
+				unordered_set<PRERenderTexture*> renderPasses;
+
 				unordered_set<PREAmbientLightComponent*> ambientLights;
 				unordered_set<PREPointLightComponent*> pointLights;
 				unordered_set<PRESpotLightComponent*> spotLights;
@@ -120,13 +126,15 @@ namespace PRE
 				void LinkLightToRenderTarget(
 					PRERenderTexture& renderPass,
 					PRELightRenderPassData& lightData,
-					unordered_map<PRERenderTexture*, list<PRELightRenderPassData*>::iterator>& lightPassMap
+					void* pLightComponent,
+					list<PRELightRenderPassData*>::iterator& itLightFront
 				);
 
 				void UnlinkLightFromRenderTarget(
 					PRERenderTexture& renderPass,
-					list<PRELightRenderPassData*>::iterator itRemovedLightData,
-					unordered_map<PRERenderTexture*, list<PRELightRenderPassData*>::iterator>& lightPassMap
+					PRELightRenderPassData& lightData,
+					void* pLightComponent,
+					list<PRELightRenderPassData*>::iterator& itLightFront
 				);
 			};
 
