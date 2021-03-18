@@ -56,7 +56,7 @@ namespace PRE
 
 		private:
 			Impl& _impl;
-			
+
 			RenderCompositingTarget(unsigned int width, unsigned int height);
 			RenderCompositingTarget(
 				unsigned int rightWidth, unsigned int rightHeight,

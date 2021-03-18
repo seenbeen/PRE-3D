@@ -19,7 +19,6 @@ namespace PRE
 			friend class PRERendering;
 
 		private:
-			const bool _isFirstPass;
 			PRERenderTexture& _renderTexture;
 
 			PREAmbientLightComponent* const _pAmbientLightComponent;
@@ -28,25 +27,21 @@ namespace PRE
 			PREDirectionalLightComponent* const _pDirectionalLightComponent;
 
 			PRELightRenderPassContext(
-				bool isFirstPass,
 				PRERenderTexture& renderTexture,
 				PREAmbientLightComponent& ambientLightComponent
 			);
 
 			PRELightRenderPassContext(
-				bool isFirstPass,
 				PRERenderTexture& renderTexture,
 				PREPointLightComponent& pointLightComponent
 			);
 
 			PRELightRenderPassContext(
-				bool isFirstPass,
 				PRERenderTexture& renderTexture,
 				PRESpotLightComponent& spotLightComponent
 			);
 
 			PRELightRenderPassContext(
-				bool isFirstPass,
 				PRERenderTexture& renderTexture,
 				PREDirectionalLightComponent& directionalLightComponent
 			);

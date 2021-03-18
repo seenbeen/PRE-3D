@@ -104,7 +104,7 @@ namespace PRE
 
 				//PRERenderTexture* mainRenderPass;
 				//unordered_set<PRERenderTexture*> additionalRenderPasses;
-				unordered_set<PRERenderTexture*> renderPasses;
+				list<PRERenderTexture*> renderPasses;
 
 				unordered_set<PREAmbientLightComponent*> ambientLights;
 				unordered_set<PREPointLightComponent*> pointLights;

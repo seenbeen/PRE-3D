@@ -11,12 +11,10 @@ namespace PRE
 	namespace Core
 	{
 		PRELightRenderPassContext::PRELightRenderPassContext(
-			bool isFirstPass,
 			PRERenderTexture& renderTexture,
 			PREAmbientLightComponent& ambientLightComponent
 		)
 			:
-			_isFirstPass(isFirstPass),
 			_renderTexture(renderTexture),
 			_pAmbientLightComponent(&ambientLightComponent),
 			_pPointLightComponent(nullptr),
@@ -24,12 +22,10 @@ namespace PRE
 			_pDirectionalLightComponent(nullptr) {}
 
 		PRELightRenderPassContext::PRELightRenderPassContext(
-			bool isFirstPass,
 			PRERenderTexture& renderTexture,
 			PREPointLightComponent& pointLightComponent
 		)
 			:
-			_isFirstPass(isFirstPass),
 			_renderTexture(renderTexture),
 			_pAmbientLightComponent(nullptr),
 			_pPointLightComponent(&pointLightComponent),
@@ -37,12 +33,10 @@ namespace PRE
 			_pDirectionalLightComponent(nullptr) {}
 
 		PRELightRenderPassContext::PRELightRenderPassContext(
-			bool isFirstPass,
 			PRERenderTexture& renderTexture,
 			PRESpotLightComponent& spotLightComponent
 		)
 			:
-			_isFirstPass(isFirstPass),
 			_renderTexture(renderTexture),
 			_pAmbientLightComponent(nullptr),
 			_pPointLightComponent(nullptr),
@@ -50,12 +44,10 @@ namespace PRE
 			_pDirectionalLightComponent(nullptr) {}
 
 		PRELightRenderPassContext::PRELightRenderPassContext(
-			bool isFirstPass,
 			PRERenderTexture& renderTexture,
 			PREDirectionalLightComponent& directionalLightComponent
 		)
 			:
-			_isFirstPass(isFirstPass),
 			_renderTexture(renderTexture),
 			_pAmbientLightComponent(nullptr),
 			_pPointLightComponent(nullptr),

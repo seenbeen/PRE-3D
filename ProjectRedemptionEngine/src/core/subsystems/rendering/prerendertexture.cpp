@@ -20,7 +20,8 @@ namespace PRE
 			_pAssociatedCameraComponent(nullptr),
 			_pBufferA(&bufferA),
 			_pBufferB(&bufferB),
-			_accumulatorBufferIsA(false) {}
+			_accumulatorBufferIsA(false),
+			_passCounter(0) {}
 
 		PRERenderTexture::~PRERenderTexture() {}
 	} // namespace Core

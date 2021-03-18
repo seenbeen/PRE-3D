@@ -379,6 +379,7 @@ namespace PRE
 			);
 			_impl.renderer.DeallocateFragmentShader(fragmentShader);
 			_impl.renderer.DeallocateVertexShader(vertexShader);
+			pShader->_shaderProgram.SetDepthFunction(RenderShaderProgram::DepthFunction::LESS_THAN_OR_EQUAL);
 			return *pShader;
 		}
 
@@ -669,6 +670,11 @@ namespace PRE
 
 				lightPassContext._renderTexture._accumulatorBufferIsA = !lightPassContext._renderTexture._accumulatorBufferIsA;
 
+				auto isFirstPass = lightPassContext._renderTexture._passCounter == 0;
+				auto isSecondPass = lightPassContext._renderTexture._passCounter == 1;
+
+				++lightPassContext._renderTexture._passCounter;
+
 				// TODO: Spatial query optimizing to only render visible models
 				for (
 					auto it = pCameraComponent->_associatedModelComponents.begin();
@@ -691,7 +697,7 @@ namespace PRE
 							auto pShader = modelRendererComponent._pMaterial->_pShader;
 							pShader->SetInt(
 								PREShader::IS_FIRST_LIGHT_PASS,
-								lightPassContext._isFirstPass ? 1 : 0
+								isFirstPass ? 1 : 0
 							);
 							pShader->SetInt(
 								PREShader::LIGHT_ACCUMULATOR_SAMPLER,
@@ -810,10 +816,10 @@ namespace PRE
 
 				composition.SetCompositingTarget(pAccumulatorWrite);
 
-				// TODO: take advantage of depth buffer early z test
-				// by setting depth test leq and not clearing depth buffer
-				// unless first pass.
-				composition.Clear();
+				if (isFirstPass || isSecondPass)
+				{
+					composition.Clear();
+				}
 			}
 		}
 
@@ -849,6 +855,10 @@ namespace PRE
 		void PRERendering::Update()
 		{
 			Renderer::SetActiveRenderer(_impl.renderer);
+			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
+			{
+				(*it)->_passCounter = 0;
+			}
 			_impl.renderer.Update();
 		}
 
@@ -1026,7 +1036,6 @@ namespace PRE
 				auto pRenderPass = *it;
 
 				auto pLightContext = new PRELightRenderPassContext(
-					pRenderPass->_lightMap.size() == 0,
 					*pRenderPass,
 					ambientLightComponent
 				);
@@ -1092,7 +1101,6 @@ namespace PRE
 				auto pRenderPass = *it;
 
 				auto pLightContext = new PRELightRenderPassContext(
-					pRenderPass->_lightMap.size() == 0,
 					*pRenderPass,
 					pointLightComponent
 				);
@@ -1159,7 +1167,6 @@ namespace PRE
 				auto pRenderPass = *it;
 
 				auto pLightContext = new PRELightRenderPassContext(
-					pRenderPass->_lightMap.size() == 0,
 					*pRenderPass,
 					spotLightComponent
 				);
@@ -1226,7 +1233,6 @@ namespace PRE
 				auto pRenderPass = *it;
 
 				auto pLightContext = new PRELightRenderPassContext(
-					pRenderPass->_lightMap.size() == 0,
 					*pRenderPass,
 					directionalLightComponent
 				);
@@ -1293,7 +1299,6 @@ namespace PRE
 				auto& ambientLightComponent = *pLightComponent;
 
 				auto pLightContext = new PRELightRenderPassContext(
-					pRenderPass->_lightMap.size() == 0,
 					*pRenderPass,
 					ambientLightComponent
 				);
@@ -1321,7 +1326,6 @@ namespace PRE
 				auto& pointLightComponent = *pLightComponent;
 
 				auto pLightContext = new PRELightRenderPassContext(
-					pRenderPass->_lightMap.size() == 0,
 					*pRenderPass,
 					pointLightComponent
 				);
@@ -1349,7 +1353,6 @@ namespace PRE
 				auto& spotLightComponent = *pLightComponent;
 
 				auto pLightContext = new PRELightRenderPassContext(
-					pRenderPass->_lightMap.size() == 0,
 					*pRenderPass,
 					spotLightComponent
 				);
@@ -1377,7 +1380,6 @@ namespace PRE
 				auto& directionalLightComponent = *pLightComponent;
 
 				auto pLightContext = new PRELightRenderPassContext(
-					pRenderPass->_lightMap.size() == 0,
 					*pRenderPass,
 					directionalLightComponent
 				);
@@ -1398,7 +1400,7 @@ namespace PRE
 			}
 #pragma endregion
 
-			_impl.renderPasses.insert(pRenderPass);
+			_impl.renderPasses.push_front(pRenderPass);
 		}
 
 		void PRERendering::UnlinkRenderTextureFromLights(
@@ -1490,7 +1492,14 @@ namespace PRE
 			}
 #pragma endregion
 
-			_impl.renderPasses.erase(pRenderPass);
+			// TODO: render target layers .-.
+			_impl.renderPasses.erase(
+				std::find(
+					_impl.renderPasses.begin(),
+					_impl.renderPasses.end(),
+					pRenderPass
+				)
+			);
 		}
 	}
 }

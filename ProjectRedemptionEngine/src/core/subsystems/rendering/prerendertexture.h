@@ -43,6 +43,10 @@ namespace PRE
 			// !accumulator: buffer to be read from
 			bool _accumulatorBufferIsA;
 
+			// tells you which light pass we're on,
+			// reset at the beginning of each frame
+			int _passCounter;
+
 			// "shortcut" to avoid making a map per light type
 			unordered_map<void*, list<PRELightRenderPassData*>::iterator> _lightMap;
 

@@ -25,7 +25,6 @@ namespace PRE
 			target->Bind();
 			target->BindTarget(GL_COLOR_ATTACHMENT0);
 
-			// TODO: rbo leaks
 			GLuint renderBufferId;
 			glGenRenderbuffers(1, &renderBufferId);
 			glBindRenderbuffer(GL_RENDERBUFFER, renderBufferId);
