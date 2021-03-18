@@ -359,6 +359,10 @@ protected:
 
     void OnUpdate() override
     {
+        if (!gameObject().GetComponent<FlyCamControllerComponent>()->enabled)
+        {
+            return;
+        }
         if (_pInput->ApplicationHasQuit() || _pInput->KeyPressed(PREKeyCode::ESCAPE))
         {
             std::cout << "Application Quitting..." << std::endl;
