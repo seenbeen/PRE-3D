@@ -1,5 +1,6 @@
 #include <core/components/premodelrenderercomponent.h>
 
+#include <set>
 #include <vector>
 
 #include <include/modules/rendering.h>
@@ -10,10 +11,15 @@
 #include <core/subsystems/world/pregameobjectcomponent.h>
 #include <core/subsystems/rendering/prerendering.h>
 
+#ifdef __PRE_DEBUG__
+#include <assert.h>
+#endif
+
 namespace PRE
 {
 	namespace Core
 	{
+		using std::set;
 		using std::vector;
 
 		using PRE::RenderingModule::RenderModel;
@@ -67,6 +73,22 @@ namespace PRE
 				*this,
 				cameraComponent
 			);
+		}
+
+		void PREModelRendererComponent::AddAffectedLightLayer(int lightLayer)
+		{
+#ifdef __PRE_DEBUG__
+			assert(_affectedLightLayers.find(lightLayer) == _affectedLightLayers.end());
+#endif
+			_affectedLightLayers.insert(lightLayer);
+		}
+
+		void PREModelRendererComponent::RemoveAffectedLightLayer(int lightLayer)
+		{
+#ifdef __PRE_DEBUG__
+			assert(_affectedLightLayers.find(lightLayer) != _affectedLightLayers.end());
+#endif
+			_affectedLightLayers.erase(lightLayer);
 		}
 
 		void PREModelRendererComponent::OnStart()

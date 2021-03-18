@@ -1,4 +1,5 @@
 #pragma once
+#include <set>
 #include <unordered_set>
 
 #include <include/modules/rendering.h>
@@ -17,6 +18,7 @@ namespace PRE
 		class PREMesh;
 		class PRESkeleton;
 
+		using std::set;
 		using std::unordered_set;
 
 		using PRE::RenderingModule::RenderModel;
@@ -38,6 +40,9 @@ namespace PRE
 			void AddCameraComponent(PRECameraComponent& cameraComponent);
 			void RemoveCameraComponent(PRECameraComponent& cameraComponent);
 
+			void AddAffectedLightLayer(int lightLayer);
+			void RemoveAffectedLightLayer(int lightLayer);
+
 		protected:
 			void OnStart() override;
 			void OnUpdate() override;
@@ -50,6 +55,7 @@ namespace PRE
 			RenderModel* _pModel;
 
 			unordered_set<PRECameraComponent*> _pCameraComponents;
+			set<int> _affectedLightLayers;
 
 			PREMaterial* _pMaterial = nullptr;
 			PREMesh* _pMesh = nullptr;

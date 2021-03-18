@@ -1,6 +1,7 @@
 #include <core/subsystems/rendering/prerendering.h>
 
 #include <algorithm>
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -49,6 +50,7 @@ namespace PRE
 {
 	namespace Core
 	{
+		using std::set;
 		using std::string;
 		using std::vector;
 		using std::unordered_map;
@@ -780,6 +782,45 @@ namespace PRE
 					)
 				{
 					auto& modelRendererComponent = **it;
+					set<int>* pAffectingLightLayers = nullptr;
+					if (lightPassContext._pAmbientLightComponent != nullptr)
+					{
+						pAffectingLightLayers = &lightPassContext._pAmbientLightComponent->_affectingLightLayers;
+					}
+					else if (lightPassContext._pPointLightComponent != nullptr)
+					{
+						pAffectingLightLayers = &lightPassContext._pPointLightComponent->_affectingLightLayers;
+					}
+					else if (lightPassContext._pSpotLightComponent != nullptr)
+					{
+						pAffectingLightLayers = &lightPassContext._pSpotLightComponent->_affectingLightLayers;
+					}
+					else
+					{
+#ifdef __PRE_DEBUG__
+						assert(lightPassContext._pDirectionalLightComponent != nullptr);
+#endif
+						pAffectingLightLayers = &lightPassContext._pDirectionalLightComponent->_affectingLightLayers;
+					}
+
+					// TODO: may want to just use a long or int and bit-wise operate
+					// as this overhead-vs-practicality trade off might not be worth it
+					vector<int> lightAffectanceBuffer(32);
+					if (
+						modelRendererComponent._affectedLightLayers.empty() ||
+						pAffectingLightLayers->empty() ||
+						std::set_intersection(
+							modelRendererComponent._affectedLightLayers.begin(),
+							modelRendererComponent._affectedLightLayers.end(),
+							pAffectingLightLayers->begin(),
+							pAffectingLightLayers->end(),
+							lightAffectanceBuffer.begin()
+						) == lightAffectanceBuffer.end()
+					)
+					{
+						continue;
+					}
+
 					modelRendererComponent.AllocateIfNotAllocated();
 					if (modelRendererComponent._pMaterial != nullptr)
 					{

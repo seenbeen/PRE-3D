@@ -1,6 +1,7 @@
 #include <core/components/prepointlightcomponent.h>
 
 #include <list>
+#include <set>
 
 #include <glm/glm.hpp>
 
@@ -12,11 +13,32 @@
 
 #include <core/subsystems/rendering/prerendering.h>
 
+#ifdef __PRE_DEBUG__
+#include <assert.h>
+#endif
+
 namespace PRE
 {
 	namespace Core
 	{
 		using std::list;
+		using std::set;
+
+		void PREPointLightComponent::AddAffectingLightLayer(int lightLayer)
+		{
+#ifdef __PRE_DEBUG__
+			assert(_affectingLightLayers.find(lightLayer) == _affectingLightLayers.end());
+#endif
+			_affectingLightLayers.insert(lightLayer);
+		}
+
+		void PREPointLightComponent::RemoveAffectingLightLayer(int lightLayer)
+		{
+#ifdef __PRE_DEBUG__
+			assert(_affectingLightLayers.find(lightLayer) != _affectingLightLayers.end());
+#endif
+			_affectingLightLayers.erase(lightLayer);
+		}
 
 		void PREPointLightComponent::SetAttentuationLinear(float attenuationLinear)
 		{
