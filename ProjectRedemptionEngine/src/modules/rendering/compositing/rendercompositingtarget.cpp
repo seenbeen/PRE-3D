@@ -26,11 +26,11 @@ namespace PRE
 			target->BindTarget(GL_COLOR_ATTACHMENT0);
 
 			// TODO: rbo leaks
-			unsigned int rbo;
-			glGenRenderbuffers(1, &rbo);
-			glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+			GLuint renderBufferId;
+			glGenRenderbuffers(1, &renderBufferId);
+			glBindRenderbuffer(GL_RENDERBUFFER, renderBufferId);
 			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBufferId);
 
 #ifdef __PRE_DEBUG__
 			assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
@@ -38,7 +38,7 @@ namespace PRE
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-			return *(new Impl(bufferId, *target));
+			return *(new Impl(width, height, bufferId, renderBufferId, *target));
 		}
 
 		RenderCompositingTarget::Impl& RenderCompositingTarget::Impl::MakeImpl(
@@ -54,16 +54,23 @@ namespace PRE
 		}
 
 		RenderCompositingTarget::Impl::Impl(
+			unsigned int width,
+			unsigned int height,
 			GLuint bufferId,
+			GLuint renderBufferId,
 			RenderTexture& target
 		)
 			:
+			width(width),
+			height(height),
 			bufferId(bufferId),
+			renderBufferId(renderBufferId),
 			target(target) {}
 
 		RenderCompositingTarget::Impl::~Impl()
 		{
 			delete &target;
+			glDeleteRenderbuffers(1, &renderBufferId);
 			glDeleteFramebuffers(1, &bufferId);
 		}
 
@@ -101,6 +108,7 @@ namespace PRE
 			return _impl.target;
 		}
 
+		// NOTE: THIS DOES NOT RETURN THE VIEWPORT TO NORMAL IF NULL IS PASSED
 		void RenderCompositingTarget::Bind(RenderCompositingTarget* pCompositingTarget)
 		{
 			if (pCompositingTarget == nullptr)
@@ -109,7 +117,9 @@ namespace PRE
 			}
 			else
 			{
+				// TODO: switch on buffer type
 				glBindFramebuffer(GL_FRAMEBUFFER, pCompositingTarget->_impl.bufferId);
+				glViewport(0, 0, pCompositingTarget->_impl.width, pCompositingTarget->_impl.height);
 			}
 		}
 	} // namespace RenderingModule

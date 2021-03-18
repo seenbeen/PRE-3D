@@ -694,6 +694,7 @@ namespace PRE
 				}
 
 				RenderCompositingTarget::Bind(nullptr);
+				glViewport(0, 0, width, height);
 			}
 
 #ifdef __PRE_DEBUG__

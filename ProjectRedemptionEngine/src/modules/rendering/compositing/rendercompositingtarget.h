@@ -25,7 +25,11 @@ namespace PRE
 				friend class RenderCompositingTarget;
 
 			private:
+				const unsigned int width;
+				const unsigned int height;
+
 				const GLuint bufferId;
+				const GLuint renderBufferId;
 
 				RenderTexture& target;
 
@@ -40,7 +44,10 @@ namespace PRE
 				);
 
 				Impl(
+					unsigned int width,
+					unsigned int height,
 					GLuint bufferId,
+					GLuint renderbufferId,
 					RenderTexture& target
 				);
 
