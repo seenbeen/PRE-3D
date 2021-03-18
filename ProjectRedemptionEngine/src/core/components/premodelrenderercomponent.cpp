@@ -1,5 +1,7 @@
 #include <core/components/premodelrenderercomponent.h>
 
+#include <vector>
+
 #include <include/modules/rendering.h>
 
 #include <core/components/pretransformcomponent.h>
@@ -12,6 +14,8 @@ namespace PRE
 {
 	namespace Core
 	{
+		using std::vector;
+
 		using PRE::RenderingModule::RenderModel;
 
 		void PREModelRendererComponent::SetMaterial(PREMaterial* pMaterial)
@@ -47,29 +51,22 @@ namespace PRE
 			return _pSkeleton;
 		}
 
-		void PREModelRendererComponent::SetCameraComponent(PRECameraComponent* pCameraComponent)
+		void PREModelRendererComponent::AddCameraComponent(PRECameraComponent& cameraComponent)
 		{
 			AllocateIfNotAllocated();
-			if (_pCameraComponent != nullptr)
-			{
-				GetRendering().UnlinkModelRendererComponentFromCameraComponent(
-					*this,
-					*_pCameraComponent
-				);
-			}
-			if (pCameraComponent != nullptr)
-			{
-				GetRendering().LinkModelRendererComponentToCameraComponent(
-					*this,
-					*pCameraComponent
-				);
-			}
-			// hasChanged does not need to be set here.
+			GetRendering().LinkModelRendererComponentToCameraComponent(
+				*this,
+				cameraComponent
+			);
 		}
 
-		PRECameraComponent* PREModelRendererComponent::GetCameraComponent() const
+		void PREModelRendererComponent::RemoveCameraComponent(PRECameraComponent& cameraComponent)
 		{
-			return _pCameraComponent;
+			AllocateIfNotAllocated();
+			GetRendering().UnlinkModelRendererComponentFromCameraComponent(
+				*this,
+				cameraComponent
+			);
 		}
 
 		void PREModelRendererComponent::OnStart()
@@ -109,11 +106,16 @@ namespace PRE
 		{
 			if (_pModel != nullptr)
 			{
-				if (_pCameraComponent != nullptr)
+				// unlink mutates _pCameraComponents, so we'll need to make a temp copy
+				vector<PRECameraComponent*> cameraComponents(
+					_pCameraComponents.begin(),
+					_pCameraComponents.end()
+				);
+				for (auto it = cameraComponents.begin(); it != cameraComponents.end(); ++it)
 				{
 					GetRendering().UnlinkModelRendererComponentFromCameraComponent(
 						*this,
-						*_pCameraComponent
+						**it
 					);
 				}
 				GetRendering().DeallocateModel(*_pModel);

@@ -357,6 +357,13 @@ namespace PRE
 		void PRERendering::DestroyRenderTexture(PRERenderTexture& renderTexture)
 		{
 			auto pRenderTexture = &renderTexture;
+			if (renderTexture._pAssociatedCameraComponent != nullptr)
+			{
+				UnlinkCameraComponentFromRenderTexture(
+					*renderTexture._pAssociatedCameraComponent,
+					renderTexture
+				);
+			}
 			UnlinkRenderTextureFromLights(*pRenderTexture);
 			_impl.renderer.DeallocateCompositingTarget(*renderTexture._pBufferA);
 			_impl.renderer.DeallocateCompositingTarget(*renderTexture._pBufferB);
@@ -957,11 +964,11 @@ namespace PRE
 		)
 		{
 #ifdef __PRE_DEBUG__
-			assert(modelRendererComponent._pCameraComponent == nullptr);
+			assert(modelRendererComponent._pCameraComponents.find(&cameraComponent) == modelRendererComponent._pCameraComponents.end());
 			assert(cameraComponent._associatedModelComponents.find(&modelRendererComponent) == cameraComponent._associatedModelComponents.end());
 #endif
 
-			modelRendererComponent._pCameraComponent = &cameraComponent;
+			modelRendererComponent._pCameraComponents.insert(&cameraComponent);
 			cameraComponent._associatedModelComponents.insert(&modelRendererComponent);
 		}
 
@@ -971,11 +978,11 @@ namespace PRE
 		)
 		{
 #ifdef __PRE_DEBUG__
-			assert(modelRendererComponent._pCameraComponent == &cameraComponent);
+			assert(modelRendererComponent._pCameraComponents.find(&cameraComponent) != modelRendererComponent._pCameraComponents.end());
 			assert(cameraComponent._associatedModelComponents.find(&modelRendererComponent) != cameraComponent._associatedModelComponents.end());
 #endif
 
-			modelRendererComponent._pCameraComponent = nullptr;
+			modelRendererComponent._pCameraComponents.erase(&cameraComponent);
 			cameraComponent._associatedModelComponents.erase(&modelRendererComponent);
 		}
 

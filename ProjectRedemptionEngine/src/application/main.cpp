@@ -244,6 +244,7 @@ class FlyCamControllerComponent : public PREGameObjectComponent
 public:
     float speed = 3.5f;
     float rotationSpeed = 60.0f;
+    bool enabled = true;
 
 protected:
     void OnStart() override
@@ -256,6 +257,16 @@ protected:
 
     void OnUpdate() override
     {
+        if (_pInput->KeyPressed(PREKeyCode::TAB))
+        {
+            enabled = !enabled;
+        }
+
+        if (!enabled)
+        {
+            return;
+        }
+
         glm::vec3 delta;
 
         // flycam controls
@@ -329,9 +340,9 @@ protected:
     {
         auto& cameraComponent = *gameObject().GetComponent<PRECameraComponent>();
         cameraComponent.SetKind(PRECameraComponent::Kind::PERSPECTIVE);
-        cameraComponent.SetRenderTexture(&GetRendering().GetScreenRenderTexture());
         cameraComponent.SetFarClippingPlane(1000);
         cameraComponent.SetSize(75);
+        cameraComponent.SetAspectRatio(4.0f / 1.5f);
         _pSkybox = &GetAssetManager().LoadSkyBox(
             GetAssetManager().rootAssetPath + skyBoxRightPath,
             GetAssetManager().rootAssetPath + skyBoxLeftPath,
@@ -391,6 +402,120 @@ private:
     PRESpotLightComponent* _pSpotLightComponent = nullptr;
 };
 
+class BufferDisplayScreenComponent : public PREGameObjectComponent
+{
+public:
+    PRERenderTexture* pRenderTexture;
+
+protected:
+    void OnStart() override
+    {
+        const string SAMPLER_KEY = "bufferSampler";
+        const int SAMPLER_UNIT = 0;
+        const string VERTEX_SHADER_SOURCE =
+            "#version 330 core\n"
+            "layout (location = 0) in vec3 iPos;\n"
+            "layout (location = 4) in vec2 iUv;\n"
+            "\n"
+            "out vec2 TexCoord;\n"
+            "\n"
+            "uniform mat4 PRE_MODEL_MATRIX;\n"
+            "uniform mat4 PRE_VIEW_MATRIX;\n"
+            "uniform mat4 PRE_PROJECTION_MATRIX;\n"
+            "\n"
+            "void main()\n"
+            "{\n"
+            "    TexCoord = iUv;\n"
+            "    gl_Position = PRE_PROJECTION_MATRIX *PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * vec4(iPos, 1.0f);\n"
+            "}\n";
+
+        const string FRAGMENT_SHADER_SOURCE =
+            "#version 330 core\n"
+            "in vec2 TexCoord;\n"
+            "\n"
+            "out vec4 FragColor;\n"
+            "\n"
+            "uniform sampler2D bufferSampler;\n"
+            "\n"
+            "void main()\n"
+            "{\n"
+            "    FragColor = texture(bufferSampler, TexCoord);\n"
+            "}\n";
+
+        const unsigned int VERTEX_COUNT = 4u;
+        const glm::vec3 VERTICES[]
+        {
+            glm::vec3(-1, 0, 0),
+            glm::vec3(1, 0, 0),
+            glm::vec3(1, 1, 0),
+            glm::vec3(-1, 1, 0)
+        };
+        const glm::vec2 UVS[]
+        {
+            glm::vec2(0, 0),
+            glm::vec2(1, 0),
+            glm::vec2(1, 1),
+            glm::vec2(0, 1)
+        };
+        unsigned int TRIANGLE_ELEMENT_COUNT = 6u;
+        const unsigned int TRIANGLE_ELEMENTS[]
+        {
+            0u, 1u, 2u, 0u, 2u, 3u
+        };
+
+        _pShader = &GetRendering().CreateShader(
+            VERTEX_SHADER_SOURCE,
+            FRAGMENT_SHADER_SOURCE
+        );
+
+        _pShader->SetInt(SAMPLER_KEY, SAMPLER_UNIT);
+
+        _pMesh = &GetRendering().CreateMesh(
+            VERTEX_COUNT,
+            VERTICES,
+            nullptr,
+            nullptr,
+            nullptr,
+            UVS,
+            nullptr,
+            nullptr,
+            TRIANGLE_ELEMENT_COUNT,
+            TRIANGLE_ELEMENTS
+        );
+
+        _pMaterial = &GetRendering().CreateMaterial();
+        _pMaterial->SetShader(_pShader);
+        _pMaterial->SetTextureBinding(*pRenderTexture, SAMPLER_UNIT);
+
+        auto& modelRendererComponent = *gameObject().GetComponent<PREModelRendererComponent>();
+        modelRendererComponent.SetMesh(_pMesh);
+        modelRendererComponent.SetMaterial(_pMaterial);
+    }
+
+    void OnDestroy() override
+    {
+        GetRendering().DestroyShader(*_pShader);
+        GetRendering().DestroyMesh(*_pMesh);
+        GetRendering().DestroyMaterial(*_pMaterial);
+    }
+
+private:
+    PREShader* _pShader = nullptr;
+    PREMesh* _pMesh = nullptr;
+    PREMaterial* _pMaterial = nullptr;
+};
+
+class BufferDisplayScreenTemplate : public PREGameObjectTemplate
+{
+protected:
+    void OnInstantiateTemplate() override
+    {
+        AddPREComponent<PREModelRendererComponent>();
+        AddPREComponent<BufferDisplayScreenComponent>();
+        GetPREComponent<PRETransformComponent>()->SetScale(glm::vec3(4.0f / 3.0f, 1.0f, 1.0f));
+    };
+};
+
 class VampireTemplate : public PREGameObjectTemplate
 {
 public:
@@ -444,6 +569,15 @@ class DirectionalLightTemplate : public PREGameObjectTemplate
     }
 };
 
+class BufferDisplayCameraTemplate : public PREGameObjectTemplate
+{
+protected:
+    void OnInstantiateTemplate() override
+    {
+        AddPREComponent<PRECameraComponent>();
+    }
+};
+
 class CameraTemplate : public PREGameObjectTemplate
 {
 protected:
@@ -455,23 +589,51 @@ protected:
         spotLightComponent.SetAttentuationLinear(0.0f);
         spotLightComponent.SetAttentuationQuadratic(0.15f);
         spotLightComponent.SetColor(glm::vec3(0.0f));
-        auto& cameraComponent = *AddPREComponent<CameraControllerComponent>();
-        cameraComponent.skyBoxRightPath = "/skyboxes/Night MoonBurst/Right+X.png";
-        cameraComponent.skyBoxLeftPath = "/skyboxes/Night MoonBurst/Left-X.png";
-        cameraComponent.skyBoxTopPath = "/skyboxes/Night MoonBurst/Top+Y.png";
-        cameraComponent.skyBoxBottomPath = "/skyboxes/Night MoonBurst/Bottom-Y.png";
-        cameraComponent.skyBoxFrontPath = "/skyboxes/Night MoonBurst/Front+Z.png";
-        cameraComponent.skyBoxBackPath = "/skyboxes/Night MoonBurst/Back-Z.png";
+        auto& cameraControllerComponent = *AddPREComponent<CameraControllerComponent>();
+        cameraControllerComponent.skyBoxRightPath = "/skyboxes/Night MoonBurst/Right+X.png";
+        cameraControllerComponent.skyBoxLeftPath = "/skyboxes/Night MoonBurst/Left-X.png";
+        cameraControllerComponent.skyBoxTopPath = "/skyboxes/Night MoonBurst/Top+Y.png";
+        cameraControllerComponent.skyBoxBottomPath = "/skyboxes/Night MoonBurst/Bottom-Y.png";
+        cameraControllerComponent.skyBoxFrontPath = "/skyboxes/Night MoonBurst/Front+Z.png";
+        cameraControllerComponent.skyBoxBackPath = "/skyboxes/Night MoonBurst/Back-Z.png";
         GetPREComponent<PRETransformComponent>()->SetPosition(
             glm::vec3(0.0f, 1.0f, 2.5f)
         );
     }
 };
 
+static PRERenderTexture* pCameraARenderTexture;
+static PRERenderTexture* pCameraBRenderTexture;
+
 void OnInitialize(PREApplicationContext& applicationContext)
 {
     std::cout << "ON INITIALIZE" << std::endl;
     applicationContext.time.SetFrameLimit(60);
+
+    BufferDisplayCameraTemplate bufferDisplayCameraTemplate;
+    BufferDisplayScreenTemplate bufferDisplayScreenTemplate;
+
+    pCameraARenderTexture = &applicationContext.rendering.CreateRenderTexture(1024, 768 / 2);
+    pCameraBRenderTexture = &applicationContext.rendering.CreateRenderTexture(1024, 768 / 2);
+
+    auto& bufferCamera = applicationContext.world.Instantiate(bufferDisplayCameraTemplate);
+    auto& bufferCameraComponent = *bufferCamera.GetComponent<PRECameraComponent>();
+    bufferCameraComponent.SetRenderTexture(&applicationContext.rendering.GetScreenRenderTexture());
+    bufferCameraComponent.SetAspectRatio(4.0f / 3.0f);
+    bufferCameraComponent.SetSize(1.0f);
+    bufferCameraComponent.SetNearClippingPlane(0.0f);
+    bufferCameraComponent.SetKind(PRECameraComponent::Kind::ORTHOGRAPHIC);
+
+    auto& bufferDisplayScreenA = applicationContext.world.Instantiate(bufferDisplayScreenTemplate);
+    auto& bufferDisplayScreenAComponent = *bufferDisplayScreenA.GetComponent<BufferDisplayScreenComponent>();
+    bufferDisplayScreenAComponent.pRenderTexture = pCameraARenderTexture;
+    bufferDisplayScreenA.GetComponent<PREModelRendererComponent>()->AddCameraComponent(bufferCameraComponent);
+
+    auto& bufferDisplayScreenB = applicationContext.world.Instantiate(bufferDisplayScreenTemplate);
+    bufferDisplayScreenB.GetComponent<PRETransformComponent>()->SetPosition(glm::vec3(0.0f, -1.0f, 0.0f));
+    auto& bufferDisplayScreenBComponent = *bufferDisplayScreenB.GetComponent<BufferDisplayScreenComponent>();
+    bufferDisplayScreenBComponent.pRenderTexture = pCameraBRenderTexture;
+    bufferDisplayScreenB.GetComponent<PREModelRendererComponent>()->AddCameraComponent(bufferCameraComponent);
 
     VampireTemplate capoeiraTemplate, thrillerTemplate;
     capoeiraTemplate.animationPath = "/animations/mixamo/Breathing Idle.dae";
@@ -485,10 +647,18 @@ void OnInitialize(PREApplicationContext& applicationContext)
     auto& sceneRoot = applicationContext.world.Instantiate();
     auto& sceneRootTransform = *sceneRoot.GetComponent<PRETransformComponent>();
 
-    auto& camera = applicationContext.world.Instantiate(cameraTemplate);
-    auto& cameraComponent = *camera.GetComponent<PRECameraComponent>();
-    auto& cameraTransform = *camera.GetComponent<PRETransformComponent>();
-    cameraTransform.SetParent(&sceneRootTransform, true);
+    auto& cameraA = applicationContext.world.Instantiate(cameraTemplate);
+    auto& cameraAComponent = *cameraA.GetComponent<PRECameraComponent>();
+    cameraAComponent.SetRenderTexture(pCameraARenderTexture);
+    auto& cameraATransform = *cameraA.GetComponent<PRETransformComponent>();
+    cameraATransform.SetParent(&sceneRootTransform, true);
+
+    auto& cameraB = applicationContext.world.Instantiate(cameraTemplate);
+    auto& cameraBComponent = *cameraB.GetComponent<PRECameraComponent>();
+    cameraBComponent.SetRenderTexture(pCameraBRenderTexture);
+    auto& cameraBTransform = *cameraB.GetComponent<PRETransformComponent>();
+    cameraBTransform.SetParent(&sceneRootTransform, true);
+    cameraB.GetComponent<FlyCamControllerComponent>()->enabled = false;
 
     auto& vampireA = applicationContext.world.Instantiate(capoeiraTemplate);
     auto& vampireATransform = *vampireA.GetComponent<PRETransformComponent>();
@@ -496,7 +666,8 @@ void OnInitialize(PREApplicationContext& applicationContext)
         vampireATransform.GetPosition() + glm::vec3(-1, 0, 0)
     );
     vampireATransform.SetParent(&sceneRootTransform, true);
-    vampireA.GetComponent<PREModelRendererComponent>()->SetCameraComponent(&cameraComponent);
+    vampireA.GetComponent<PREModelRendererComponent>()->AddCameraComponent(cameraAComponent);
+    vampireA.GetComponent<PREModelRendererComponent>()->AddCameraComponent(cameraBComponent);
 
     auto& vampireB = applicationContext.world.Instantiate(thrillerTemplate);
     auto& vampireBTransform = *vampireB.GetComponent<PRETransformComponent>();
@@ -504,8 +675,9 @@ void OnInitialize(PREApplicationContext& applicationContext)
         vampireBTransform.GetPosition() + glm::vec3(1, 0, 0)
     );
     vampireBTransform.SetParent(&sceneRootTransform, true);
-    vampireB.GetComponent<PREModelRendererComponent>()->SetCameraComponent(&cameraComponent);
-    
+    vampireB.GetComponent<PREModelRendererComponent>()->AddCameraComponent(cameraAComponent);
+    vampireB.GetComponent<PREModelRendererComponent>()->AddCameraComponent(cameraBComponent);
+
     sceneRootTransform.SetEuler(glm::vec3(0, 180, 0));
 
     glm::vec3 lightPositions[] { glm::vec3(-2.5f, 2, 1), glm::vec3(2.5f, 2, 1), glm::vec3(0, 2, -2.5f) };
@@ -534,12 +706,16 @@ void OnInitialize(PREApplicationContext& applicationContext)
         lightComponent.SetColor(lightColors[i]);
         auto& lightCube = *light.GetComponent<LightCubeComponent>();
         lightCube.color = lightColors[i];
-        light.GetComponent<PREModelRendererComponent>()->SetCameraComponent(&cameraComponent);
+        light.GetComponent<PREModelRendererComponent>()->AddCameraComponent(cameraAComponent);
+        light.GetComponent<PREModelRendererComponent>()->AddCameraComponent(cameraBComponent);
     }
 }
 
 void OnShutdown(PREApplicationContext& applicationContext)
 {
+    applicationContext.rendering.DestroyRenderTexture(*pCameraARenderTexture);
+    applicationContext.rendering.DestroyRenderTexture(*pCameraBRenderTexture);
+
     std::cout << "ON SHUTDOWN" << std::endl;
 }
 

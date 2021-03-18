@@ -1,4 +1,6 @@
 #pragma once
+#include <unordered_set>
+
 #include <include/modules/rendering.h>
 
 #include <core/subsystems/world/pregameobjectcomponent.h>
@@ -14,6 +16,8 @@ namespace PRE
 		class PREMaterial;
 		class PREMesh;
 		class PRESkeleton;
+
+		using std::unordered_set;
 
 		using PRE::RenderingModule::RenderModel;
 
@@ -31,8 +35,8 @@ namespace PRE
 			void SetSkeleton(PRESkeleton* pSkeleton);
 			PRESkeleton* GetSkeleton() const;
 
-			void SetCameraComponent(PRECameraComponent* pCameraComponent);
-			PRECameraComponent* GetCameraComponent() const;
+			void AddCameraComponent(PRECameraComponent& cameraComponent);
+			void RemoveCameraComponent(PRECameraComponent& cameraComponent);
 
 		protected:
 			void OnStart() override;
@@ -43,9 +47,9 @@ namespace PRE
 			bool _hasChanged = false;
 
 			PRETransformComponent* _pTransformComponent = nullptr;
-			RenderModel* _pModel = nullptr;
+			RenderModel* _pModel;
 
-			PRECameraComponent* _pCameraComponent = nullptr;
+			unordered_set<PRECameraComponent*> _pCameraComponents;
 
 			PREMaterial* _pMaterial = nullptr;
 			PREMesh* _pMesh = nullptr;
