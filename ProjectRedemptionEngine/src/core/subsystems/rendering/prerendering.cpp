@@ -906,15 +906,14 @@ namespace PRE
 					composition.AddModel(*modelRendererComponent._pModel);
 				}
 
-				if (pCameraComponent->_pSkyBox != nullptr)
-				{
-					composition.AddModel(pCameraComponent->_pSkyBox->_model);
-				}
-
 				composition.SetCompositingTarget(pAccumulatorWrite);
 
 				if (isFirstPass || isSecondPass)
 				{
+					if (pCameraComponent->_pSkyBox != nullptr)
+					{
+						composition.AddModel(pCameraComponent->_pSkyBox->_model);
+					}
 					composition.Clear();
 				}
 			}
