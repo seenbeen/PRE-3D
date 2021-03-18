@@ -13,10 +13,12 @@ namespace PRE
 		using PRE::RenderingModule::RenderCompositingNode;
 
 		PRERenderTexture::PRERenderTexture(
+			int layer,
 			RenderCompositingTarget& bufferA,
 			RenderCompositingTarget& bufferB
 		)
 			:
+			_layer(layer),
 			_pAssociatedCameraComponent(nullptr),
 			_pBufferA(&bufferA),
 			_pBufferB(&bufferB),

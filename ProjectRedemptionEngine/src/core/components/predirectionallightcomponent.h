@@ -1,5 +1,6 @@
 #pragma once
 #include <list>
+#include <unordered_map>
 
 #include <glm/glm.hpp>
 
@@ -16,6 +17,7 @@ namespace PRE
 		class PRELightRenderPassData;
 
 		using std::list;
+		using std::unordered_map;
 
 		class PREDirectionalLightComponent : public PREGameObjectComponent
 		{
@@ -31,7 +33,7 @@ namespace PRE
 
 		private:
 			PRETransformComponent* _pTransform = nullptr;
-			list<PRELightRenderPassData*>::iterator _front;
+			unordered_map<int, list<PRELightRenderPassData*>::iterator> _fronts;
 
 			glm::vec3 _color = glm::vec3(1.0f);
 

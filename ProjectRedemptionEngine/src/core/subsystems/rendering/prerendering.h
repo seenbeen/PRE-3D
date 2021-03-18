@@ -1,5 +1,6 @@
 #pragma once
 #include <list>
+#include <map>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -42,6 +43,7 @@ namespace PRE
 		class PRESkyBox;
 
 		using std::list;
+		using std::map;
 		using std::string;
 		using std::unordered_map;
 		using std::unordered_set;
@@ -98,14 +100,11 @@ namespace PRE
 				RenderModel& screenModel;
 				RenderCamera& screenCamera;
 
-				//list<PRELightRenderPassData*> mainRenderPassCompositingChain;
-				//list<PRELightRenderPassData*> additionalRenderPassesCompositingChain;
-				list<PRELightRenderPassData*> compositingChain;
+				PRELightRenderPassData* const rootRenderPassData;
 
-				//PRERenderTexture* mainRenderPass;
-				//unordered_set<PRERenderTexture*> additionalRenderPasses;
-				list<PRERenderTexture*> renderPasses;
+				map<int, list<PRELightRenderPassData*>> compositingChains;
 
+				unordered_set<PRERenderTexture*> renderPasses;
 				unordered_set<PREAmbientLightComponent*> ambientLights;
 				unordered_set<PREPointLightComponent*> pointLights;
 				unordered_set<PRESpotLightComponent*> spotLights;
@@ -123,10 +122,14 @@ namespace PRE
 				);
 				~Impl();
 
+				void UnlinkCompositingChains();
+				void RelinkCompositingChains();
+
 				void LinkLightToRenderTarget(
 					PRERenderTexture& renderPass,
 					PRELightRenderPassData& lightData,
 					void* pLightComponent,
+					list<PRELightRenderPassData*>& compositingChain,
 					list<PRELightRenderPassData*>::iterator& itLightFront
 				);
 
@@ -134,14 +137,17 @@ namespace PRE
 					PRERenderTexture& renderPass,
 					PRELightRenderPassData& lightData,
 					void* pLightComponent,
+					list<PRELightRenderPassData*>& compositingChain,
 					list<PRELightRenderPassData*>::iterator& itLightFront
 				);
 			};
 
 		public:
+			static const int DEFAULT_LAYER;
+
 			PRERenderTexture& GetScreenRenderTexture();
 
-			PRERenderTexture& CreateRenderTexture(unsigned int width, unsigned int height);
+			PRERenderTexture& CreateRenderTexture(int layer, unsigned int width, unsigned int height);
 			void DestroyRenderTexture(PRERenderTexture& renderTexture);
 
 			PREShader& CreateShader(const string& vertex, const string& fragment);

@@ -409,7 +409,7 @@ private:
 class BufferDisplayScreenComponent : public PREGameObjectComponent
 {
 public:
-    PRERenderTexture* pRenderTexture;
+    PRERenderTexture* pRenderTexture = nullptr;
 
 protected:
     void OnStart() override
@@ -617,8 +617,8 @@ void OnInitialize(PREApplicationContext& applicationContext)
     BufferDisplayCameraTemplate bufferDisplayCameraTemplate;
     BufferDisplayScreenTemplate bufferDisplayScreenTemplate;
 
-    pCameraARenderTexture = &applicationContext.rendering.CreateRenderTexture(1024, 768 / 2);
-    pCameraBRenderTexture = &applicationContext.rendering.CreateRenderTexture(1024, 768 / 2);
+    pCameraARenderTexture = &applicationContext.rendering.CreateRenderTexture(1, 1024, 768 / 2);
+    pCameraBRenderTexture = &applicationContext.rendering.CreateRenderTexture(1, 1024, 768 / 2);
 
     auto& bufferCamera = applicationContext.world.Instantiate(bufferDisplayCameraTemplate);
     auto& bufferCameraComponent = *bufferCamera.GetComponent<PRECameraComponent>();

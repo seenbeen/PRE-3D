@@ -36,6 +36,7 @@ namespace PRE
 		private:
 			PRECameraComponent* _pAssociatedCameraComponent;
 
+			const int _layer;
 			RenderCompositingTarget* const _pBufferA;
 			RenderCompositingTarget* const _pBufferB;
 
@@ -51,6 +52,7 @@ namespace PRE
 			unordered_map<void*, list<PRELightRenderPassData*>::iterator> _lightMap;
 
 			PRERenderTexture(
+				int layer,
 				RenderCompositingTarget& bufferA,
 				RenderCompositingTarget& bufferB
 			);

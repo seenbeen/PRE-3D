@@ -206,14 +206,12 @@ namespace PRE
 			screenMesh(screenMesh),
 			screenMaterial(screenMaterial),
 			screenModel(screenModel),
-			screenCamera(screenCamera)
-		{
-			compositingChain.push_back(new PRELightRenderPassData(screenCompositingNode));
-		}
+			screenCamera(screenCamera),
+			rootRenderPassData(new PRELightRenderPassData(screenCompositingNode)) {}
 
 		PRERendering::Impl::~Impl()
 		{
-			delete compositingChain.front();
+			delete rootRenderPassData;
 			renderer.DeallocateCamera(screenCamera);
 			renderer.DeallocateModel(screenModel);
 			renderer.DeallocateMaterial(screenMaterial);
@@ -223,19 +221,57 @@ namespace PRE
 			Renderer::ShutdownRenderer(renderer);
 		}
 
+		void PRERendering::Impl::UnlinkCompositingChains()
+		{
+			auto previousNode = rootRenderPassData->pNode;
+			for (auto it = compositingChains.rbegin(); it != compositingChains.rend(); ++it)
+			{
+				auto itLightRenderPassData = it->second.begin();
+				if (itLightRenderPassData != it->second.end())
+				{
+					renderer.DetachCompositingNodeDependency(
+						*previousNode,
+						*(*itLightRenderPassData)->pNode
+					);
+					previousNode = (*(--it->second.end()))->pNode;
+				}
+			}
+		}
+
+		void PRERendering::Impl::RelinkCompositingChains()
+		{
+			auto previousNode = rootRenderPassData->pNode;
+			for (auto it = compositingChains.rbegin(); it != compositingChains.rend(); ++it)
+			{
+				auto itLightRenderPassData = it->second.begin();
+				if (itLightRenderPassData != it->second.end())
+				{
+					renderer.AttachCompositingNodeDependency(
+						*previousNode,
+						*(*itLightRenderPassData)->pNode
+					);
+					previousNode = (*(--it->second.end()))->pNode;
+				}
+			}
+		}
 
 		void PRERendering::Impl::LinkLightToRenderTarget(
 			PRERenderTexture& renderPass,
 			PRELightRenderPassData& lightData,
 			void* pLightComponent,
+			list<PRELightRenderPassData*>& compositingChain,
 			list<PRELightRenderPassData*>::iterator& itLightFront
 		)
 		{
 			auto pRenderPass = &renderPass;
 			auto pLightData = &lightData;
 
-			auto itPreviousLightData(itLightFront);
-			PRELightRenderPassData* pPreviousLightData = *(--itPreviousLightData);
+			PRELightRenderPassData* pPreviousLightData = nullptr;
+			if (itLightFront != compositingChain.begin())
+			{
+				auto itLightPrevious(itLightFront);
+				pPreviousLightData = *(--itLightPrevious);
+			}
 
 			PRELightRenderPassData* pNextLightData = nullptr;
 			if (itLightFront != compositingChain.end())
@@ -243,8 +279,8 @@ namespace PRE
 				pNextLightData = *itLightFront;
 			}
 
-			// detach next light if exists
-			if (pNextLightData != nullptr)
+			// detach if both previous and next exist
+			if (pPreviousLightData != nullptr && pNextLightData != nullptr)
 			{
 				renderer.DetachCompositingNodeDependency(
 					*pPreviousLightData->pNode,
@@ -252,11 +288,14 @@ namespace PRE
 				);
 			}
 
-			// splice in new light
-			renderer.AttachCompositingNodeDependency(
-				*pPreviousLightData->pNode,
-				*pLightData->pNode
-			);
+			// splice in new light if previous exists
+			if (pPreviousLightData != nullptr)
+			{
+				renderer.AttachCompositingNodeDependency(
+					*pPreviousLightData->pNode,
+					*pLightData->pNode
+				);
+			}
 
 			// re-attach next light if exists
 			if (pNextLightData != nullptr)
@@ -283,6 +322,7 @@ namespace PRE
 			PRERenderTexture& renderPass,
 			PRELightRenderPassData& lightData,
 			void* pLightComponent,
+			list<PRELightRenderPassData*>& compositingChain,
 			list<PRELightRenderPassData*>::iterator& itLightFront
 		)
 		{
@@ -294,22 +334,29 @@ namespace PRE
 #endif
 
 			auto itRemovedLightData(renderPass._lightMap.find(pLightComponent)->second);
-			auto itPreviousLightData(itRemovedLightData);
-			PRELightRenderPassData* pPreviousLightData = *(--itPreviousLightData);
+
+			PRELightRenderPassData* pPreviousLightData = nullptr;
+			if (itRemovedLightData != compositingChain.begin())
+			{
+				auto itPreviousLightData(itRemovedLightData);
+				pPreviousLightData = *(--itPreviousLightData);
+			}
 
 			PRELightRenderPassData* pNextLightData = nullptr;
 			auto itNextLightData(itRemovedLightData);
-			++itNextLightData;
-			if (itNextLightData != compositingChain.end())
+			if (++itNextLightData != compositingChain.end())
 			{
 				pNextLightData = *itNextLightData;
 			}
 
-			// unlink previous light
-			renderer.DetachCompositingNodeDependency(
-				*pPreviousLightData->pNode,
-				*pRemovedLightData->pNode
-			);
+			// unlink previous light if exists
+			if (pPreviousLightData != nullptr)
+			{
+				renderer.DetachCompositingNodeDependency(
+					*pPreviousLightData->pNode,
+					*pRemovedLightData->pNode
+				);
+			}
 
 			// unlink next light if exists
 			if (pNextLightData != nullptr)
@@ -320,8 +367,8 @@ namespace PRE
 				);
 			}
 
-			// re-splice if next exists
-			if (pNextLightData != nullptr)
+			// re-splice if both previous and next exist
+			if (pPreviousLightData != nullptr && pNextLightData != nullptr)
 			{
 				renderer.AttachCompositingNodeDependency(
 					*pPreviousLightData->pNode,
@@ -339,17 +386,46 @@ namespace PRE
 			pRenderPass->_lightMap.erase(pLightComponent);
 		}
 
+		const int PRERendering::DEFAULT_LAYER = 0;
+
 		PRERenderTexture& PRERendering::GetScreenRenderTexture()
 		{
 			return _screenRenderTexture;
 		}
 
-		PRERenderTexture& PRERendering::CreateRenderTexture(unsigned int width, unsigned int height)
+		PRERenderTexture& PRERendering::CreateRenderTexture(int layer, unsigned int width, unsigned int height)
 		{
 			auto pRenderTexture = new PRERenderTexture(
+				layer,
 				_impl.renderer.AllocateCompositingTarget(width, height),
 				_impl.renderer.AllocateCompositingTarget(width, height)
 			);
+			auto itCompositingChain = _impl.compositingChains.find(layer);
+			if (itCompositingChain == _impl.compositingChains.end())
+			{
+				auto itEnd = _impl.compositingChains.insert(
+					std::make_pair(
+						layer,
+						std::move(list<PRELightRenderPassData*>())
+					)
+				).first->second.end();
+				for (auto itLight = _impl.ambientLights.begin(); itLight != _impl.ambientLights.end(); ++itLight)
+				{
+					(*itLight)->_fronts[layer] = itEnd;
+				}
+				for (auto itLight = _impl.pointLights.begin(); itLight != _impl.pointLights.end(); ++itLight)
+				{
+					(*itLight)->_fronts[layer] = itEnd;
+				}
+				for (auto itLight = _impl.spotLights.begin(); itLight != _impl.spotLights.end(); ++itLight)
+				{
+					(*itLight)->_fronts[layer] = itEnd;
+				}
+				for (auto itLight = _impl.directionalLights.begin(); itLight != _impl.directionalLights.end(); ++itLight)
+				{
+					(*itLight)->_fronts[layer] = itEnd;
+				}
+			}
 			LinkRenderTextureToLights(*pRenderTexture);
 			return *pRenderTexture;
 		}
@@ -365,6 +441,27 @@ namespace PRE
 				);
 			}
 			UnlinkRenderTextureFromLights(*pRenderTexture);
+			auto itCompositingChain = _impl.compositingChains.find(renderTexture._layer);
+			if (itCompositingChain->second.size() == 0)
+			{
+				_impl.compositingChains.erase(itCompositingChain);
+				for (auto itLight = _impl.ambientLights.begin(); itLight != _impl.ambientLights.end(); ++itLight)
+				{
+					(*itLight)->_fronts.erase(renderTexture._layer);
+				}
+				for (auto itLight = _impl.pointLights.begin(); itLight != _impl.pointLights.end(); ++itLight)
+				{
+					(*itLight)->_fronts.erase(renderTexture._layer);
+				}
+				for (auto itLight = _impl.spotLights.begin(); itLight != _impl.spotLights.end(); ++itLight)
+				{
+					(*itLight)->_fronts.erase(renderTexture._layer);
+				}
+				for (auto itLight = _impl.directionalLights.begin(); itLight != _impl.directionalLights.end(); ++itLight)
+				{
+					(*itLight)->_fronts.erase(renderTexture._layer);
+				}
+			}
 			_impl.renderer.DeallocateCompositingTarget(*renderTexture._pBufferA);
 			_impl.renderer.DeallocateCompositingTarget(*renderTexture._pBufferB);
 			delete &renderTexture;
@@ -842,7 +939,13 @@ namespace PRE
 		)
 			:
 			_impl(Impl::MakeImpl(applicationContext, renderer, *this)),
-			_screenRenderTexture(CreateRenderTexture(renderer.width, renderer.height)) {}
+			_screenRenderTexture(
+				CreateRenderTexture(
+					DEFAULT_LAYER,
+					renderer.width,
+					renderer.height
+				)
+			) {}
 
 		PRERendering::~PRERendering()
 		{
@@ -1029,11 +1132,14 @@ namespace PRE
 			PREAmbientLightComponent& ambientLightComponent
 		)
 		{
+			_impl.UnlinkCompositingChains();
+
 			auto pLightComponent = &ambientLightComponent;
-			pLightComponent->_front = ++_impl.compositingChain.begin();
 			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
 			{
 				auto pRenderPass = *it;
+				auto& compositingChain = _impl.compositingChains.at(pRenderPass->_layer);
+				pLightComponent->_fronts[pRenderPass->_layer] = compositingChain.begin();
 
 				auto pLightContext = new PRELightRenderPassContext(
 					*pRenderPass,
@@ -1051,17 +1157,22 @@ namespace PRE
 					*pRenderPass,
 					*pNewLightData,
 					pLightComponent,
-					ambientLightComponent._front
+					compositingChain,
+					ambientLightComponent._fronts.at(pRenderPass->_layer)
 				);
 			}
 
 			_impl.ambientLights.insert(&ambientLightComponent);
+
+			_impl.RelinkCompositingChains();
 		}
 
 		void PRERendering::UnlinkLightFromRenderTargets(
 			PREAmbientLightComponent& ambientLightComponent
 		)
 		{
+			_impl.UnlinkCompositingChains();
+
 			auto pLightComponent = &ambientLightComponent;
 			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
 			{
@@ -1078,7 +1189,8 @@ namespace PRE
 					*pRenderPass,
 					*pRemovedLightData,
 					pLightComponent,
-					ambientLightComponent._front
+					_impl.compositingChains.at(pRenderPass->_layer),
+					ambientLightComponent._fronts.at(pRenderPass->_layer)
 				);
 
 				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
@@ -1086,6 +1198,8 @@ namespace PRE
 				delete pRemovedLightData;
 			}
 			_impl.ambientLights.erase(&ambientLightComponent);
+
+			_impl.RelinkCompositingChains();
 		}
 #pragma endregion
 
@@ -1094,11 +1208,14 @@ namespace PRE
 			PREPointLightComponent& pointLightComponent
 		)
 		{
+			_impl.UnlinkCompositingChains();
+
 			auto pLightComponent = &pointLightComponent;
-			pLightComponent->_front = ++_impl.compositingChain.begin();
 			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
 			{
 				auto pRenderPass = *it;
+				auto& compositingChain = _impl.compositingChains.at(pRenderPass->_layer);
+				pLightComponent->_fronts[pRenderPass->_layer] = compositingChain.begin();
 
 				auto pLightContext = new PRELightRenderPassContext(
 					*pRenderPass,
@@ -1116,17 +1233,22 @@ namespace PRE
 					*pRenderPass,
 					*pNewLightData,
 					pLightComponent,
-					pointLightComponent._front
+					compositingChain,
+					pointLightComponent._fronts.at(pRenderPass->_layer)
 				);
 			}
 
 			_impl.pointLights.insert(&pointLightComponent);
+
+			_impl.RelinkCompositingChains();
 		}
 
 		void PRERendering::UnlinkLightFromRenderTargets(
 			PREPointLightComponent& pointLightComponent
 		)
 		{
+			_impl.UnlinkCompositingChains();
+
 			auto pLightComponent = &pointLightComponent;
 			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
 			{
@@ -1143,7 +1265,8 @@ namespace PRE
 					*pRenderPass,
 					*pRemovedLightData,
 					pLightComponent,
-					pointLightComponent._front
+					_impl.compositingChains.at(pRenderPass->_layer),
+					pointLightComponent._fronts.at(pRenderPass->_layer)
 				);
 
 				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
@@ -1152,6 +1275,8 @@ namespace PRE
 			}
 
 			_impl.pointLights.erase(&pointLightComponent);
+
+			_impl.RelinkCompositingChains();
 		}
 #pragma endregion
 
@@ -1160,11 +1285,14 @@ namespace PRE
 			PRESpotLightComponent& spotLightComponent
 		)
 		{
+			_impl.UnlinkCompositingChains();
+
 			auto pLightComponent = &spotLightComponent;
-			pLightComponent->_front = ++_impl.compositingChain.begin();
 			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
 			{
 				auto pRenderPass = *it;
+				auto& compositingChain = _impl.compositingChains.at(pRenderPass->_layer);
+				pLightComponent->_fronts[pRenderPass->_layer] = compositingChain.begin();
 
 				auto pLightContext = new PRELightRenderPassContext(
 					*pRenderPass,
@@ -1182,17 +1310,22 @@ namespace PRE
 					*pRenderPass,
 					*pNewLightData,
 					pLightComponent,
-					spotLightComponent._front
+					compositingChain,
+					spotLightComponent._fronts.at(pRenderPass->_layer)
 				);
 			}
 
 			_impl.spotLights.insert(&spotLightComponent);
+
+			_impl.RelinkCompositingChains();
 		}
 
 		void PRERendering::UnlinkLightFromRenderTargets(
 			PRESpotLightComponent& spotLightComponent
 		)
 		{
+			_impl.UnlinkCompositingChains();
+
 			auto pLightComponent = &spotLightComponent;
 			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
 			{
@@ -1209,7 +1342,8 @@ namespace PRE
 					*pRenderPass,
 					*pRemovedLightData,
 					pLightComponent,
-					spotLightComponent._front
+					_impl.compositingChains.at(pRenderPass->_layer),
+					spotLightComponent._fronts.at(pRenderPass->_layer)
 				);
 
 				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
@@ -1218,6 +1352,8 @@ namespace PRE
 			}
 
 			_impl.spotLights.erase(&spotLightComponent);
+
+			_impl.RelinkCompositingChains();
 		}
 #pragma endregion
 
@@ -1226,11 +1362,14 @@ namespace PRE
 			PREDirectionalLightComponent& directionalLightComponent
 		)
 		{
+			_impl.UnlinkCompositingChains();
+
 			auto pLightComponent = &directionalLightComponent;
-			pLightComponent->_front = ++_impl.compositingChain.begin();
 			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
 			{
 				auto pRenderPass = *it;
+				auto& compositingChain = _impl.compositingChains.at(pRenderPass->_layer);
+				pLightComponent->_fronts[pRenderPass->_layer] = compositingChain.begin();
 
 				auto pLightContext = new PRELightRenderPassContext(
 					*pRenderPass,
@@ -1248,17 +1387,22 @@ namespace PRE
 					*pRenderPass,
 					*pNewLightData,
 					pLightComponent,
-					directionalLightComponent._front
+					compositingChain,
+					directionalLightComponent._fronts.at(pRenderPass->_layer)
 				);
 			}
 
 			_impl.directionalLights.insert(&directionalLightComponent);
+
+			_impl.RelinkCompositingChains();
 		}
 
 		void PRERendering::UnlinkLightFromRenderTargets(
 			PREDirectionalLightComponent& directionalLightComponent
 		)
 		{
+			_impl.UnlinkCompositingChains();
+
 			auto pLightComponent = &directionalLightComponent;
 			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
 			{
@@ -1275,7 +1419,8 @@ namespace PRE
 					*pRenderPass,
 					*pRemovedLightData,
 					pLightComponent,
-					directionalLightComponent._front
+					_impl.compositingChains.at(pRenderPass->_layer),
+					directionalLightComponent._fronts.at(pRenderPass->_layer)
 				);
 
 				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
@@ -1284,6 +1429,8 @@ namespace PRE
 			}
 
 			_impl.directionalLights.erase(&directionalLightComponent);
+
+			_impl.RelinkCompositingChains();
 		}
 #pragma endregion
 
@@ -1291,7 +1438,10 @@ namespace PRE
 			PRERenderTexture& renderTexture
 		)
 		{
+			_impl.UnlinkCompositingChains();
+
 			auto pRenderPass = &renderTexture;
+			auto& compositingChain = _impl.compositingChains.at(renderTexture._layer);
 #pragma region Ambient Lights
 			for (auto it = _impl.ambientLights.begin(); it != _impl.ambientLights.end(); ++it)
 			{
@@ -1314,7 +1464,8 @@ namespace PRE
 					*pRenderPass,
 					*pNewLightData,
 					pLightComponent,
-					ambientLightComponent._front
+					compositingChain,
+					ambientLightComponent._fronts.at(pRenderPass->_layer)
 				);
 			}
 #pragma endregion
@@ -1341,7 +1492,8 @@ namespace PRE
 					*pRenderPass,
 					*pNewLightData,
 					pLightComponent,
-					pointLightComponent._front
+					compositingChain,
+					pointLightComponent._fronts.at(pRenderPass->_layer)
 				);
 			}
 #pragma endregion
@@ -1368,7 +1520,8 @@ namespace PRE
 					*pRenderPass,
 					*pNewLightData,
 					pLightComponent,
-					spotLightComponent._front
+					compositingChain,
+					spotLightComponent._fronts.at(pRenderPass->_layer)
 				);
 			}
 #pragma endregion
@@ -1395,19 +1548,25 @@ namespace PRE
 					*pRenderPass,
 					*pNewLightData,
 					pLightComponent,
-					directionalLightComponent._front
+					compositingChain,
+					directionalLightComponent._fronts.at(pRenderPass->_layer)
 				);
 			}
 #pragma endregion
 
-			_impl.renderPasses.push_front(pRenderPass);
+			_impl.renderPasses.insert(pRenderPass);
+
+			_impl.RelinkCompositingChains();
 		}
 
 		void PRERendering::UnlinkRenderTextureFromLights(
 			PRERenderTexture& renderTexture
 		)
 		{
+			_impl.UnlinkCompositingChains();
+
 			auto pRenderPass = &renderTexture;
+			auto& compositingChain = _impl.compositingChains.at(renderTexture._layer);
 #pragma region Ambient Lights
 			for (auto it = _impl.ambientLights.begin(); it != _impl.ambientLights.end(); ++it)
 			{
@@ -1420,7 +1579,8 @@ namespace PRE
 					*pRenderPass,
 					*pRemovedLightData,
 					pLightComponent,
-					ambientLightComponent._front
+					compositingChain,
+					ambientLightComponent._fronts.at(pRenderPass->_layer)
 				);
 
 				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
@@ -1441,7 +1601,8 @@ namespace PRE
 					*pRenderPass,
 					*pRemovedLightData,
 					pLightComponent,
-					pointLightComponent._front
+					compositingChain,
+					pointLightComponent._fronts.at(pRenderPass->_layer)
 				);
 
 				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
@@ -1462,7 +1623,8 @@ namespace PRE
 					*pRenderPass,
 					*pRemovedLightData,
 					pLightComponent,
-					spotLightComponent._front
+					compositingChain,
+					spotLightComponent._fronts.at(pRenderPass->_layer)
 				);
 
 				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
@@ -1483,7 +1645,8 @@ namespace PRE
 					*pRenderPass,
 					*pRemovedLightData,
 					pLightComponent,
-					directionalLightComponent._front
+					compositingChain,
+					directionalLightComponent._fronts.at(pRenderPass->_layer)
 				);
 
 				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
@@ -1492,14 +1655,9 @@ namespace PRE
 			}
 #pragma endregion
 
-			// TODO: render target layers .-.
-			_impl.renderPasses.erase(
-				std::find(
-					_impl.renderPasses.begin(),
-					_impl.renderPasses.end(),
-					pRenderPass
-				)
-			);
+			_impl.renderPasses.erase(pRenderPass);
+
+			_impl.RelinkCompositingChains();
 		}
 	}
 }
