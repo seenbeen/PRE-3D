@@ -154,6 +154,127 @@ private:
     PREAnimator* _pAnimator = nullptr;
 };
 
+class FloorModelComponent : public PREGameObjectComponent
+{
+protected:
+    void OnStart() override
+    {
+        const unsigned int VERTEX_COUNT = 4u;
+        const glm::vec3 VERTICES[]
+        {
+            glm::vec3(-1,  1, 0),
+            glm::vec3(-1, -1, 0),
+            glm::vec3( 1, -1, 0),
+            glm::vec3( 1,  1, 0)
+        };
+        const glm::vec2 UVS[]
+        {
+            glm::vec2(0, 4),
+            glm::vec2(0, 0),
+            glm::vec2(4, 0),
+            glm::vec2(4, 4)
+        };
+        const glm::vec3 NORMALS[]
+        {
+            glm::vec3(0, 0, 1),
+            glm::vec3(0, 0, 1),
+            glm::vec3(0, 0, 1),
+            glm::vec3(0, 0, 1)
+        };
+        const glm::vec3 TANGENTS[]
+        {
+            glm::vec3(1, 0, 0),
+            glm::vec3(1, 0, 0),
+            glm::vec3(1, 0, 0),
+            glm::vec3(1, 0, 0)
+        };
+        const glm::vec3 BITANGENTS[]
+        {
+            glm::vec3(0, 1, 0),
+            glm::vec3(0, 1, 0),
+            glm::vec3(0, 1, 0),
+            glm::vec3(0, 1, 0)
+        };
+        unsigned int TRIANGLE_ELEMENT_COUNT = 6u;
+        const unsigned int TRIANGLE_ELEMENTS[]
+        {
+            0u, 1u, 2u, 0u, 2u, 3u
+        };
+
+        _pShader = &GetAssetManager().LoadShader(
+            GetAssetManager().rootAssetPath + "/shaders/simplevertex.vs",
+            GetAssetManager().rootAssetPath + "/shaders/simplefragment.fs"
+        );
+
+        _pMesh = &GetRendering().CreateMesh(
+            VERTEX_COUNT,
+            VERTICES,
+            NORMALS,
+            TANGENTS,
+            BITANGENTS,
+            UVS,
+            nullptr,
+            nullptr,
+            TRIANGLE_ELEMENT_COUNT,
+            TRIANGLE_ELEMENTS
+        );
+
+        _pDiffuseTexture = &GetAssetManager().LoadTexture(
+            GetAssetManager().rootAssetPath + "/models/cobble/diffuse.png"
+        );
+
+        _pEmissionTexture = &GetAssetManager().LoadTexture(
+            GetAssetManager().rootAssetPath + "/models/cobble/diffuse.png"
+        );
+
+        _pNormalTexture = &GetAssetManager().LoadTexture(
+            GetAssetManager().rootAssetPath + "/models/cobble/normal.png"
+        );
+
+        _pSpecularTexture = &GetAssetManager().LoadTexture(
+            GetAssetManager().rootAssetPath + "/models/cobble/specular.png"
+        );
+
+        _pMaterial = &GetRendering().CreateMaterial();
+        _pMaterial->SetShader(_pShader);
+
+        _pMaterial->SetTextureBinding(_pDiffuseTexture, 1);
+        _pMaterial->SetTextureBinding(_pEmissionTexture, 2);
+        _pMaterial->SetTextureBinding(_pNormalTexture, 3);
+        _pMaterial->SetTextureBinding(_pSpecularTexture, 4);
+
+        _pShader->SetInt("diffuseSampler", 1);
+        _pShader->SetInt("emissionSampler", 2);
+        _pShader->SetInt("normalSampler", 3);
+        _pShader->SetInt("specularSampler", 4);
+        auto& modelRendererComponent = *gameObject().GetComponent<PREModelRendererComponent>();
+        modelRendererComponent.SetMesh(_pMesh);
+        modelRendererComponent.SetMaterial(_pMaterial);
+    }
+
+    void OnDestroy() override
+    {
+        GetRendering().DestroyShader(*_pShader);
+        GetRendering().DestroyMesh(*_pMesh);
+        GetRendering().DestroyTexture(*_pDiffuseTexture);
+        GetRendering().DestroyTexture(*_pEmissionTexture);
+        GetRendering().DestroyTexture(*_pNormalTexture);
+        GetRendering().DestroyTexture(*_pSpecularTexture);
+        GetRendering().DestroyMaterial(*_pMaterial);
+    }
+
+private:
+    PREShader* _pShader = nullptr;
+    PREMesh* _pMesh = nullptr;
+
+    PRETexture* _pDiffuseTexture = nullptr;
+    PRETexture* _pEmissionTexture = nullptr;
+    PRETexture* _pNormalTexture = nullptr;
+    PRETexture* _pSpecularTexture = nullptr;
+
+    PREMaterial* _pMaterial = nullptr;
+};
+
 class LightCubeComponent : public PREGameObjectComponent
 {
 public:
@@ -430,7 +551,7 @@ protected:
             "void main()\n"
             "{\n"
             "    TexCoord = iUv;\n"
-            "    gl_Position = PRE_PROJECTION_MATRIX *PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * vec4(iPos, 1.0f);\n"
+            "    gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * vec4(iPos, 1.0f);\n"
             "}\n";
 
         const string FRAGMENT_SHADER_SOURCE =
@@ -544,6 +665,16 @@ protected:
     }
 };
 
+class FloorTemplate : public PREGameObjectTemplate
+{
+protected:
+    void OnInstantiateTemplate() override
+    {
+        AddPREComponent<PREModelRendererComponent>();
+        AddPREComponent<FloorModelComponent>();
+    }
+};
+
 class AmbientLightTemplate : public PREGameObjectTemplate
 {
 protected:
@@ -569,7 +700,7 @@ class DirectionalLightTemplate : public PREGameObjectTemplate
     void OnInstantiateTemplate() override
     {
         auto& directionalLightComponent = *AddPREComponent<PREDirectionalLightComponent>();
-        directionalLightComponent.SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+        directionalLightComponent.SetColor(glm::vec3(2.0f / 3.0f));
     }
 };
 
@@ -647,6 +778,8 @@ void OnInitialize(PREApplicationContext& applicationContext)
     capoeiraTemplate.animationPath = "/animations/mixamo/Breathing Idle.dae";
     thrillerTemplate.animationPath = "/animations/mixamo/Thriller Part 4.dae";
 
+    FloorTemplate floorTemplate;
+
     CameraTemplate cameraTemplate;
     AmbientLightTemplate ambientLightTemplate;
     PointLightTemplate pointLightTemplate;
@@ -679,16 +812,28 @@ void OnInitialize(PREApplicationContext& applicationContext)
     pVampireAModelRendererComponent->AddCameraComponent(cameraBComponent);
     pVampireAModelRendererComponent->AddAffectedLightLayer(1);
 
-    auto& vampireB = applicationContext.world.Instantiate(thrillerTemplate);
-    auto& vampireBTransform = *vampireB.GetComponent<PRETransformComponent>();
-    vampireBTransform.SetPosition(
-        vampireBTransform.GetPosition() + glm::vec3(1, 0, 0)
-    );
-    vampireBTransform.SetParent(&sceneRootTransform, true);
-    auto pVampireBModelRendererComponent = vampireB.GetComponent<PREModelRendererComponent>();
-    pVampireBModelRendererComponent->AddCameraComponent(cameraAComponent);
-    pVampireBModelRendererComponent->AddCameraComponent(cameraBComponent);
-    pVampireBModelRendererComponent->AddAffectedLightLayer(1);
+    for (auto i = 0; i < 1; ++i)
+    {
+        auto& vampireB = applicationContext.world.Instantiate(thrillerTemplate);
+        auto& vampireBTransform = *vampireB.GetComponent<PRETransformComponent>();
+        vampireBTransform.SetPosition(
+            vampireBTransform.GetPosition() + glm::vec3(1 + i, 0, 0)
+        );
+        vampireBTransform.SetParent(&sceneRootTransform, true);
+        auto pVampireBModelRendererComponent = vampireB.GetComponent<PREModelRendererComponent>();
+        pVampireBModelRendererComponent->AddCameraComponent(cameraAComponent);
+        pVampireBModelRendererComponent->AddCameraComponent(cameraBComponent);
+        pVampireBModelRendererComponent->AddAffectedLightLayer(1);
+    }
+
+    auto& floor = applicationContext.world.Instantiate(floorTemplate);
+    auto pFloorTransform = floor.GetComponent<PRETransformComponent>();
+    pFloorTransform->SetEuler(glm::vec3(-90.0f, 0.0f, 0.0f));
+    pFloorTransform->SetScale(glm::vec3(8.0f));
+    auto pFloorModelRendererComponent = floor.GetComponent<PREModelRendererComponent>();
+    pFloorModelRendererComponent->AddCameraComponent(cameraAComponent);
+    pFloorModelRendererComponent->AddCameraComponent(cameraBComponent);
+    pFloorModelRendererComponent->AddAffectedLightLayer(1);
 
     sceneRootTransform.SetEuler(glm::vec3(0, 180, 0));
 

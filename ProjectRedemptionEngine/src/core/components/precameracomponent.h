@@ -67,7 +67,7 @@ namespace PRE
 			float _size = 5.0f;
 			float _aspectRatio = 800.0f / 600.0f;
 			float _nearClippingPlane = 0.1f;
-			float _farClippingPlane = 1000.0f;
+			float _farClippingPlane = 100.0f;
 
 			PRERenderTexture* _pRenderTexture = nullptr;
 			PRESkyBox* _pSkyBox = nullptr;

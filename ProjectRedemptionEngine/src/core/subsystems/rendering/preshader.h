@@ -24,6 +24,7 @@ namespace PRE
 		public:
 			// this is the accumulated light buffer from previous light passes
 			static const string IS_FIRST_LIGHT_PASS;
+			static const string LIGHT_ACCUMULATOR_SAMPLER_SIZE;
 			static const string LIGHT_ACCUMULATOR_SAMPLER;
 			static const int LIGHT_ACCUMULATOR_BINDING;
 

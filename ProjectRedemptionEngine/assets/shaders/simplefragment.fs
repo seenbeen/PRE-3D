@@ -8,12 +8,12 @@ in vec3 iTangentLightPos;
 in vec3 iTangentLightDirection;
 
 in vec2 iTexCoord;
-in vec2 iAccumCoord;
 
 const float MATERIAL_SHININESS = 32.0f;
 
 uniform int PRE_IS_FIRST_LIGHT_PASS;
 
+uniform vec2 PRE_LIGHT_ACCUMULATOR_SAMPLER_SIZE;
 uniform sampler2D PRE_LIGHT_ACCUMULATOR_SAMPLER;
 
 uniform int PRE_AMBIENT_LIGHT_FLAG;
@@ -38,7 +38,7 @@ out vec4 FragColor;
 
 void main()
 {
-	vec4 accumulatorColor = texture(PRE_LIGHT_ACCUMULATOR_SAMPLER, iAccumCoord) * (1 - PRE_IS_FIRST_LIGHT_PASS);
+	vec4 accumulatorColor = texture(PRE_LIGHT_ACCUMULATOR_SAMPLER, gl_FragCoord.xy / PRE_LIGHT_ACCUMULATOR_SAMPLER_SIZE) * (1 - PRE_IS_FIRST_LIGHT_PASS);
 
 	vec4 diffuseColor = texture(diffuseSampler, iTexCoord);
 	vec4 specularColor = texture(specularSampler, iTexCoord);

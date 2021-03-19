@@ -52,7 +52,7 @@ namespace PRE
 			bool _hasChanged = false;
 
 			PRETransformComponent* _pTransformComponent = nullptr;
-			RenderModel* _pModel;
+			RenderModel* _pModel = nullptr;
 
 			unordered_set<PRECameraComponent*> _pCameraComponents;
 			set<int> _affectedLightLayers;

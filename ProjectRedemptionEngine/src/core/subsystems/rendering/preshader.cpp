@@ -11,6 +11,7 @@ namespace PRE
 		using PRE::RenderingModule::RenderShaderProgram;
 
 		const string PREShader::IS_FIRST_LIGHT_PASS = "PRE_IS_FIRST_LIGHT_PASS";
+		const string PREShader::LIGHT_ACCUMULATOR_SAMPLER_SIZE = "PRE_LIGHT_ACCUMULATOR_SAMPLER_SIZE";
 		const string PREShader::LIGHT_ACCUMULATOR_SAMPLER = "PRE_LIGHT_ACCUMULATOR_SAMPLER";
 		const int PREShader::LIGHT_ACCUMULATOR_BINDING = 0;
 

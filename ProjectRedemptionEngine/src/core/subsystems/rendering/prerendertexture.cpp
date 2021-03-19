@@ -14,11 +14,13 @@ namespace PRE
 
 		PRERenderTexture::PRERenderTexture(
 			int layer,
+			const glm::vec2& size,
 			RenderCompositingTarget& bufferA,
 			RenderCompositingTarget& bufferB
 		)
 			:
 			_layer(layer),
+			_size(size),
 			_pAssociatedCameraComponent(nullptr),
 			_pBufferA(&bufferA),
 			_pBufferB(&bufferB),

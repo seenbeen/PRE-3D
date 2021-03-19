@@ -29,7 +29,6 @@ out vec3 iTangentLightPos;
 out vec3 iTangentLightDirection;
 
 out vec2 iTexCoord;
-out vec2 iAccumCoord;
 
 void main()
 {
@@ -64,5 +63,4 @@ void main()
     gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * boneInfluence * vec4(iPos, 1.0);
 
     iTexCoord = iUV;
-    iAccumCoord = (gl_Position.xy / gl_Position.w + vec2(1.0f, 1.0f)) / 2.0f;
 }

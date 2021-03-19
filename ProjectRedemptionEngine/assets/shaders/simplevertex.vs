@@ -1,13 +1,21 @@
 #version 330 core
+
 layout (location = 0) in vec3 iPos;
 layout (location = 1) in vec3 iNorm;
 layout (location = 2) in vec3 iTangent;
 layout (location = 3) in vec3 iBiTangent;
 layout (location = 4) in vec2 iUV;
+layout (location = 5) in ivec4 iBoneIndices;
+layout (location = 6) in vec4 iBoneWeights;
+
+const int MAX_BONES = 100;
+const int MAX_BONE_INFLUENCE = 4;
 
 uniform mat4 PRE_MODEL_MATRIX;
 uniform mat4 PRE_VIEW_MATRIX;
 uniform mat4 PRE_PROJECTION_MATRIX;
+
+uniform mat4 PRE_BONE_TRANSFORMS[MAX_BONES];
 
 uniform vec3 PRE_VIEW_POSITION;
 uniform vec3 PRE_LIGHT_POSITION;
@@ -21,7 +29,6 @@ out vec3 iTangentLightPos;
 out vec3 iTangentLightDirection;
 
 out vec2 iTexCoord;
-out vec2 iAccumCoord;
 
 void main()
 {
@@ -38,8 +45,7 @@ void main()
     iTangentLightPos = TBN * PRE_LIGHT_POSITION;
     iTangentLightDirection = TBN * PRE_LIGHT_DIRECTION;
 
-    gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * vec4(iPos, 1.0f);
+    gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * vec4(iPos, 1.0);
 
     iTexCoord = iUV;
-    iAccumCoord = (gl_Position.xy / gl_Position.w + vec2(1.0f, 1.0f)) / 2.0f;
 }

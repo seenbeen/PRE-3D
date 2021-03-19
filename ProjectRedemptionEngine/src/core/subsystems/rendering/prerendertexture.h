@@ -2,6 +2,8 @@
 #include <list>
 #include <unordered_map>
 
+#include <glm/glm.hpp>
+
 #include <include/modules/rendering.h>
 
 namespace PRE
@@ -37,6 +39,7 @@ namespace PRE
 			PRECameraComponent* _pAssociatedCameraComponent;
 
 			const int _layer;
+			const glm::vec2 _size;
 			RenderCompositingTarget* const _pBufferA;
 			RenderCompositingTarget* const _pBufferB;
 
@@ -53,6 +56,7 @@ namespace PRE
 
 			PRERenderTexture(
 				int layer,
+				const glm::vec2& size,
 				RenderCompositingTarget& bufferA,
 				RenderCompositingTarget& bufferB
 			);

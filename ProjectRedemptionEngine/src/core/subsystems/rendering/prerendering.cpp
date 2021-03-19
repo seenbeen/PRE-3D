@@ -399,6 +399,7 @@ namespace PRE
 		{
 			auto pRenderTexture = new PRERenderTexture(
 				layer,
+				glm::vec2(width, height),
 				_impl.renderer.AllocateCompositingTarget(width, height),
 				_impl.renderer.AllocateCompositingTarget(width, height)
 			);
@@ -836,6 +837,10 @@ namespace PRE
 							pShader->SetInt(
 								PREShader::IS_FIRST_LIGHT_PASS,
 								isFirstPass ? 1 : 0
+							);
+							pShader->SetVec2(
+								PREShader::LIGHT_ACCUMULATOR_SAMPLER_SIZE,
+								lightPassContext._renderTexture._size
 							);
 							pShader->SetInt(
 								PREShader::LIGHT_ACCUMULATOR_SAMPLER,
