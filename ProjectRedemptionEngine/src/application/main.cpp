@@ -700,7 +700,7 @@ class DirectionalLightTemplate : public PREGameObjectTemplate
     void OnInstantiateTemplate() override
     {
         auto& directionalLightComponent = *AddPREComponent<PREDirectionalLightComponent>();
-        directionalLightComponent.SetColor(glm::vec3(2.0f / 3.0f));
+        directionalLightComponent.SetColor(glm::vec3(1.0f / 2.5f));
     }
 };
 

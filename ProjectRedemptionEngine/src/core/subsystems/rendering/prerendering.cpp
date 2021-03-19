@@ -406,27 +406,27 @@ namespace PRE
 			auto itCompositingChain = _impl.compositingChains.find(layer);
 			if (itCompositingChain == _impl.compositingChains.end())
 			{
-				auto itEnd = _impl.compositingChains.insert(
+				auto itBegin = _impl.compositingChains.insert(
 					std::make_pair(
 						layer,
 						std::move(list<PRELightRenderPassData*>())
 					)
-				).first->second.end();
+				).first->second.begin();
 				for (auto itLight = _impl.ambientLights.begin(); itLight != _impl.ambientLights.end(); ++itLight)
 				{
-					(*itLight)->_fronts[layer] = itEnd;
+					(*itLight)->_fronts[layer] = itBegin;
 				}
 				for (auto itLight = _impl.pointLights.begin(); itLight != _impl.pointLights.end(); ++itLight)
 				{
-					(*itLight)->_fronts[layer] = itEnd;
+					(*itLight)->_fronts[layer] = itBegin;
 				}
 				for (auto itLight = _impl.spotLights.begin(); itLight != _impl.spotLights.end(); ++itLight)
 				{
-					(*itLight)->_fronts[layer] = itEnd;
+					(*itLight)->_fronts[layer] = itBegin;
 				}
 				for (auto itLight = _impl.directionalLights.begin(); itLight != _impl.directionalLights.end(); ++itLight)
 				{
-					(*itLight)->_fronts[layer] = itEnd;
+					(*itLight)->_fronts[layer] = itBegin;
 				}
 			}
 			LinkRenderTextureToLights(*pRenderTexture);
