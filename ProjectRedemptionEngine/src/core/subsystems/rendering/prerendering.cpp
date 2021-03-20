@@ -165,7 +165,13 @@ namespace PRE
 					screenMesh,
 					screenMaterial,
 					screenModel,
-					screenCamera
+					screenCamera,
+					renderer.AllocateDepthCompositingTarget(SHADOW_MAP_SIZE, false),
+					renderer.AllocateCamera(
+						// these can be whatever; they'll be assigned prior to shadow mapping
+						Renderer::CameraKind::ORTHOGRAPHIC,
+						1, 1, 0, 1
+					)
 				)
 			);
 		}
@@ -199,7 +205,9 @@ namespace PRE
 			RenderMesh& screenMesh,
 			RenderMaterial& screenMaterial,
 			RenderModel& screenModel,
-			RenderCamera& screenCamera
+			RenderCamera& screenCamera,
+			RenderCompositingTarget& shadowMap2D,
+			RenderCamera& lightPOVCamera
 		)
 			:
 			applicationContext(applicationContext),
@@ -212,8 +220,9 @@ namespace PRE
 			screenModel(screenModel),
 			screenCamera(screenCamera),
 			rootRenderPassData(new PRELightRenderPassData(screenCompositingNode)),
-			shadowMap2D(renderer.AllocateDepthCompositingTarget(SHADOW_MAP_SIZE, false))
+			shadowMap2D(shadowMap2D),
 			// shadowMap3D(renderer.AllocateCompositingTarget(SHADOW_MAP_SIZE, true),
+			lightPOVCamera(lightPOVCamera)
 		{
 			modelTagMap.insert(
 				std::make_pair(
@@ -225,6 +234,7 @@ namespace PRE
 
 		PRERendering::Impl::~Impl()
 		{
+			renderer.DeallocateCamera(lightPOVCamera);
 			// renderer.DeallocateCompositingTarget(shadowMap3D);
 			renderer.DeallocateCompositingTarget(shadowMap2D);
 			delete rootRenderPassData;
@@ -276,11 +286,21 @@ namespace PRE
 			PRELightRenderPassData& lightData,
 			void* pLightComponent,
 			list<PRELightRenderPassData*>& compositingChain,
-			list<PRELightRenderPassData*>::iterator& itLightFront
+			list<PRELightRenderPassData*>::iterator& itLightFront,
+			PREShadowRenderPassData* pShadowData
 		)
 		{
 			auto pRenderPass = &renderPass;
 			auto pLightData = &lightData;
+
+			if (pShadowData != nullptr && pShadowData->pLastLightData == nullptr)
+			{
+				renderer.AttachCompositingNodeDependency(
+					*pLightData->pNode,
+					*pShadowData->pNode
+				);
+				pShadowData->pLastLightData = pLightData;
+			}
 
 			PRELightRenderPassData* pPreviousLightData = nullptr;
 			if (itLightFront != compositingChain.begin())
@@ -339,7 +359,8 @@ namespace PRE
 			PRELightRenderPassData& lightData,
 			void* pLightComponent,
 			list<PRELightRenderPassData*>& compositingChain,
-			list<PRELightRenderPassData*>::iterator& itLightFront
+			list<PRELightRenderPassData*>::iterator& itLightFront,
+			PREShadowRenderPassData* pShadowData
 		)
 		{
 			auto pRenderPass = &renderPass;
@@ -392,6 +413,25 @@ namespace PRE
 				);
 			}
 
+			if (pShadowData != nullptr && pShadowData->pLastLightData == pRemovedLightData)
+			{
+				pShadowData->pLastLightData = nullptr;
+				renderer.DetachCompositingNodeDependency(
+					*pRemovedLightData->pNode,
+					*pShadowData->pNode
+				);
+				if (itRemovedLightData != itLightFront)
+				{
+					auto itSecondLastLightData(itRemovedLightData);
+					auto pSecondLastLightData = *--itSecondLastLightData;
+					renderer.AttachCompositingNodeDependency(
+						*pSecondLastLightData->pNode,
+						*pShadowData->pNode
+					);
+					pShadowData->pLastLightData = pSecondLastLightData;
+				}
+			}
+
 			// erase light render pass data
 			if (itRemovedLightData == itLightFront)
 			{
@@ -436,7 +476,24 @@ namespace PRE
 				}
 				for (auto itLight = _impl.spotLights.begin(); itLight != _impl.spotLights.end(); ++itLight)
 				{
-					(*itLight)->_fronts[layer] = itBegin;
+					auto& spotLightComponent = **itLight;
+					spotLightComponent._fronts[layer] = itBegin;
+					auto pShadowContext = new PREShadowRenderPassContext(
+						_impl.lightPOVCamera,
+						_impl.modelTagMap,
+						_impl.shadowMap2D,
+						_shadowShader2D,
+						spotLightComponent
+					);
+					auto pNewShadowData = new PREShadowRenderPassData(
+						_impl.renderer.AllocateCompositingNode(
+							ShadowPassOnRender,
+							pShadowContext
+						),
+						*pShadowContext
+					);
+
+					spotLightComponent._shadowPassData[layer] = pNewShadowData;
 				}
 				for (auto itLight = _impl.directionalLights.begin(); itLight != _impl.directionalLights.end(); ++itLight)
 				{
@@ -457,7 +514,9 @@ namespace PRE
 					renderTexture
 				);
 			}
+
 			UnlinkRenderTextureFromLights(*pRenderTexture);
+
 			auto itCompositingChain = _impl.compositingChains.find(renderTexture._layer);
 			if (itCompositingChain->second.size() == 0)
 			{
@@ -472,6 +531,12 @@ namespace PRE
 				}
 				for (auto itLight = _impl.spotLights.begin(); itLight != _impl.spotLights.end(); ++itLight)
 				{
+					auto& spotLightComponent = **itLight;
+					auto pRemovedShadowData = spotLightComponent._shadowPassData.at(renderTexture._layer);
+					_impl.renderer.DeallocateCompositingNode(*pRemovedShadowData->pNode);
+					delete pRemovedShadowData->pRenderPassContext;
+					delete pRemovedShadowData;
+					spotLightComponent._shadowPassData.erase(renderTexture._layer);
 					(*itLight)->_fronts.erase(renderTexture._layer);
 				}
 				for (auto itLight = _impl.directionalLights.begin(); itLight != _impl.directionalLights.end(); ++itLight)
@@ -500,8 +565,8 @@ namespace PRE
 		void PRERendering::DestroyShader(PREShader& shader)
 		{
 			_impl.renderer.DeallocateShaderProgram(shader._shaderProgram);
-			delete &shader;
 			_impl.applicationContext.assetManager.TryFreeShader(shader);
+			delete& shader;
 		}
 
 		PRETexture& PRERendering::CreateTexture(
@@ -524,8 +589,8 @@ namespace PRE
 		void PRERendering::DestroyTexture(PRETexture& texture)
 		{
 			_impl.renderer.DeallocateTexture(texture._texture);
-			delete &texture;
 			_impl.applicationContext.assetManager.TryFreeTexture(texture);
+			delete& texture;
 		}
 
 		PREMaterial& PRERendering::CreateMaterial()
@@ -569,8 +634,8 @@ namespace PRE
 		void PRERendering::DestroyMesh(PREMesh& mesh)
 		{
 			_impl.renderer.DeallocateMesh(mesh._mesh);
-			delete &mesh;
 			_impl.applicationContext.assetManager.TryFreeMesh(mesh);
+			delete& mesh;
 		}
 
 		PRESkeleton& PRERendering::CreateSkeleton(
@@ -589,8 +654,8 @@ namespace PRE
 		void PRERendering::DestroySkeleton(PRESkeleton& skeleton)
 		{
 			_impl.renderer.DeallocateSkeleton(skeleton._skeleton);
-			delete &skeleton;
 			_impl.applicationContext.assetManager.TryFreeSkeleton(skeleton);
+			delete& skeleton;
 		}
 
 		PREAnimation& PRERendering::CreateAnimation(
@@ -602,8 +667,8 @@ namespace PRE
 
 		void PRERendering::DestroyAnimation(PREAnimation& animation)
 		{
-			delete &animation;
 			_impl.applicationContext.assetManager.TryFreeAnimation(animation);
+			delete& animation;
 		}
 
 		PREAnimator& PRERendering::CreateAnimator(
@@ -983,162 +1048,79 @@ namespace PRE
 			void* vShadowPassContext
 		)
 		{
-			/*
 			auto& shadowPassContext = *static_cast<PREShadowRenderPassContext*>(vShadowPassContext);
-			if (shadowPassContext._renderTexture._pAssociatedCameraComponent != nullptr)
-			{
-				auto pCameraComponent = shadowPassContext._renderTexture._pAssociatedCameraComponent;
 
-				for (
-					auto it = pCameraComponent->_associatedModelComponents.begin();
-					it != pCameraComponent->_associatedModelComponents.end();
-					++it
+			int tag;
+			if (shadowPassContext._pPointLightComponent != nullptr)
+			{
+				tag = shadowPassContext._pPointLightComponent->_tag;
+			}
+			else if (shadowPassContext._pSpotLightComponent != nullptr)
+			{
+				tag = shadowPassContext._pSpotLightComponent->_tag;
+			}
+			else
+			{
+#ifdef __PRE_DEBUG__
+				assert(shadowPassContext._pDirectionalLightComponent != nullptr);
+#endif
+				tag = shadowPassContext._pDirectionalLightComponent->_tag;
+			}
+
+			unordered_set<PREModelRendererComponent*>* pModels = nullptr;
+			auto itModels = shadowPassContext._modelTagMap.find(tag);
+			if (itModels == shadowPassContext._modelTagMap.end())
+			{
+				return;
+			}
+
+			pModels = &itModels->second;
+
+			// TODO: Spatial query optimizing to only render visible models
+			for (auto it = pModels->begin(); it != pModels->end(); ++it)
+			{
+				auto& modelRendererComponent = **it;
+
+				if (
+					modelRendererComponent._pModel == nullptr ||
+					modelRendererComponent._pMaterial == nullptr ||
+					modelRendererComponent._pMaterial->_pShader == nullptr
 					)
 				{
-					auto& modelRendererComponent = **it;
-
-					if (
-						modelRendererComponent._pModel == nullptr ||
-						modelRendererComponent._pMaterial == nullptr ||
-						modelRendererComponent._pMaterial->_pShader == nullptr
-						)
-					{
-						continue;
-					}
-
-					set<int>* pAffectingLightLayers = nullptr;
-					if (shadowPassContext._pPointLightComponent != nullptr)
-					{
-						pAffectingLightLayers = &shadowPassContext._pPointLightComponent->_affectingLightLayers;
-					}
-					else if (shadowPassContext._pSpotLightComponent != nullptr)
-					{
-						pAffectingLightLayers = &shadowPassContext._pSpotLightComponent->_affectingLightLayers;
-					}
-					else
-					{
-#ifdef __PRE_DEBUG__
-						assert(shadowPassContext._pDirectionalLightComponent != nullptr);
-#endif
-						pAffectingLightLayers = &shadowPassContext._pDirectionalLightComponent->_affectingLightLayers;
-					}
-
-					// TODO: may want to just use a long or int and bit-wise operate
-					// as this overhead-vs-practicality trade off might not be worth it
-					vector<int> lightAffectanceBuffer(32);
-					if (
-						modelRendererComponent._affectedLightLayers.empty() ||
-						pAffectingLightLayers->empty() ||
-						std::set_intersection(
-							modelRendererComponent._affectedLightLayers.begin(),
-							modelRendererComponent._affectedLightLayers.end(),
-							pAffectingLightLayers->begin(),
-							pAffectingLightLayers->end(),
-							lightAffectanceBuffer.begin()
-						) == lightAffectanceBuffer.end()
-						)
-					{
-						continue;
-					}
-
-
-					auto pShader = modelRendererComponent._pMaterial->_pShader;
-					pShader->SetInt(
-						PREShader::IS_FIRST_LIGHT_PASS,
-						isFirstPass ? 1 : 0
-					);
-					pShader->SetVec2(
-						PREShader::LIGHT_ACCUMULATOR_SAMPLER_SIZE,
-						lightPassContext._renderTexture._size
-					);
-					pShader->SetInt(
-						PREShader::LIGHT_ACCUMULATOR_SAMPLER,
-						PREShader::LIGHT_ACCUMULATOR_BINDING
-					);
-					pShader->SetInt(PREShader::AMBIENT_LIGHT_FLAG, 0);
-					pShader->SetInt(PREShader::POINT_LIGHT_FLAG, 0);
-					pShader->SetInt(PREShader::SPOT_LIGHT_FLAG, 0);
-					pShader->SetInt(PREShader::DIRECTIONAL_LIGHT_FLAG, 0);
-					pShader->SetVec3(
-						PREShader::VIEW_POSITION,
-						pCameraComponent->_pTransformComponent->GetPosition()
-					);
-
-					if (lightPassContext._pPointLightComponent != nullptr)
-					{
-						auto pPointLightComponent = lightPassContext._pPointLightComponent;
-						pPointLightComponent->AllocateIfNotAllocated();
-						pShader->SetInt(PREShader::POINT_LIGHT_FLAG, 1);
-						pShader->SetVec3(
-							PREShader::LIGHT_POSITION,
-							pPointLightComponent->_pTransform->GetPosition()
-						);
-						pShader->SetVec3(
-							PREShader::LIGHT_COLOR,
-							pPointLightComponent->_color
-						);
-						pShader->SetFloat(
-							PREShader::LIGHT_ATTENUATION_LINEAR,
-							pPointLightComponent->_attenuationLinear
-						);
-						pShader->SetFloat(
-							PREShader::LIGHT_ATTENUATION_QUADRATIC,
-							pPointLightComponent->_attenuationQuadratic
-						);
-					}
-					else if (lightPassContext._pSpotLightComponent != nullptr)
-					{
-						auto pSpotLightComponent = lightPassContext._pSpotLightComponent;
-						pSpotLightComponent->AllocateIfNotAllocated();
-						pShader->SetInt(PREShader::SPOT_LIGHT_FLAG, 1);
-						pShader->SetVec3(
-							PREShader::LIGHT_POSITION,
-							pSpotLightComponent->_pTransform->GetPosition()
-						);
-						pShader->SetVec3(
-							PREShader::LIGHT_COLOR,
-							pSpotLightComponent->_color
-						);
-						pShader->SetVec3(
-							PREShader::LIGHT_DIRECTION,
-							pSpotLightComponent->_pTransform->GetForward()
-						);
-						pShader->SetFloat(
-							PREShader::LIGHT_ATTENUATION_LINEAR,
-							pSpotLightComponent->_attenuationLinear
-						);
-						pShader->SetFloat(
-							PREShader::LIGHT_ATTENUATION_QUADRATIC,
-							pSpotLightComponent->_attenuationQuadratic
-						);
-						pShader->SetFloat(
-							PREShader::LIGHT_INNER_RADIUS,
-							pSpotLightComponent->_innerRadius
-						);
-						pShader->SetFloat(
-							PREShader::LIGHT_OUTER_RADIUS,
-							pSpotLightComponent->_outerRadius
-						);
-					}
-					else if (lightPassContext._pDirectionalLightComponent != nullptr)
-					{
-						auto pDirectionalLightComponent = lightPassContext._pDirectionalLightComponent;
-						pDirectionalLightComponent->AllocateIfNotAllocated();
-						pShader->SetInt(PREShader::DIRECTIONAL_LIGHT_FLAG, 1);
-						pShader->SetVec3(
-							PREShader::LIGHT_COLOR,
-							pDirectionalLightComponent->_color
-						);
-						pShader->SetVec3(
-							PREShader::LIGHT_DIRECTION,
-							pDirectionalLightComponent->_pTransform->GetForward()
-						);
-					}
-					composition.AddModel(*modelRendererComponent._pModel);
+					continue;
 				}
-				composition.SetCompositingTarget(&shadowPassContext._target);
+
+				if (shadowPassContext._pPointLightComponent != nullptr)
+				{
+					auto pPointLightComponent = shadowPassContext._pPointLightComponent;
+					pPointLightComponent->AllocateIfNotAllocated();
+				}
+				else if (shadowPassContext._pSpotLightComponent != nullptr)
+				{
+					auto pSpotLightComponent = shadowPassContext._pSpotLightComponent;
+					pSpotLightComponent->AllocateIfNotAllocated();
+
+					modelRendererComponent._pMaterial->TempSetShaderProgram(
+						shadowPassContext._shadowShader
+					);
+					shadowPassContext._lightPOVCamera.SetKind(RenderCamera::Kind::PERSPECTIVE);
+					shadowPassContext._lightPOVCamera.SetAspectRatio(1);
+					shadowPassContext._lightPOVCamera.SetNearClippingPlane(0.1f);
+					shadowPassContext._lightPOVCamera.SetFarClippingPlane(100.0f);
+					shadowPassContext._lightPOVCamera.SetSize(90);
+					shadowPassContext._lightPOVCamera.SetViewMatrix(
+						pSpotLightComponent->_pTransform->GetMatrix()
+					);
+				}
+				else if (shadowPassContext._pDirectionalLightComponent != nullptr)
+				{
+					auto pDirectionalLightComponent = shadowPassContext._pDirectionalLightComponent;
+					pDirectionalLightComponent->AllocateIfNotAllocated();
+				}
+				composition.AddModel(*modelRendererComponent._pModel);
 			}
-			*/
+			composition.SetCamera(&shadowPassContext._lightPOVCamera);
+			composition.SetCompositingTarget(&shadowPassContext._target);
 		}
 
 		const unsigned int PRERendering::SHADOW_MAP_SIZE = 1024;
@@ -1156,6 +1138,23 @@ namespace PRE
 			return *(new PRERendering(applicationContext, renderer));
 		}
 
+		static const string SHADOW_SHADER_2D_VERTEX =
+			"#version 330 core\n"
+			"layout (location = 0) in vec3 iPos;\n"
+			"\n"
+			"uniform mat4 PRE_MODEL_MATRIX;\n"
+			"uniform mat4 PRE_VIEW_MATRIX;\n"
+			"uniform mat4 PRE_PROJECTION_MATRIX;\n"
+			"\n"
+			"void main()\n"
+			"{\n"
+			"	gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * vec4(iPos, 1.0f);\n"
+			"}\n";
+
+		static const string SHADOW_SHADER_2D_FRAGMENT =
+			"#version 330 core\n"
+			"void main() {}\n";
+
 		PRERendering::PRERendering(
 			PREApplicationContext& applicationContext,
 			Renderer& renderer
@@ -1168,10 +1167,17 @@ namespace PRE
 					renderer.width,
 					renderer.height
 				)
+			),
+			_shadowShader2D(
+				CreateShader(
+					SHADOW_SHADER_2D_VERTEX,
+					SHADOW_SHADER_2D_FRAGMENT
+				)
 			) {}
 
 		PRERendering::~PRERendering()
 		{
+			DestroyShader(_shadowShader2D);
 			DestroyRenderTexture(_screenRenderTexture);
 			delete &_impl;
 		}
@@ -1414,7 +1420,8 @@ namespace PRE
 					*pNewLightData,
 					pLightComponent,
 					compositingChain,
-					ambientLightComponent._fronts.at(pRenderPass->_layer)
+					ambientLightComponent._fronts.at(pRenderPass->_layer),
+					nullptr
 				);
 			}
 
@@ -1446,7 +1453,8 @@ namespace PRE
 					*pRemovedLightData,
 					pLightComponent,
 					_impl.compositingChains.at(pRenderPass->_layer),
-					ambientLightComponent._fronts.at(pRenderPass->_layer)
+					ambientLightComponent._fronts.at(pRenderPass->_layer),
+					nullptr
 				);
 
 				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
@@ -1491,7 +1499,8 @@ namespace PRE
 					*pNewLightData,
 					pLightComponent,
 					compositingChain,
-					pointLightComponent._fronts.at(pRenderPass->_layer)
+					pointLightComponent._fronts.at(pRenderPass->_layer),
+					nullptr // TODO: Point Shadows
 				);
 			}
 
@@ -1523,7 +1532,8 @@ namespace PRE
 					*pRemovedLightData,
 					pLightComponent,
 					_impl.compositingChains.at(pRenderPass->_layer),
-					pointLightComponent._fronts.at(pRenderPass->_layer)
+					pointLightComponent._fronts.at(pRenderPass->_layer),
+					nullptr // TODO: Point Shadows
 				);
 
 				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
@@ -1565,35 +1575,35 @@ namespace PRE
 					*pLightContext
 				);
 
-				//// link shadow node if necessary
-				//if (shadowPassData.find(pRenderPass->_layer) == shadowPassData.end())
-				//{
-				//	auto pShadowContext = new PREShadowRenderPassContext(
-				//		_impl.shadowMap2D,
-				//		*pRenderPass,
-				//		spotLightComponent
-				//	);
-				//	auto pNewShadowData = new PREShadowRenderPassData(
-				//		_impl.renderer.AllocateCompositingNode(
-				//			ShadowPassOnRender,
-				//			pShadowContext
-				//		)
-				//	);
+				PREShadowRenderPassData* pNewShadowData = nullptr;
+				// link shadow node if necessary
+				if (shadowPassData.find(pRenderPass->_layer) == shadowPassData.end())
+				{
+					auto pShadowContext = new PREShadowRenderPassContext(
+						_impl.lightPOVCamera,
+						_impl.modelTagMap,
+						_impl.shadowMap2D,
+						_shadowShader2D,
+						spotLightComponent
+					);
+					pNewShadowData = new PREShadowRenderPassData(
+						_impl.renderer.AllocateCompositingNode(
+							ShadowPassOnRender,
+							pShadowContext
+						),
+						*pShadowContext
+					);
 
-				//	_impl.renderer.AttachCompositingNodeDependency(
-				//		*pNewLightData->pNode,
-				//		*pNewShadowData->pNode
-				//	);
-
-				//	shadowPassData[pRenderPass->_layer] = pNewShadowData;
-				//}
+					shadowPassData[pRenderPass->_layer] = pNewShadowData;
+				}
 
 				_impl.LinkLightToRenderTarget(
 					*pRenderPass,
 					*pNewLightData,
 					pLightComponent,
 					compositingChain,
-					spotLightComponent._fronts.at(pRenderPass->_layer)
+					spotLightComponent._fronts.at(pRenderPass->_layer),
+					pNewShadowData
 				);
 			}
 
@@ -1609,6 +1619,7 @@ namespace PRE
 			_impl.UnlinkCompositingChains();
 
 			auto pLightComponent = &spotLightComponent;
+			auto& shadowPassData = spotLightComponent._shadowPassData;
 			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
 			{
 				auto pRenderPass = *it;
@@ -1620,13 +1631,30 @@ namespace PRE
 				auto itRemovedLightData(pRenderPass->_lightMap.find(pLightComponent)->second);
 				auto pRemovedLightData = *itRemovedLightData;
 
+				// unlink shadow node if necessary
+				PREShadowRenderPassData* pRemovedShadowData = nullptr;
+				auto itRemovedShadowData = shadowPassData.find(pRenderPass->_layer);
+				if (itRemovedShadowData != shadowPassData.end())
+				{
+					pRemovedShadowData = itRemovedShadowData->second;
+				}
+
 				_impl.UnlinkLightFromRenderTarget(
 					*pRenderPass,
 					*pRemovedLightData,
 					pLightComponent,
 					_impl.compositingChains.at(pRenderPass->_layer),
-					spotLightComponent._fronts.at(pRenderPass->_layer)
+					spotLightComponent._fronts.at(pRenderPass->_layer),
+					pRemovedShadowData
 				);
+
+				if (pRemovedShadowData != nullptr)
+				{
+					_impl.renderer.DeallocateCompositingNode(*pRemovedShadowData->pNode);
+					delete pRemovedShadowData->pRenderPassContext;
+					delete pRemovedShadowData;
+					shadowPassData.erase(itRemovedShadowData);
+				}
 
 				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
 				delete pRemovedLightData->pRenderPassContext;
@@ -1671,7 +1699,8 @@ namespace PRE
 					*pNewLightData,
 					pLightComponent,
 					compositingChain,
-					directionalLightComponent._fronts.at(pRenderPass->_layer)
+					directionalLightComponent._fronts.at(pRenderPass->_layer),
+					nullptr // TODO: Directional Shadows
 				);
 			}
 
@@ -1703,7 +1732,8 @@ namespace PRE
 					*pRemovedLightData,
 					pLightComponent,
 					_impl.compositingChains.at(pRenderPass->_layer),
-					directionalLightComponent._fronts.at(pRenderPass->_layer)
+					directionalLightComponent._fronts.at(pRenderPass->_layer),
+					nullptr // TODO: Directional Shadows
 				);
 
 				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
@@ -1749,7 +1779,8 @@ namespace PRE
 					*pNewLightData,
 					pLightComponent,
 					compositingChain,
-					ambientLightComponent._fronts.at(pRenderPass->_layer)
+					ambientLightComponent._fronts.at(pRenderPass->_layer),
+					nullptr
 				);
 			}
 #pragma endregion
@@ -1778,7 +1809,8 @@ namespace PRE
 					*pNewLightData,
 					pLightComponent,
 					compositingChain,
-					pointLightComponent._fronts.at(pRenderPass->_layer)
+					pointLightComponent._fronts.at(pRenderPass->_layer),
+					nullptr // TODO: Point Shadows
 				);
 			}
 #pragma endregion
@@ -1807,7 +1839,8 @@ namespace PRE
 					*pNewLightData,
 					pLightComponent,
 					compositingChain,
-					spotLightComponent._fronts.at(pRenderPass->_layer)
+					spotLightComponent._fronts.at(pRenderPass->_layer),
+					spotLightComponent._shadowPassData.at(pRenderPass->_layer)
 				);
 			}
 #pragma endregion
@@ -1836,7 +1869,8 @@ namespace PRE
 					*pNewLightData,
 					pLightComponent,
 					compositingChain,
-					directionalLightComponent._fronts.at(pRenderPass->_layer)
+					directionalLightComponent._fronts.at(pRenderPass->_layer),
+					nullptr // TODO: Directional Shadows
 				);
 			}
 #pragma endregion
@@ -1867,7 +1901,8 @@ namespace PRE
 					*pRemovedLightData,
 					pLightComponent,
 					compositingChain,
-					ambientLightComponent._fronts.at(pRenderPass->_layer)
+					ambientLightComponent._fronts.at(pRenderPass->_layer),
+					nullptr
 				);
 
 				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
@@ -1889,7 +1924,8 @@ namespace PRE
 					*pRemovedLightData,
 					pLightComponent,
 					compositingChain,
-					pointLightComponent._fronts.at(pRenderPass->_layer)
+					pointLightComponent._fronts.at(pRenderPass->_layer),
+					nullptr // TODO: Point Shadows
 				);
 
 				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
@@ -1906,12 +1942,16 @@ namespace PRE
 				auto itRemovedLightData(pRenderPass->_lightMap.find(pLightComponent)->second);
 				auto pRemovedLightData = *itRemovedLightData;
 
+				auto& itFront = spotLightComponent._fronts.at(pRenderPass->_layer);
+				auto isLastNode = *itFront == pRemovedLightData;
+
 				_impl.UnlinkLightFromRenderTarget(
 					*pRenderPass,
 					*pRemovedLightData,
 					pLightComponent,
 					compositingChain,
-					spotLightComponent._fronts.at(pRenderPass->_layer)
+					itFront,
+					spotLightComponent._shadowPassData.at(pRenderPass->_layer)
 				);
 
 				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);
@@ -1933,7 +1973,8 @@ namespace PRE
 					*pRemovedLightData,
 					pLightComponent,
 					compositingChain,
-					directionalLightComponent._fronts.at(pRenderPass->_layer)
+					directionalLightComponent._fronts.at(pRenderPass->_layer),
+					nullptr // TODO: Directional Shadows
 				);
 
 				_impl.renderer.DeallocateCompositingNode(*pRemovedLightData->pNode);

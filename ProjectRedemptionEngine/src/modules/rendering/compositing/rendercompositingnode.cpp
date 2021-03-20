@@ -68,7 +68,14 @@ namespace PRE
 			onRender(onRender),
 			vContext(vContext) {}
 
-		RenderCompositingNode::Impl::~Impl() {}
+		RenderCompositingNode::Impl::~Impl()
+		{
+
+#ifdef __PRE_DEBUG__
+			assert(compositingNodeDependencies.empty());
+#endif
+
+		}
 
 		RenderCompositingNode::RenderCompositingNode(
 			OnRender onRender,

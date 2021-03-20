@@ -1,15 +1,24 @@
 #pragma once
+#include <unordered_map>
+#include <unordered_set>
+
 #include <include/modules/rendering.h>
 
 namespace PRE
 {
 	namespace Core
 	{
+		class PREModelRendererComponent;
+
 		class PRERendering;
+		class PREShader;
 		class PRERenderTexture;
 		class PREPointLightComponent;
 		class PRESpotLightComponent;
 		class PREDirectionalLightComponent;
+
+		using std::unordered_map;
+		using std::unordered_set;
 
 		using PRE::RenderingModule::RenderCompositingTarget;
 		using PRE::RenderingModule::RenderCamera;
@@ -22,30 +31,41 @@ namespace PRE
 			friend class PRERendering;
 
 		private:
+			// this is the camera component we'll use to simulate
+			// the light's view transform
+			RenderCamera& _lightPOVCamera;
+
+			unordered_map<int, unordered_set<PREModelRendererComponent*>>& _modelTagMap;
+
 			// this is the shadow depth frame buffer
 			RenderCompositingTarget& _target;
-			// this is the texture this shadow map will be used for
-			PRERenderTexture& _renderTexture;
+			PREShader& _shadowShader;
 
 			PREPointLightComponent* const _pPointLightComponent;
 			PRESpotLightComponent* const _pSpotLightComponent;
 			PREDirectionalLightComponent* const _pDirectionalLightComponent;
 
 			PREShadowRenderPassContext(
+				RenderCamera& lightPOVCamera,
+				unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 				RenderCompositingTarget& target,
-				PRERenderTexture& renderTexture,
+				PREShader& shadowShader,
 				PREPointLightComponent& pointLightComponent
 			);
 
 			PREShadowRenderPassContext(
+				RenderCamera& lightPOVCamera,
+				unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 				RenderCompositingTarget& target,
-				PRERenderTexture& renderTexture,
+				PREShader& shadowShader,
 				PRESpotLightComponent& spotLightComponent
 			);
 
 			PREShadowRenderPassContext(
+				RenderCamera& lightPOVCamera,
+				unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 				RenderCompositingTarget& target,
-				PRERenderTexture& renderTexture,
+				PREShader& shadowShader,
 				PREDirectionalLightComponent& directionalLightComponent
 			);
 

@@ -601,5 +601,11 @@
     <ClCompile Include="src\core\components\predirectionallightcomponent.cpp">
       <Filter>Source Files\Core\Components</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\subsystems\rendering\preshadowrenderpasscontext.cpp">
+      <Filter>Source Files\Core\Subsystems\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\subsystems\rendering\preshadowrenderpassdata.cpp">
+      <Filter>Source Files\Core\Subsystems\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

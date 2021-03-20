@@ -783,7 +783,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
 
     VampireTemplate capoeiraTemplate, thrillerTemplate;
     capoeiraTemplate.animationPath = "/animations/mixamo/Breathing Idle.dae";
-    thrillerTemplate.animationPath = "/animations/mixamo/Thriller Part 4.dae";
+    thrillerTemplate.animationPath = "/animations/mixamo/Running.dae";
 
     FloorTemplate floorTemplate;
 
@@ -878,7 +878,6 @@ void OnShutdown(PREApplicationContext& applicationContext)
 {
     applicationContext.rendering.DestroyRenderTexture(*pCameraARenderTexture);
     applicationContext.rendering.DestroyRenderTexture(*pCameraBRenderTexture);
-
     std::cout << "ON SHUTDOWN" << std::endl;
 }
 

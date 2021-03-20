@@ -44,6 +44,8 @@
     <ClCompile Include="src\core\subsystems\rendering\prerenderingconfig.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\prerendertexture.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\preshader.cpp" />
+    <ClCompile Include="src\core\subsystems\rendering\preshadowrenderpasscontext.cpp" />
+    <ClCompile Include="src\core\subsystems\rendering\preshadowrenderpassdata.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\preskeleton.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\preskybox.cpp" />
     <ClCompile Include="src\core\subsystems\rendering\pretexture.cpp" />

@@ -6,6 +6,7 @@ namespace PRE
 	namespace Core
 	{
 		class PRERendering;
+		class PRELightRenderPassData;
 		class PREShadowRenderPassContext;
 
 		using PRE::RenderingModule::RenderCompositingNode;
@@ -21,8 +22,7 @@ namespace PRE
 			RenderCompositingNode* const pNode;
 			PREShadowRenderPassContext* const pRenderPassContext;
 
-			// used for the screen-display compositing node
-			PREShadowRenderPassData(RenderCompositingNode& node);
+			PRELightRenderPassData* pLastLightData;
 
 			PREShadowRenderPassData(
 				RenderCompositingNode& node,

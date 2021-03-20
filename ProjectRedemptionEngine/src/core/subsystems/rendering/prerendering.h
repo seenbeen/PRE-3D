@@ -108,6 +108,8 @@ namespace PRE
 				RenderCompositingTarget& shadowMap2D;
 				//RenderCompositingTarget& shadowMap3D;
 
+				RenderCamera& lightPOVCamera;
+
 				unordered_map<int, unordered_set<PREModelRendererComponent*>> modelTagMap;
 
 				map<int, list<PRELightRenderPassData*>> compositingChains;
@@ -126,7 +128,9 @@ namespace PRE
 					RenderMesh& screenMesh,
 					RenderMaterial& screenMaterial,
 					RenderModel& screenModel,
-					RenderCamera& screenCamera
+					RenderCamera& screenCamera,
+					RenderCompositingTarget& shadowMap2D,
+					RenderCamera& lightPOVCamera
 				);
 				~Impl();
 
@@ -138,7 +142,8 @@ namespace PRE
 					PRELightRenderPassData& lightData,
 					void* pLightComponent,
 					list<PRELightRenderPassData*>& compositingChain,
-					list<PRELightRenderPassData*>::iterator& itLightFront
+					list<PRELightRenderPassData*>::iterator& itLightFront,
+					PREShadowRenderPassData* pShadowData
 				);
 
 				void UnlinkLightFromRenderTarget(
@@ -146,7 +151,8 @@ namespace PRE
 					PRELightRenderPassData& lightData,
 					void* pLightComponent,
 					list<PRELightRenderPassData*>& compositingChain,
-					list<PRELightRenderPassData*>::iterator& itLightFront
+					list<PRELightRenderPassData*>::iterator& itLightFront,
+					PREShadowRenderPassData* pShadowData
 				);
 			};
 
@@ -244,6 +250,8 @@ namespace PRE
 
 			Impl& _impl;
 			PRERenderTexture& _screenRenderTexture;
+			PREShader& _shadowShader2D;
+			// RenderShaderProgram& shadowShader3D;
 
 			PRERendering(
 				PREApplicationContext& applicationContext,

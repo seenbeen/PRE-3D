@@ -75,6 +75,7 @@ namespace PRE
 		)
 		{
 			// TODO: Cubemap framebuffers
+			throw "Don't do this yet";
 		}
 
 		RenderCompositingTarget::Impl::Impl(

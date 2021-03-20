@@ -63,8 +63,8 @@ namespace PRE
 			delete& time;
 			delete& input;
 			delete& world;
-			delete& assetManager;
 			delete& rendering;
+			delete& assetManager;
 		}
 
 		void PREApplicationContext::Initialize()
@@ -94,8 +94,8 @@ namespace PRE
 			time.Shutdown();
 			input.Shutdown();
 			world.Shutdown();
-			assetManager.Shutdown();
 			rendering.Shutdown();
+			assetManager.Shutdown();
 		}
 	}
 }
