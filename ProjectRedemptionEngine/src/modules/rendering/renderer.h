@@ -53,6 +53,11 @@ namespace PRE
 
 			void Update();
 
+			RenderCompositingTarget& AllocateDepthCompositingTarget(
+				unsigned int size,
+				bool isCubeMap
+			);
+
 			RenderCompositingTarget& AllocateCompositingTarget(
 				unsigned int width,
 				unsigned int height

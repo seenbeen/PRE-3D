@@ -724,7 +724,7 @@ protected:
         spotLightComponent.SetAttentuationLinear(0.0f);
         spotLightComponent.SetAttentuationQuadratic(0.15f);
         spotLightComponent.SetColor(glm::vec3(0.0f));
-        spotLightComponent.AddAffectingLightLayer(1);
+        spotLightComponent.SetTag(1);
 
         auto& cameraControllerComponent = *AddPREComponent<CameraControllerComponent>();
         cameraControllerComponent.skyBoxRightPath = "/skyboxes/Night MoonBurst/Right+X.png";
@@ -760,19 +760,26 @@ void OnInitialize(PREApplicationContext& applicationContext)
     bufferCameraComponent.SetSize(1.0f);
     bufferCameraComponent.SetNearClippingPlane(0.0f);
     bufferCameraComponent.SetKind(PRECameraComponent::Kind::ORTHOGRAPHIC);
+    bufferCameraComponent.SetTag(0); // technically not necessary; default = 0
 
     auto& bufferDisplayScreenA = applicationContext.world.Instantiate(bufferDisplayScreenTemplate);
     auto& bufferDisplayScreenAComponent = *bufferDisplayScreenA.GetComponent<BufferDisplayScreenComponent>();
     bufferDisplayScreenAComponent.pRenderTexture = pCameraARenderTexture;
-    bufferDisplayScreenA.GetComponent<PREModelRendererComponent>()->AddCameraComponent(bufferCameraComponent);
-    bufferDisplayScreenA.GetComponent<PREModelRendererComponent>()->AddAffectedLightLayer(0);
+    bufferDisplayScreenA.GetComponent<PREModelRendererComponent>()->SetTag(0);
 
     auto& bufferDisplayScreenB = applicationContext.world.Instantiate(bufferDisplayScreenTemplate);
     bufferDisplayScreenB.GetComponent<PRETransformComponent>()->SetPosition(glm::vec3(0.0f, -1.0f, 0.0f));
     auto& bufferDisplayScreenBComponent = *bufferDisplayScreenB.GetComponent<BufferDisplayScreenComponent>();
     bufferDisplayScreenBComponent.pRenderTexture = pCameraBRenderTexture;
-    bufferDisplayScreenB.GetComponent<PREModelRendererComponent>()->AddCameraComponent(bufferCameraComponent);
-    bufferDisplayScreenB.GetComponent<PREModelRendererComponent>()->AddAffectedLightLayer(0);
+    bufferDisplayScreenB.GetComponent<PREModelRendererComponent>()->SetTag(0);
+
+    // borrow this; require at least one light for anything to render
+    AmbientLightTemplate nullLightTemplate;
+
+    auto &nullLightComponent = *applicationContext.world
+        .Instantiate(nullLightTemplate)
+        .GetComponent<PREAmbientLightComponent>();
+    nullLightComponent.SetTag(0); // technically not necessary; default = 0
 
     VampireTemplate capoeiraTemplate, thrillerTemplate;
     capoeiraTemplate.animationPath = "/animations/mixamo/Breathing Idle.dae";
@@ -791,12 +798,14 @@ void OnInitialize(PREApplicationContext& applicationContext)
     auto& cameraA = applicationContext.world.Instantiate(cameraTemplate);
     auto& cameraAComponent = *cameraA.GetComponent<PRECameraComponent>();
     cameraAComponent.SetRenderTexture(pCameraARenderTexture);
+    cameraAComponent.SetTag(1);
     auto& cameraATransform = *cameraA.GetComponent<PRETransformComponent>();
     cameraATransform.SetParent(&sceneRootTransform, true);
 
     auto& cameraB = applicationContext.world.Instantiate(cameraTemplate);
     auto& cameraBComponent = *cameraB.GetComponent<PRECameraComponent>();
     cameraBComponent.SetRenderTexture(pCameraBRenderTexture);
+    cameraBComponent.SetTag(1);
     auto& cameraBTransform = *cameraB.GetComponent<PRETransformComponent>();
     cameraBTransform.SetParent(&sceneRootTransform, true);
     cameraB.GetComponent<FlyCamControllerComponent>()->enabled = false;
@@ -808,9 +817,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
     );
     vampireATransform.SetParent(&sceneRootTransform, true);
     auto pVampireAModelRendererComponent = vampireA.GetComponent<PREModelRendererComponent>();
-    pVampireAModelRendererComponent->AddCameraComponent(cameraAComponent);
-    pVampireAModelRendererComponent->AddCameraComponent(cameraBComponent);
-    pVampireAModelRendererComponent->AddAffectedLightLayer(1);
+    pVampireAModelRendererComponent->SetTag(1);
 
     for (auto i = 0; i < 1; ++i)
     {
@@ -821,9 +828,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
         );
         vampireBTransform.SetParent(&sceneRootTransform, true);
         auto pVampireBModelRendererComponent = vampireB.GetComponent<PREModelRendererComponent>();
-        pVampireBModelRendererComponent->AddCameraComponent(cameraAComponent);
-        pVampireBModelRendererComponent->AddCameraComponent(cameraBComponent);
-        pVampireBModelRendererComponent->AddAffectedLightLayer(1);
+        pVampireBModelRendererComponent->SetTag(1);
     }
 
     auto& floor = applicationContext.world.Instantiate(floorTemplate);
@@ -831,9 +836,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
     pFloorTransform->SetEuler(glm::vec3(-90.0f, 0.0f, 0.0f));
     pFloorTransform->SetScale(glm::vec3(8.0f));
     auto pFloorModelRendererComponent = floor.GetComponent<PREModelRendererComponent>();
-    pFloorModelRendererComponent->AddCameraComponent(cameraAComponent);
-    pFloorModelRendererComponent->AddCameraComponent(cameraBComponent);
-    pFloorModelRendererComponent->AddAffectedLightLayer(1);
+    pFloorModelRendererComponent->SetTag(1);
 
     sceneRootTransform.SetEuler(glm::vec3(0, 180, 0));
 
@@ -847,13 +850,12 @@ void OnInitialize(PREApplicationContext& applicationContext)
     ambientLightComponent.SetAttentuationLinear(0.2f);
     ambientLightComponent.SetAttentuationQuadratic(0.45f);
     ambientLightComponent.SetColor(glm::vec3(0.5f));
-    ambientLightComponent.AddAffectingLightLayer(0); // 0 to make sure "split screen display" renders
-    ambientLightComponent.AddAffectingLightLayer(1);
+    ambientLightComponent.SetTag(1);
 
     auto& directionalLight = applicationContext.world.Instantiate(directionalLightTemplate);
     auto& directionalLightTransform = *directionalLight.GetComponent<PRETransformComponent>();
     directionalLightTransform.SetEuler(glm::vec3(-45.f, 0.0f, 0.0f));
-    directionalLight.GetComponent<PREDirectionalLightComponent>()->AddAffectingLightLayer(1);
+    directionalLight.GetComponent<PREDirectionalLightComponent>()->SetTag(1);
 
     for (auto i = 0; i < 3; ++i)
     {
@@ -864,13 +866,11 @@ void OnInitialize(PREApplicationContext& applicationContext)
         lightComponent.SetAttentuationLinear(linearLightLuminosities[i]);
         lightComponent.SetAttentuationQuadratic(quadraticLightLuminosities[i]);
         lightComponent.SetColor(lightColors[i]);
-        lightComponent.AddAffectingLightLayer(1);
+        lightComponent.SetTag(1);
         auto& lightCube = *light.GetComponent<LightCubeComponent>();
         lightCube.color = lightColors[i];
         auto plightModelRendererComponent = light.GetComponent<PREModelRendererComponent>();
-        plightModelRendererComponent->AddCameraComponent(cameraAComponent);
-        plightModelRendererComponent->AddCameraComponent(cameraBComponent);
-        plightModelRendererComponent->AddAffectedLightLayer(1);
+        plightModelRendererComponent->SetTag(1);
     }
 }
 

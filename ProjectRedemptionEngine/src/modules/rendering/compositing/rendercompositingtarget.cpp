@@ -13,6 +13,31 @@ namespace PRE
 	namespace RenderingModule
 	{
 		RenderCompositingTarget::Impl& RenderCompositingTarget::Impl::MakeImpl(
+			unsigned int size,
+			bool isCubeMap
+		)
+		{
+			GLuint bufferId;
+			glGenFramebuffers(1, &bufferId);
+			glBindFramebuffer(GL_FRAMEBUFFER, bufferId);
+
+			auto target = new RenderTexture(size, false);
+			target->Bind();
+			target->BindTarget(GL_DEPTH_ATTACHMENT);
+
+			glDrawBuffer(GL_NONE);
+			glReadBuffer(GL_NONE);
+
+#ifdef __PRE_DEBUG__
+			assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+#endif
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			return *(new Impl(size, size, bufferId, nullptr, *target));
+		}
+
+		RenderCompositingTarget::Impl& RenderCompositingTarget::Impl::MakeImpl(
 			unsigned int width,
 			unsigned int height
 		)
@@ -25,11 +50,11 @@ namespace PRE
 			target->Bind();
 			target->BindTarget(GL_COLOR_ATTACHMENT0);
 
-			GLuint renderBufferId;
-			glGenRenderbuffers(1, &renderBufferId);
-			glBindRenderbuffer(GL_RENDERBUFFER, renderBufferId);
+			auto pRenderBufferId = new GLuint();
+			glGenRenderbuffers(1, pRenderBufferId);
+			glBindRenderbuffer(GL_RENDERBUFFER, *pRenderBufferId);
 			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBufferId);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, *pRenderBufferId);
 
 #ifdef __PRE_DEBUG__
 			assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
@@ -37,7 +62,7 @@ namespace PRE
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-			return *(new Impl(width, height, bufferId, renderBufferId, *target));
+			return *(new Impl(width, height, bufferId, pRenderBufferId, *target));
 		}
 
 		RenderCompositingTarget::Impl& RenderCompositingTarget::Impl::MakeImpl(
@@ -56,22 +81,33 @@ namespace PRE
 			unsigned int width,
 			unsigned int height,
 			GLuint bufferId,
-			GLuint renderBufferId,
+			const GLuint* pRenderBufferId,
 			RenderTexture& target
 		)
 			:
 			width(width),
 			height(height),
 			bufferId(bufferId),
-			renderBufferId(renderBufferId),
+			pRenderBufferId(pRenderBufferId),
 			target(target) {}
 
 		RenderCompositingTarget::Impl::~Impl()
 		{
 			delete &target;
-			glDeleteRenderbuffers(1, &renderBufferId);
+			if (pRenderBufferId != nullptr)
+			{
+				glDeleteRenderbuffers(1, pRenderBufferId);
+				delete pRenderBufferId;
+			}
 			glDeleteFramebuffers(1, &bufferId);
 		}
+
+		RenderCompositingTarget::RenderCompositingTarget(
+			unsigned int size,
+			bool isCubeMap
+		)
+			:
+			_impl(Impl::MakeImpl(size, isCubeMap)) {}
 
 		RenderCompositingTarget::RenderCompositingTarget(unsigned int width, unsigned int height)
 			:

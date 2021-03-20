@@ -52,6 +52,16 @@ namespace PRE
 
 		PREMaterial::~PREMaterial() {}
 
+		void PREMaterial::TempSetShaderProgram(PREShader& shader)
+		{
+			_material.SetShaderProgram(&shader._shaderProgram);
+		}
+
+		void PREMaterial::ResetShaderProgram()
+		{
+			SetShader(_pShader);
+		}
+
 		void PREMaterial::BindRenderTextureAccumulatorBindings()
 		{
 			for (

@@ -392,6 +392,12 @@
     <ClInclude Include="src\core\components\predirectionallightcomponent.h">
       <Filter>Header Files\Core\Components</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\subsystems\rendering\preshadowrenderpasscontext.h">
+      <Filter>Header Files\Core\Subsystems\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\subsystems\rendering\preshadowrenderpassdata.h">
+      <Filter>Header Files\Core\Subsystems\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\modules\gameobject\gameobject.cpp">

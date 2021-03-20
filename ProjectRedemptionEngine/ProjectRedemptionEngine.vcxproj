@@ -111,6 +111,8 @@
     <ClInclude Include="src\core\subsystems\rendering\prerenderingconfig.h" />
     <ClInclude Include="src\core\subsystems\rendering\prerendertexture.h" />
     <ClInclude Include="src\core\subsystems\rendering\preshader.h" />
+    <ClInclude Include="src\core\subsystems\rendering\preshadowrenderpasscontext.h" />
+    <ClInclude Include="src\core\subsystems\rendering\preshadowrenderpassdata.h" />
     <ClInclude Include="src\core\subsystems\rendering\preskeleton.h" />
     <ClInclude Include="src\core\subsystems\rendering\preskybox.h" />
     <ClInclude Include="src\core\subsystems\rendering\pretexture.h" />

@@ -49,15 +49,18 @@ namespace PRE
 			void SetSkyBox(PRESkyBox* pSkyBox);
 			PRESkyBox* GetSkyBox();
 
+			void SetTag(int tag);
+			int GetTag();
+
 		protected:
 			void OnStart() override;
 			void OnUpdate() override;
 			void OnDestroy() override;
 
 		private:
-			unordered_set<PREModelRendererComponent*> _associatedModelComponents;
-
 			bool _hasChanged = false;
+
+			int _tag = 0;
 
 			PRETransformComponent* _pTransformComponent = nullptr;
 			RenderCamera* _pCamera = nullptr;

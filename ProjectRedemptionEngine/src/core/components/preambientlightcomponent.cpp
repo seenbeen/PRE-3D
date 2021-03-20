@@ -13,31 +13,20 @@
 
 #include <core/subsystems/rendering/prerendering.h>
 
-#ifdef __PRE_DEBUG__
-#include <assert.h>
-#endif
-
 namespace PRE
 {
 	namespace Core
 	{
 		using std::list;
-		using std::set;
 
-		void PREAmbientLightComponent::AddAffectingLightLayer(int lightLayer)
+		void PREAmbientLightComponent::SetTag(int tag)
 		{
-#ifdef __PRE_DEBUG__
-			assert(_affectingLightLayers.find(lightLayer) == _affectingLightLayers.end());
-#endif
-			_affectingLightLayers.insert(lightLayer);
+			_tag = tag;
 		}
 
-		void PREAmbientLightComponent::RemoveAffectingLightLayer(int lightLayer)
+		int PREAmbientLightComponent::GetTag()
 		{
-#ifdef __PRE_DEBUG__
-			assert(_affectingLightLayers.find(lightLayer) != _affectingLightLayers.end());
-#endif
-			_affectingLightLayers.erase(lightLayer);
+			return _tag;
 		}
 
 		void PREAmbientLightComponent::SetAttentuationLinear(float attenuationLinear)

@@ -1,6 +1,5 @@
 #pragma once
 #include <list>
-#include <set>
 #include <unordered_map>
 
 #include <glm/glm.hpp>
@@ -16,9 +15,9 @@ namespace PRE
 		class PRETransformComponent;
 		class PRERendering;
 		class PRELightRenderPassData;
+		class PREShadowRenderPassData;
 
 		using std::list;
-		using std::set;
 		using std::unordered_map;
 
 		class PRESpotLightComponent : public PREGameObjectComponent
@@ -26,8 +25,8 @@ namespace PRE
 			friend class PRERendering;
 
 		public:
-			void AddAffectingLightLayer(int lightLayer);
-			void RemoveAffectingLightLayer(int lightLayer);
+			void SetTag(int tag);
+			int GetTag();
 
 			void SetAttentuationLinear(float attenuationLinear);
 			void SetAttentuationQuadratic(float attenuationQuadratic);
@@ -44,7 +43,9 @@ namespace PRE
 			PRETransformComponent* _pTransform = nullptr;
 			unordered_map<int, list<PRELightRenderPassData*>::iterator> _fronts;
 
-			set<int> _affectingLightLayers;
+			unordered_map<int, PREShadowRenderPassData*> _shadowPassData;
+
+			int _tag = 0;
 
 			// numbers courtesy of ogre3d wiki
 			float _attenuationLinear = 0.7f;

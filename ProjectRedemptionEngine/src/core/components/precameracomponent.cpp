@@ -124,9 +124,18 @@ namespace PRE
 			return _pSkyBox;
 		}
 
+		void PRECameraComponent::SetTag(int tag)
+		{
+			_tag = tag;
+		}
+
+		int PRECameraComponent::GetTag()
+		{
+			return _tag;
+		}
+
 		void PRECameraComponent::OnStart()
 		{
-			_pTransformComponent = gameObject().GetComponent<PRETransformComponent>();
 			AllocateIfNotAllocated();
 		}
 
@@ -162,6 +171,7 @@ namespace PRE
 		{
 			if (_pCamera == nullptr)
 			{
+				_pTransformComponent = gameObject().GetComponent<PRETransformComponent>();
 				_pCamera = &GetRendering().AllocateCamera(
 					_kind == Kind::ORTHOGRAPHIC ?
 					PRERendering::CameraKind::ORTHOGRAPHIC :
@@ -185,22 +195,9 @@ namespace PRE
 						*_pRenderTexture
 					);
 				}
-
-				// RemoveModelFromTagGroup mutates _associatedModelComponents
-				// so we'll need to make vector copy before unlinking.
-				vector<PREModelRendererComponent*> modelComponents(
-					_associatedModelComponents.begin(),
-					_associatedModelComponents.end()
-				);
-				for (auto it = modelComponents.begin(); it != modelComponents.end(); ++it)
-				{
-					GetRendering().UnlinkModelRendererComponentFromCameraComponent(
-						**it,
-						*this
-					);
-				}
 				GetRendering().DeallocateCamera(*_pCamera);
 				_pCamera = nullptr;
+				_pTransformComponent = nullptr;
 			}
 		}
 	} // namespace Core

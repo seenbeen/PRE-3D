@@ -57,43 +57,29 @@ namespace PRE
 			return _pSkeleton;
 		}
 
-		void PREModelRendererComponent::AddCameraComponent(PRECameraComponent& cameraComponent)
+		void PREModelRendererComponent::SetTag(int tag)
 		{
 			AllocateIfNotAllocated();
-			GetRendering().LinkModelRendererComponentToCameraComponent(
-				*this,
-				cameraComponent
-			);
+			GetRendering().UpdateModelRendererComponentTag(*this, tag);
 		}
 
-		void PREModelRendererComponent::RemoveCameraComponent(PRECameraComponent& cameraComponent)
+		int PREModelRendererComponent::GetTag()
 		{
-			AllocateIfNotAllocated();
-			GetRendering().UnlinkModelRendererComponentFromCameraComponent(
-				*this,
-				cameraComponent
-			);
+			return _tag;
 		}
 
-		void PREModelRendererComponent::AddAffectedLightLayer(int lightLayer)
+		void PREModelRendererComponent::SetCastsShadows(bool castsShadows)
 		{
-#ifdef __PRE_DEBUG__
-			assert(_affectedLightLayers.find(lightLayer) == _affectedLightLayers.end());
-#endif
-			_affectedLightLayers.insert(lightLayer);
+			_castsShadows = castsShadows;
 		}
 
-		void PREModelRendererComponent::RemoveAffectedLightLayer(int lightLayer)
+		bool PREModelRendererComponent::GetCastsShadows()
 		{
-#ifdef __PRE_DEBUG__
-			assert(_affectedLightLayers.find(lightLayer) != _affectedLightLayers.end());
-#endif
-			_affectedLightLayers.erase(lightLayer);
+			return _castsShadows;
 		}
 
 		void PREModelRendererComponent::OnStart()
 		{
-			_pTransformComponent = gameObject().GetComponent<PRETransformComponent>();
 			AllocateIfNotAllocated();
 		}
 
@@ -104,7 +90,6 @@ namespace PRE
 			if (_hasChanged)
 			{
 				_hasChanged = false;
-
 				GetRendering().UpdateModelRendererComponentModel(*this);
 			}
 		}
@@ -120,7 +105,9 @@ namespace PRE
 		{
 			if (_pModel == nullptr)
 			{
+				_pTransformComponent = gameObject().GetComponent<PRETransformComponent>();
 				_pModel = &GetRendering().AllocateModel();
+				GetRendering().InitializeModelRendererComponentTag(*this);
 			}
 		}
 
@@ -128,20 +115,10 @@ namespace PRE
 		{
 			if (_pModel != nullptr)
 			{
-				// unlink mutates _pCameraComponents, so we'll need to make a temp copy
-				vector<PRECameraComponent*> cameraComponents(
-					_pCameraComponents.begin(),
-					_pCameraComponents.end()
-				);
-				for (auto it = cameraComponents.begin(); it != cameraComponents.end(); ++it)
-				{
-					GetRendering().UnlinkModelRendererComponentFromCameraComponent(
-						*this,
-						**it
-					);
-				}
+				GetRendering().UninitializeModelRendererComponentTag(*this);
 				GetRendering().DeallocateModel(*_pModel);
 				_pModel = nullptr;
+				_pTransformComponent = nullptr;
 			}
 		}
 	} // namespace Core

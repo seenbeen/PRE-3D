@@ -34,6 +34,8 @@ namespace PRE
 
 		class PRELightRenderPassContext;
 		class PRELightRenderPassData;
+		class PREShadowRenderPassContext;
+		class PREShadowRenderPassData;
 
 		class PREAnimation;
 		class PREAnimationConfig;
@@ -50,6 +52,7 @@ namespace PRE
 
 		using PRE::RenderingModule::Renderer;
 		using PRE::RenderingModule::RenderCompositingNode;
+		using PRE::RenderingModule::RenderCompositingTarget;
 		using PRE::RenderingModule::RenderCamera;
 		using PRE::RenderingModule::RenderShaderProgram;
 		using PRE::RenderingModule::RenderMesh;
@@ -101,6 +104,11 @@ namespace PRE
 				RenderCamera& screenCamera;
 
 				PRELightRenderPassData* const rootRenderPassData;
+
+				RenderCompositingTarget& shadowMap2D;
+				//RenderCompositingTarget& shadowMap3D;
+
+				unordered_map<int, unordered_set<PREModelRendererComponent*>> modelTagMap;
 
 				map<int, list<PRELightRenderPassData*>> compositingChains;
 
@@ -215,6 +223,8 @@ namespace PRE
 			void DestroySkyBox(PRESkyBox& skyBox);
 
 		private:
+			static const unsigned int SHADOW_MAP_SIZE;
+
 			enum class CameraKind { ORTHOGRAPHIC, PERSPECTIVE };
 
 			static PRERendering& MakePRERendering(
@@ -225,6 +235,11 @@ namespace PRE
 			static void LightPassOnRender(
 				RenderCompositingNode::RenderComposition& composition,
 				void* vLightPassContext
+			);
+
+			static void ShadowPassOnRender(
+				RenderCompositingNode::RenderComposition& composition,
+				void* vShadowPassContext
 			);
 
 			Impl& _impl;
@@ -273,13 +288,17 @@ namespace PRE
 				PREModelRendererComponent& modelRendererComponent
 			);
 
-			void LinkModelRendererComponentToCameraComponent(
-				PREModelRendererComponent& modelRendererComponent,
-				PRECameraComponent& cameraComponent
+			void InitializeModelRendererComponentTag(
+				PREModelRendererComponent& modelRendererComponent
 			);
-			void UnlinkModelRendererComponentFromCameraComponent(
+
+			void UpdateModelRendererComponentTag(
 				PREModelRendererComponent& modelRendererComponent,
-				PRECameraComponent& cameraComponent
+				int tag
+			);
+
+			void UninitializeModelRendererComponentTag(
+				PREModelRendererComponent& modelRendererComponent
 			);
 
 			void LinkCameraComponentToSkyBox(

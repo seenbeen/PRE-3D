@@ -34,6 +34,11 @@ namespace PRE
 				const GLuint textureId;
 				
 				static Impl& MakeImpl(
+					unsigned int size,
+					bool isCubeMap
+				);
+
+				static Impl& MakeImpl(
 					unsigned int width,
 					unsigned int height,
 					const unsigned char* data
@@ -66,6 +71,9 @@ namespace PRE
 
 		private:
 			Impl& _impl;
+
+			// used for shadows; buffer generated for depth
+			RenderTexture(unsigned int size, bool isCubeMap);
 
 			RenderTexture(
 				unsigned int width,

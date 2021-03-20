@@ -131,6 +131,20 @@ namespace PRE
 			SDL_GL_SwapWindow(&_window);
 		}
 
+		RenderCompositingTarget& Renderer::AllocateDepthCompositingTarget(
+			unsigned int size,
+			bool isCubeMap
+		)
+		{
+			auto pCompositingTarget = new RenderCompositingTarget(size, isCubeMap);
+
+#ifdef __PRE_DEBUG__
+			_compositingTargets.insert(pCompositingTarget);
+#endif
+
+			return *pCompositingTarget;
+		}
+
 		RenderCompositingTarget& Renderer::AllocateCompositingTarget(
 			unsigned int width,
 			unsigned int height

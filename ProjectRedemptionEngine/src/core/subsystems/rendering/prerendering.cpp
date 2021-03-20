@@ -41,6 +41,8 @@
 
 #include <core/subsystems/rendering/prelightrenderpassdata.h>
 #include <core/subsystems/rendering/prelightrenderpasscontext.h>
+#include <core/subsystems/rendering/preshadowrenderpassdata.h>
+#include <core/subsystems/rendering/preshadowrenderpasscontext.h>
 
 #ifdef __PRE_DEBUG__
 #include <assert.h>
@@ -209,10 +211,22 @@ namespace PRE
 			screenMaterial(screenMaterial),
 			screenModel(screenModel),
 			screenCamera(screenCamera),
-			rootRenderPassData(new PRELightRenderPassData(screenCompositingNode)) {}
+			rootRenderPassData(new PRELightRenderPassData(screenCompositingNode)),
+			shadowMap2D(renderer.AllocateDepthCompositingTarget(SHADOW_MAP_SIZE, false))
+			// shadowMap3D(renderer.AllocateCompositingTarget(SHADOW_MAP_SIZE, true),
+		{
+			modelTagMap.insert(
+				std::make_pair(
+					0,
+					std::move(unordered_set<PREModelRendererComponent*>())
+				)
+			);
+		}
 
 		PRERendering::Impl::~Impl()
 		{
+			// renderer.DeallocateCompositingTarget(shadowMap3D);
+			renderer.DeallocateCompositingTarget(shadowMap2D);
 			delete rootRenderPassData;
 			renderer.DeallocateCamera(screenCamera);
 			renderer.DeallocateModel(screenModel);
@@ -756,8 +770,41 @@ namespace PRE
 			if (lightPassContext._renderTexture._pAssociatedCameraComponent != nullptr)
 			{
 				auto pCameraComponent = lightPassContext._renderTexture._pAssociatedCameraComponent;
-
 				pCameraComponent->AllocateIfNotAllocated();
+
+				int tag;
+				if (lightPassContext._pAmbientLightComponent != nullptr)
+				{
+					tag = lightPassContext._pAmbientLightComponent->_tag;
+				}
+				else if (lightPassContext._pPointLightComponent != nullptr)
+				{
+					tag = lightPassContext._pPointLightComponent->_tag;
+				}
+				else if (lightPassContext._pSpotLightComponent != nullptr)
+				{
+					tag = lightPassContext._pSpotLightComponent->_tag;
+				}
+				else
+				{
+#ifdef __PRE_DEBUG__
+					assert(lightPassContext._pDirectionalLightComponent != nullptr);
+#endif
+					tag = lightPassContext._pDirectionalLightComponent->_tag;
+				}
+
+				if (tag != pCameraComponent->_tag)
+				{
+					return;
+				}
+
+				unordered_set<PREModelRendererComponent*>* pModels = nullptr;
+				auto itModels = lightPassContext._modelTagMap.find(tag);
+				if (itModels == lightPassContext._modelTagMap.end())
+				{
+					return;
+				}
+
 				composition.SetCamera(pCameraComponent->_pCamera);
 
 				auto pAccumulatorWrite = lightPassContext._renderTexture._accumulatorBufferIsA ?
@@ -775,179 +822,145 @@ namespace PRE
 
 				++lightPassContext._renderTexture._passCounter;
 
+				pModels = &itModels->second;
+
 				// TODO: Spatial query optimizing to only render visible models
-				for (
-					auto it = pCameraComponent->_associatedModelComponents.begin();
-					it != pCameraComponent->_associatedModelComponents.end();
-					++it
-					)
+				for (auto it = pModels->begin(); it != pModels->end(); ++it)
 				{
 					auto& modelRendererComponent = **it;
-					set<int>* pAffectingLightLayers = nullptr;
-					if (lightPassContext._pAmbientLightComponent != nullptr)
-					{
-						pAffectingLightLayers = &lightPassContext._pAmbientLightComponent->_affectingLightLayers;
-					}
-					else if (lightPassContext._pPointLightComponent != nullptr)
-					{
-						pAffectingLightLayers = &lightPassContext._pPointLightComponent->_affectingLightLayers;
-					}
-					else if (lightPassContext._pSpotLightComponent != nullptr)
-					{
-						pAffectingLightLayers = &lightPassContext._pSpotLightComponent->_affectingLightLayers;
-					}
-					else
-					{
-#ifdef __PRE_DEBUG__
-						assert(lightPassContext._pDirectionalLightComponent != nullptr);
-#endif
-						pAffectingLightLayers = &lightPassContext._pDirectionalLightComponent->_affectingLightLayers;
-					}
 
-					// TODO: may want to just use a long or int and bit-wise operate
-					// as this overhead-vs-practicality trade off might not be worth it
-					vector<int> lightAffectanceBuffer(32);
 					if (
-						modelRendererComponent._affectedLightLayers.empty() ||
-						pAffectingLightLayers->empty() ||
-						std::set_intersection(
-							modelRendererComponent._affectedLightLayers.begin(),
-							modelRendererComponent._affectedLightLayers.end(),
-							pAffectingLightLayers->begin(),
-							pAffectingLightLayers->end(),
-							lightAffectanceBuffer.begin()
-						) == lightAffectanceBuffer.end()
+						modelRendererComponent._pModel == nullptr ||
+						modelRendererComponent._pMaterial == nullptr ||
+						modelRendererComponent._pMaterial->_pShader == nullptr
 					)
 					{
 						continue;
 					}
 
-					modelRendererComponent.AllocateIfNotAllocated();
-					if (modelRendererComponent._pMaterial != nullptr)
+					modelRendererComponent._pMaterial->_material.SetTextureBinding(
+						pAccumulatorRead,
+						PREShader::LIGHT_ACCUMULATOR_BINDING
+					);
+					modelRendererComponent._pMaterial->BindRenderTextureAccumulatorBindings();
+
+					// shader program may have been temporarily set by shadow
+					// casting, so reset any of these temp changes from last pass
+					modelRendererComponent._pMaterial->ResetShaderProgram();
+
+					auto pShader = modelRendererComponent._pMaterial->_pShader;
+					pShader->SetInt(
+						PREShader::IS_FIRST_LIGHT_PASS,
+						isFirstPass ? 1 : 0
+					);
+					pShader->SetVec2(
+						PREShader::LIGHT_ACCUMULATOR_SAMPLER_SIZE,
+						lightPassContext._renderTexture._size
+					);
+					pShader->SetInt(
+						PREShader::LIGHT_ACCUMULATOR_SAMPLER,
+						PREShader::LIGHT_ACCUMULATOR_BINDING
+					);
+					pShader->SetInt(PREShader::AMBIENT_LIGHT_FLAG, 0);
+					pShader->SetInt(PREShader::POINT_LIGHT_FLAG, 0);
+					pShader->SetInt(PREShader::SPOT_LIGHT_FLAG, 0);
+					pShader->SetInt(PREShader::DIRECTIONAL_LIGHT_FLAG, 0);
+					pShader->SetVec3(
+						PREShader::VIEW_POSITION,
+						pCameraComponent->_pTransformComponent->GetPosition()
+					);
+
+					if (lightPassContext._pAmbientLightComponent != nullptr)
 					{
-						if (modelRendererComponent._pMaterial->_pShader != nullptr)
-						{
-							modelRendererComponent._pMaterial->_material.SetTextureBinding(
-								pAccumulatorRead,
-								PREShader::LIGHT_ACCUMULATOR_BINDING
-							);
-							modelRendererComponent._pMaterial->BindRenderTextureAccumulatorBindings();
-
-							auto pShader = modelRendererComponent._pMaterial->_pShader;
-							pShader->SetInt(
-								PREShader::IS_FIRST_LIGHT_PASS,
-								isFirstPass ? 1 : 0
-							);
-							pShader->SetVec2(
-								PREShader::LIGHT_ACCUMULATOR_SAMPLER_SIZE,
-								lightPassContext._renderTexture._size
-							);
-							pShader->SetInt(
-								PREShader::LIGHT_ACCUMULATOR_SAMPLER,
-								PREShader::LIGHT_ACCUMULATOR_BINDING
-							);
-							pShader->SetInt(PREShader::AMBIENT_LIGHT_FLAG, 0);
-							pShader->SetInt(PREShader::POINT_LIGHT_FLAG, 0);
-							pShader->SetInt(PREShader::SPOT_LIGHT_FLAG, 0);
-							pShader->SetInt(PREShader::DIRECTIONAL_LIGHT_FLAG, 0);
-							pShader->SetVec3(
-								PREShader::VIEW_POSITION,
-								pCameraComponent->_pTransformComponent->GetPosition()
-							);
-
-							if (lightPassContext._pAmbientLightComponent != nullptr)
-							{
-								auto pAmbientLightComponent = lightPassContext._pAmbientLightComponent;
-								pAmbientLightComponent->AllocateIfNotAllocated();
-								pShader->SetInt(PREShader::AMBIENT_LIGHT_FLAG, 1);
-								pShader->SetVec3(
-									PREShader::LIGHT_POSITION,
-									pAmbientLightComponent->_pTransform->GetPosition()
-								);
-								pShader->SetVec3(
-									PREShader::LIGHT_COLOR,
-									pAmbientLightComponent->_color
-								);
-								pShader->SetFloat(
-									PREShader::LIGHT_ATTENUATION_LINEAR,
-									pAmbientLightComponent->_attenuationLinear
-								);
-								pShader->SetFloat(
-									PREShader::LIGHT_ATTENUATION_QUADRATIC,
-									pAmbientLightComponent->_attenuationQuadratic
-								);
-							}
-							else if (lightPassContext._pPointLightComponent != nullptr)
-							{
-								auto pPointLightComponent = lightPassContext._pPointLightComponent;
-								pPointLightComponent->AllocateIfNotAllocated();
-								pShader->SetInt(PREShader::POINT_LIGHT_FLAG, 1);
-								pShader->SetVec3(
-									PREShader::LIGHT_POSITION,
-									pPointLightComponent->_pTransform->GetPosition()
-								);
-								pShader->SetVec3(
-									PREShader::LIGHT_COLOR,
-									pPointLightComponent->_color
-								);
-								pShader->SetFloat(
-									PREShader::LIGHT_ATTENUATION_LINEAR,
-									pPointLightComponent->_attenuationLinear
-								);
-								pShader->SetFloat(
-									PREShader::LIGHT_ATTENUATION_QUADRATIC,
-									pPointLightComponent->_attenuationQuadratic
-								);
-							}
-							else if (lightPassContext._pSpotLightComponent != nullptr)
-							{
-								auto pSpotLightComponent = lightPassContext._pSpotLightComponent;
-								pSpotLightComponent->AllocateIfNotAllocated();
-								pShader->SetInt(PREShader::SPOT_LIGHT_FLAG, 1);
-								pShader->SetVec3(
-									PREShader::LIGHT_POSITION,
-									pSpotLightComponent->_pTransform->GetPosition()
-								);
-								pShader->SetVec3(
-									PREShader::LIGHT_COLOR,
-									pSpotLightComponent->_color
-								);
-								pShader->SetVec3(
-									PREShader::LIGHT_DIRECTION,
-									pSpotLightComponent->_pTransform->GetForward()
-								);
-								pShader->SetFloat(
-									PREShader::LIGHT_ATTENUATION_LINEAR,
-									pSpotLightComponent->_attenuationLinear
-								);
-								pShader->SetFloat(
-									PREShader::LIGHT_ATTENUATION_QUADRATIC,
-									pSpotLightComponent->_attenuationQuadratic
-								);
-								pShader->SetFloat(
-									PREShader::LIGHT_INNER_RADIUS,
-									pSpotLightComponent->_innerRadius
-								);
-								pShader->SetFloat(
-									PREShader::LIGHT_OUTER_RADIUS,
-									pSpotLightComponent->_outerRadius
-								);
-							}
-							else if (lightPassContext._pDirectionalLightComponent != nullptr)
-							{
-								auto pDirectionalLightComponent = lightPassContext._pDirectionalLightComponent;
-								pDirectionalLightComponent->AllocateIfNotAllocated();
-								pShader->SetInt(PREShader::DIRECTIONAL_LIGHT_FLAG, 1);
-								pShader->SetVec3(
-									PREShader::LIGHT_COLOR,
-									pDirectionalLightComponent->_color
-								);
-								pShader->SetVec3(
-									PREShader::LIGHT_DIRECTION,
-									pDirectionalLightComponent->_pTransform->GetForward()
-								);
-							}
-						}
+						auto pAmbientLightComponent = lightPassContext._pAmbientLightComponent;
+						pAmbientLightComponent->AllocateIfNotAllocated();
+						pShader->SetInt(PREShader::AMBIENT_LIGHT_FLAG, 1);
+						pShader->SetVec3(
+							PREShader::LIGHT_POSITION,
+							pAmbientLightComponent->_pTransform->GetPosition()
+						);
+						pShader->SetVec3(
+							PREShader::LIGHT_COLOR,
+							pAmbientLightComponent->_color
+						);
+						pShader->SetFloat(
+							PREShader::LIGHT_ATTENUATION_LINEAR,
+							pAmbientLightComponent->_attenuationLinear
+						);
+						pShader->SetFloat(
+							PREShader::LIGHT_ATTENUATION_QUADRATIC,
+							pAmbientLightComponent->_attenuationQuadratic
+						);
+					}
+					else if (lightPassContext._pPointLightComponent != nullptr)
+					{
+						auto pPointLightComponent = lightPassContext._pPointLightComponent;
+						pPointLightComponent->AllocateIfNotAllocated();
+						pShader->SetInt(PREShader::POINT_LIGHT_FLAG, 1);
+						pShader->SetVec3(
+							PREShader::LIGHT_POSITION,
+							pPointLightComponent->_pTransform->GetPosition()
+						);
+						pShader->SetVec3(
+							PREShader::LIGHT_COLOR,
+							pPointLightComponent->_color
+						);
+						pShader->SetFloat(
+							PREShader::LIGHT_ATTENUATION_LINEAR,
+							pPointLightComponent->_attenuationLinear
+						);
+						pShader->SetFloat(
+							PREShader::LIGHT_ATTENUATION_QUADRATIC,
+							pPointLightComponent->_attenuationQuadratic
+						);
+					}
+					else if (lightPassContext._pSpotLightComponent != nullptr)
+					{
+						auto pSpotLightComponent = lightPassContext._pSpotLightComponent;
+						pSpotLightComponent->AllocateIfNotAllocated();
+						pShader->SetInt(PREShader::SPOT_LIGHT_FLAG, 1);
+						pShader->SetVec3(
+							PREShader::LIGHT_POSITION,
+							pSpotLightComponent->_pTransform->GetPosition()
+						);
+						pShader->SetVec3(
+							PREShader::LIGHT_COLOR,
+							pSpotLightComponent->_color
+						);
+						pShader->SetVec3(
+							PREShader::LIGHT_DIRECTION,
+							pSpotLightComponent->_pTransform->GetForward()
+						);
+						pShader->SetFloat(
+							PREShader::LIGHT_ATTENUATION_LINEAR,
+							pSpotLightComponent->_attenuationLinear
+						);
+						pShader->SetFloat(
+							PREShader::LIGHT_ATTENUATION_QUADRATIC,
+							pSpotLightComponent->_attenuationQuadratic
+						);
+						pShader->SetFloat(
+							PREShader::LIGHT_INNER_RADIUS,
+							pSpotLightComponent->_innerRadius
+						);
+						pShader->SetFloat(
+							PREShader::LIGHT_OUTER_RADIUS,
+							pSpotLightComponent->_outerRadius
+						);
+					}
+					else if (lightPassContext._pDirectionalLightComponent != nullptr)
+					{
+						auto pDirectionalLightComponent = lightPassContext._pDirectionalLightComponent;
+						pDirectionalLightComponent->AllocateIfNotAllocated();
+						pShader->SetInt(PREShader::DIRECTIONAL_LIGHT_FLAG, 1);
+						pShader->SetVec3(
+							PREShader::LIGHT_COLOR,
+							pDirectionalLightComponent->_color
+						);
+						pShader->SetVec3(
+							PREShader::LIGHT_DIRECTION,
+							pDirectionalLightComponent->_pTransform->GetForward()
+						);
 					}
 					composition.AddModel(*modelRendererComponent._pModel);
 				}
@@ -964,6 +977,171 @@ namespace PRE
 				}
 			}
 		}
+
+		void PRERendering::ShadowPassOnRender(
+			RenderCompositingNode::RenderComposition& composition,
+			void* vShadowPassContext
+		)
+		{
+			/*
+			auto& shadowPassContext = *static_cast<PREShadowRenderPassContext*>(vShadowPassContext);
+			if (shadowPassContext._renderTexture._pAssociatedCameraComponent != nullptr)
+			{
+				auto pCameraComponent = shadowPassContext._renderTexture._pAssociatedCameraComponent;
+
+				for (
+					auto it = pCameraComponent->_associatedModelComponents.begin();
+					it != pCameraComponent->_associatedModelComponents.end();
+					++it
+					)
+				{
+					auto& modelRendererComponent = **it;
+
+					if (
+						modelRendererComponent._pModel == nullptr ||
+						modelRendererComponent._pMaterial == nullptr ||
+						modelRendererComponent._pMaterial->_pShader == nullptr
+						)
+					{
+						continue;
+					}
+
+					set<int>* pAffectingLightLayers = nullptr;
+					if (shadowPassContext._pPointLightComponent != nullptr)
+					{
+						pAffectingLightLayers = &shadowPassContext._pPointLightComponent->_affectingLightLayers;
+					}
+					else if (shadowPassContext._pSpotLightComponent != nullptr)
+					{
+						pAffectingLightLayers = &shadowPassContext._pSpotLightComponent->_affectingLightLayers;
+					}
+					else
+					{
+#ifdef __PRE_DEBUG__
+						assert(shadowPassContext._pDirectionalLightComponent != nullptr);
+#endif
+						pAffectingLightLayers = &shadowPassContext._pDirectionalLightComponent->_affectingLightLayers;
+					}
+
+					// TODO: may want to just use a long or int and bit-wise operate
+					// as this overhead-vs-practicality trade off might not be worth it
+					vector<int> lightAffectanceBuffer(32);
+					if (
+						modelRendererComponent._affectedLightLayers.empty() ||
+						pAffectingLightLayers->empty() ||
+						std::set_intersection(
+							modelRendererComponent._affectedLightLayers.begin(),
+							modelRendererComponent._affectedLightLayers.end(),
+							pAffectingLightLayers->begin(),
+							pAffectingLightLayers->end(),
+							lightAffectanceBuffer.begin()
+						) == lightAffectanceBuffer.end()
+						)
+					{
+						continue;
+					}
+
+
+					auto pShader = modelRendererComponent._pMaterial->_pShader;
+					pShader->SetInt(
+						PREShader::IS_FIRST_LIGHT_PASS,
+						isFirstPass ? 1 : 0
+					);
+					pShader->SetVec2(
+						PREShader::LIGHT_ACCUMULATOR_SAMPLER_SIZE,
+						lightPassContext._renderTexture._size
+					);
+					pShader->SetInt(
+						PREShader::LIGHT_ACCUMULATOR_SAMPLER,
+						PREShader::LIGHT_ACCUMULATOR_BINDING
+					);
+					pShader->SetInt(PREShader::AMBIENT_LIGHT_FLAG, 0);
+					pShader->SetInt(PREShader::POINT_LIGHT_FLAG, 0);
+					pShader->SetInt(PREShader::SPOT_LIGHT_FLAG, 0);
+					pShader->SetInt(PREShader::DIRECTIONAL_LIGHT_FLAG, 0);
+					pShader->SetVec3(
+						PREShader::VIEW_POSITION,
+						pCameraComponent->_pTransformComponent->GetPosition()
+					);
+
+					if (lightPassContext._pPointLightComponent != nullptr)
+					{
+						auto pPointLightComponent = lightPassContext._pPointLightComponent;
+						pPointLightComponent->AllocateIfNotAllocated();
+						pShader->SetInt(PREShader::POINT_LIGHT_FLAG, 1);
+						pShader->SetVec3(
+							PREShader::LIGHT_POSITION,
+							pPointLightComponent->_pTransform->GetPosition()
+						);
+						pShader->SetVec3(
+							PREShader::LIGHT_COLOR,
+							pPointLightComponent->_color
+						);
+						pShader->SetFloat(
+							PREShader::LIGHT_ATTENUATION_LINEAR,
+							pPointLightComponent->_attenuationLinear
+						);
+						pShader->SetFloat(
+							PREShader::LIGHT_ATTENUATION_QUADRATIC,
+							pPointLightComponent->_attenuationQuadratic
+						);
+					}
+					else if (lightPassContext._pSpotLightComponent != nullptr)
+					{
+						auto pSpotLightComponent = lightPassContext._pSpotLightComponent;
+						pSpotLightComponent->AllocateIfNotAllocated();
+						pShader->SetInt(PREShader::SPOT_LIGHT_FLAG, 1);
+						pShader->SetVec3(
+							PREShader::LIGHT_POSITION,
+							pSpotLightComponent->_pTransform->GetPosition()
+						);
+						pShader->SetVec3(
+							PREShader::LIGHT_COLOR,
+							pSpotLightComponent->_color
+						);
+						pShader->SetVec3(
+							PREShader::LIGHT_DIRECTION,
+							pSpotLightComponent->_pTransform->GetForward()
+						);
+						pShader->SetFloat(
+							PREShader::LIGHT_ATTENUATION_LINEAR,
+							pSpotLightComponent->_attenuationLinear
+						);
+						pShader->SetFloat(
+							PREShader::LIGHT_ATTENUATION_QUADRATIC,
+							pSpotLightComponent->_attenuationQuadratic
+						);
+						pShader->SetFloat(
+							PREShader::LIGHT_INNER_RADIUS,
+							pSpotLightComponent->_innerRadius
+						);
+						pShader->SetFloat(
+							PREShader::LIGHT_OUTER_RADIUS,
+							pSpotLightComponent->_outerRadius
+						);
+					}
+					else if (lightPassContext._pDirectionalLightComponent != nullptr)
+					{
+						auto pDirectionalLightComponent = lightPassContext._pDirectionalLightComponent;
+						pDirectionalLightComponent->AllocateIfNotAllocated();
+						pShader->SetInt(PREShader::DIRECTIONAL_LIGHT_FLAG, 1);
+						pShader->SetVec3(
+							PREShader::LIGHT_COLOR,
+							pDirectionalLightComponent->_color
+						);
+						pShader->SetVec3(
+							PREShader::LIGHT_DIRECTION,
+							pDirectionalLightComponent->_pTransform->GetForward()
+						);
+					}
+					composition.AddModel(*modelRendererComponent._pModel);
+				}
+				composition.SetCompositingTarget(&shadowPassContext._target);
+			}
+			*/
+		}
+
+		const unsigned int PRERendering::SHADOW_MAP_SIZE = 1024;
 
 		PRERendering& PRERendering::MakePRERendering(
 			const PRERenderingConfig& renderingConfig,
@@ -1116,32 +1294,64 @@ namespace PRE
 			);
 		}
 
-		void PRERendering::LinkModelRendererComponentToCameraComponent(
-			PREModelRendererComponent& modelRendererComponent,
-			PRECameraComponent& cameraComponent
+		void PRERendering::InitializeModelRendererComponentTag(
+			PREModelRendererComponent& modelRendererComponent
 		)
 		{
+			auto itTagZero = _impl.modelTagMap.find(0);
+
 #ifdef __PRE_DEBUG__
-			assert(modelRendererComponent._pCameraComponents.find(&cameraComponent) == modelRendererComponent._pCameraComponents.end());
-			assert(cameraComponent._associatedModelComponents.find(&modelRendererComponent) == cameraComponent._associatedModelComponents.end());
+			assert(itTagZero->second.find(&modelRendererComponent) == itTagZero->second.end());
 #endif
 
-			modelRendererComponent._pCameraComponents.insert(&cameraComponent);
-			cameraComponent._associatedModelComponents.insert(&modelRendererComponent);
+			itTagZero->second.insert(&modelRendererComponent);
 		}
 
-		void PRERendering::UnlinkModelRendererComponentFromCameraComponent(
-			PREModelRendererComponent& modelRendererComponent,
-			PRECameraComponent& cameraComponent
+		void PRERendering::UninitializeModelRendererComponentTag(
+			PREModelRendererComponent& modelRendererComponent
 		)
 		{
+			auto itTag = _impl.modelTagMap.find(modelRendererComponent._tag);
+
 #ifdef __PRE_DEBUG__
-			assert(modelRendererComponent._pCameraComponents.find(&cameraComponent) != modelRendererComponent._pCameraComponents.end());
-			assert(cameraComponent._associatedModelComponents.find(&modelRendererComponent) != cameraComponent._associatedModelComponents.end());
+			assert(itTag != _impl.modelTagMap.end());
+			assert(itTag->second.find(&modelRendererComponent) != itTag->second.end());
 #endif
 
-			modelRendererComponent._pCameraComponents.erase(&cameraComponent);
-			cameraComponent._associatedModelComponents.erase(&modelRendererComponent);
+			itTag->second.erase(&modelRendererComponent);
+			if (itTag->second.empty())
+			{
+				_impl.modelTagMap.erase(itTag);
+			}
+
+			modelRendererComponent._tag = 0;
+		}
+
+		void PRERendering::UpdateModelRendererComponentTag(
+			PREModelRendererComponent& modelRendererComponent,
+			int tag
+		)
+		{
+			UninitializeModelRendererComponentTag(modelRendererComponent);
+
+			auto itNewTag = _impl.modelTagMap.find(tag);
+			if (itNewTag == _impl.modelTagMap.end())
+			{
+				itNewTag = _impl.modelTagMap.insert(
+					std::make_pair(
+						tag,
+						std::move(unordered_set<PREModelRendererComponent*>())
+					)
+				).first;
+			}
+
+#ifdef __PRE_DEBUG__
+			assert(itNewTag->second.find(&modelRendererComponent) == itNewTag->second.end());
+#endif
+
+			itNewTag->second.insert(&modelRendererComponent);
+
+			modelRendererComponent._tag = tag;
 		}
 
 		void PRERendering::LinkCameraComponentToSkyBox(
@@ -1187,6 +1397,7 @@ namespace PRE
 				pLightComponent->_fronts[pRenderPass->_layer] = compositingChain.begin();
 
 				auto pLightContext = new PRELightRenderPassContext(
+					_impl.modelTagMap,
 					*pRenderPass,
 					ambientLightComponent
 				);
@@ -1263,6 +1474,7 @@ namespace PRE
 				pLightComponent->_fronts[pRenderPass->_layer] = compositingChain.begin();
 
 				auto pLightContext = new PRELightRenderPassContext(
+					_impl.modelTagMap,
 					*pRenderPass,
 					pointLightComponent
 				);
@@ -1333,6 +1545,7 @@ namespace PRE
 			_impl.UnlinkCompositingChains();
 
 			auto pLightComponent = &spotLightComponent;
+			auto& shadowPassData = spotLightComponent._shadowPassData;
 			for (auto it = _impl.renderPasses.begin(); it != _impl.renderPasses.end(); ++it)
 			{
 				auto pRenderPass = *it;
@@ -1340,6 +1553,7 @@ namespace PRE
 				pLightComponent->_fronts[pRenderPass->_layer] = compositingChain.begin();
 
 				auto pLightContext = new PRELightRenderPassContext(
+					_impl.modelTagMap,
 					*pRenderPass,
 					spotLightComponent
 				);
@@ -1350,6 +1564,29 @@ namespace PRE
 					),
 					*pLightContext
 				);
+
+				//// link shadow node if necessary
+				//if (shadowPassData.find(pRenderPass->_layer) == shadowPassData.end())
+				//{
+				//	auto pShadowContext = new PREShadowRenderPassContext(
+				//		_impl.shadowMap2D,
+				//		*pRenderPass,
+				//		spotLightComponent
+				//	);
+				//	auto pNewShadowData = new PREShadowRenderPassData(
+				//		_impl.renderer.AllocateCompositingNode(
+				//			ShadowPassOnRender,
+				//			pShadowContext
+				//		)
+				//	);
+
+				//	_impl.renderer.AttachCompositingNodeDependency(
+				//		*pNewLightData->pNode,
+				//		*pNewShadowData->pNode
+				//	);
+
+				//	shadowPassData[pRenderPass->_layer] = pNewShadowData;
+				//}
 
 				_impl.LinkLightToRenderTarget(
 					*pRenderPass,
@@ -1417,6 +1654,7 @@ namespace PRE
 				pLightComponent->_fronts[pRenderPass->_layer] = compositingChain.begin();
 
 				auto pLightContext = new PRELightRenderPassContext(
+					_impl.modelTagMap,
 					*pRenderPass,
 					directionalLightComponent
 				);
@@ -1494,6 +1732,7 @@ namespace PRE
 				auto& ambientLightComponent = *pLightComponent;
 
 				auto pLightContext = new PRELightRenderPassContext(
+					_impl.modelTagMap,
 					*pRenderPass,
 					ambientLightComponent
 				);
@@ -1522,6 +1761,7 @@ namespace PRE
 				auto& pointLightComponent = *pLightComponent;
 
 				auto pLightContext = new PRELightRenderPassContext(
+					_impl.modelTagMap,
 					*pRenderPass,
 					pointLightComponent
 				);
@@ -1550,6 +1790,7 @@ namespace PRE
 				auto& spotLightComponent = *pLightComponent;
 
 				auto pLightContext = new PRELightRenderPassContext(
+					_impl.modelTagMap,
 					*pRenderPass,
 					spotLightComponent
 				);
@@ -1578,6 +1819,7 @@ namespace PRE
 				auto& directionalLightComponent = *pLightComponent;
 
 				auto pLightContext = new PRELightRenderPassContext(
+					_impl.modelTagMap,
 					*pRenderPass,
 					directionalLightComponent
 				);

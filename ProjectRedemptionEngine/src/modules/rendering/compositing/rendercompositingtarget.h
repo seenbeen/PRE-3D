@@ -29,11 +29,17 @@ namespace PRE
 				const unsigned int height;
 
 				const GLuint bufferId;
-				const GLuint renderBufferId;
+				const GLuint* const pRenderBufferId;
 
 				RenderTexture& target;
 
-				static Impl& MakeImpl(unsigned int width, unsigned int height);
+				static Impl& MakeImpl(
+					unsigned int size, bool isCubeMap
+				);
+
+				static Impl& MakeImpl(
+					unsigned int width, unsigned int height
+				);
 				static Impl& MakeImpl(
 					unsigned int rightWidth, unsigned int rightHeight,
 					unsigned int leftWidth, unsigned int leftHeight,
@@ -47,7 +53,7 @@ namespace PRE
 					unsigned int width,
 					unsigned int height,
 					GLuint bufferId,
-					GLuint renderbufferId,
+					const GLuint* pRenderbufferId,
 					RenderTexture& target
 				);
 
@@ -56,6 +62,9 @@ namespace PRE
 
 		private:
 			Impl& _impl;
+
+			// constructs a depth-map compositing target for shadowmaps
+			RenderCompositingTarget(unsigned int size, bool isCubeMap);
 
 			RenderCompositingTarget(unsigned int width, unsigned int height);
 			RenderCompositingTarget(

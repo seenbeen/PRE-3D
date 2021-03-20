@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 
 #include <list>
-#include <set>
 
 #include <include/modules/rendering.h>
 
@@ -13,31 +12,20 @@
 
 #include <core/subsystems/rendering/prerendering.h>
 
-#ifdef __PRE_DEBUG__
-#include <assert.h>
-#endif
-
 namespace PRE
 {
 	namespace Core
 	{
 		using std::list;
-		using std::set;
 
-		void PREDirectionalLightComponent::AddAffectingLightLayer(int lightLayer)
+		void PREDirectionalLightComponent::SetTag(int tag)
 		{
-#ifdef __PRE_DEBUG__
-			assert(_affectingLightLayers.find(lightLayer) == _affectingLightLayers.end());
-#endif
-			_affectingLightLayers.insert(lightLayer);
+			_tag = tag;
 		}
 
-		void PREDirectionalLightComponent::RemoveAffectingLightLayer(int lightLayer)
+		int PREDirectionalLightComponent::GetTag()
 		{
-#ifdef __PRE_DEBUG__
-			assert(_affectingLightLayers.find(lightLayer) != _affectingLightLayers.end());
-#endif
-			_affectingLightLayers.erase(lightLayer);
+			return _tag;
 		}
 
 		void PREDirectionalLightComponent::SetColor(const glm::vec3& color)

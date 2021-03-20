@@ -37,11 +37,11 @@ namespace PRE
 			void SetSkeleton(PRESkeleton* pSkeleton);
 			PRESkeleton* GetSkeleton() const;
 
-			void AddCameraComponent(PRECameraComponent& cameraComponent);
-			void RemoveCameraComponent(PRECameraComponent& cameraComponent);
+			void SetTag(int tag);
+			int GetTag();
 
-			void AddAffectedLightLayer(int lightLayer);
-			void RemoveAffectedLightLayer(int lightLayer);
+			void SetCastsShadows(bool castsShadows);
+			bool GetCastsShadows();
 
 		protected:
 			void OnStart() override;
@@ -54,8 +54,9 @@ namespace PRE
 			PRETransformComponent* _pTransformComponent = nullptr;
 			RenderModel* _pModel = nullptr;
 
-			unordered_set<PRECameraComponent*> _pCameraComponents;
-			set<int> _affectedLightLayers;
+			int _tag = 0;
+
+			bool _castsShadows = true;
 
 			PREMaterial* _pMaterial = nullptr;
 			PREMesh* _pMesh = nullptr;

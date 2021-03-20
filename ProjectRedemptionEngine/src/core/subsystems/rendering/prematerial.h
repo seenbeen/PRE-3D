@@ -39,6 +39,14 @@ namespace PRE
 			PREMaterial(RenderMaterial& material);
 			~PREMaterial();
 
+			// temporarily binds a shader program without changing
+			// the currently bound shader program. Used for temporary shader
+			// settingm, such as for shadows
+			void TempSetShaderProgram(PREShader& shader);
+
+			// re-binds the bound shader program if it exists
+			void ResetShaderProgram();
+
 			void BindRenderTextureAccumulatorBindings();
 		};
 	} // namespace Core

@@ -11,6 +11,43 @@ namespace PRE
 		using std::vector;
 
 		RenderTexture::Impl& RenderTexture::Impl::MakeImpl(
+			unsigned int size,
+			bool isCubeMap
+		)
+		{
+			if (isCubeMap)
+			{
+				throw "don't do that yet";
+			}
+			else
+			{
+				GLuint textureId;
+				glGenTextures(1, &textureId);
+				glBindTexture(GL_TEXTURE_2D, textureId);
+				glTexImage2D(
+					GL_TEXTURE_2D,
+					0,
+					GL_DEPTH_COMPONENT,
+					size,
+					size,
+					0,
+					GL_DEPTH_COMPONENT,
+					GL_FLOAT,
+					NULL
+				);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+				float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+				glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+				glBindTexture(GL_TEXTURE_2D, GL_NONE);
+
+				return *(new RenderTexture::Impl(TextureKind::STANDARD, textureId));
+			}
+		}
+
+		RenderTexture::Impl& RenderTexture::Impl::MakeImpl(
 			unsigned int width,
 			unsigned int height,
 			const unsigned char* const data
@@ -122,6 +159,10 @@ namespace PRE
 		{
 			glDeleteTextures(1, &textureId);
 		}
+
+		RenderTexture::RenderTexture(unsigned int size, bool isCubeMap)
+			:
+			_impl(Impl::MakeImpl(size, isCubeMap)) {}
 
 		RenderTexture::RenderTexture(
 			unsigned int width,
