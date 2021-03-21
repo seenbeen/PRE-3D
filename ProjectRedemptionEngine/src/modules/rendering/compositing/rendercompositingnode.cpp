@@ -111,7 +111,7 @@ namespace PRE
 			assert(it == _impl.compositingNodeDependencies.end());
 #endif
 
-			_impl.compositingNodeDependencies.push_back(pCompositingNode);
+			_impl.compositingNodeDependencies.push_front(pCompositingNode);
 		}
 
 		void RenderCompositingNode::RemoveDependency(RenderCompositingNode& compositingNode)

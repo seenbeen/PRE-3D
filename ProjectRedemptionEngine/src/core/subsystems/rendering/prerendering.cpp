@@ -294,6 +294,16 @@ namespace PRE
 			auto pRenderPass = &renderPass;
 			auto pLightData = &lightData;
 
+			// link shadow pass
+			if (pShadowData != nullptr && pShadowData->pLastLightData == nullptr)
+			{
+				renderer.AttachCompositingNodeDependency(
+					*pLightData->pNode,
+					*pShadowData->pNode
+				);
+				pShadowData->pLastLightData = pLightData;
+			}
+
 			PRELightRenderPassData* pPreviousLightData = nullptr;
 			if (itLightFront != compositingChain.begin())
 			{
@@ -334,16 +344,6 @@ namespace PRE
 				);
 			}
 
-			// link shadow pass
-			if (pShadowData != nullptr && pShadowData->pLastLightData == nullptr)
-			{
-				renderer.AttachCompositingNodeDependency(
-					*pLightData->pNode,
-					*pShadowData->pNode
-				);
-				pShadowData->pLastLightData = pLightData;
-			}
-
 			// insert light render pass data
 			itLightFront = compositingChain.insert(itLightFront, pLightData);
 
@@ -373,6 +373,26 @@ namespace PRE
 #endif
 
 			auto itRemovedLightData(renderPass._lightMap.find(pLightComponent)->second);
+
+			// re-link shadow pass if necessary
+			if (pShadowData != nullptr && pShadowData->pLastLightData == pRemovedLightData)
+			{
+				pShadowData->pLastLightData = nullptr;
+				renderer.DetachCompositingNodeDependency(
+					*pRemovedLightData->pNode,
+					*pShadowData->pNode
+				);
+				if (itRemovedLightData != itLightFront)
+				{
+					auto itSecondLastLightData(itRemovedLightData);
+					auto pSecondLastLightData = *--itSecondLastLightData;
+					renderer.AttachCompositingNodeDependency(
+						*pSecondLastLightData->pNode,
+						*pShadowData->pNode
+					);
+					pShadowData->pLastLightData = pSecondLastLightData;
+				}
+			}
 
 			PRELightRenderPassData* pPreviousLightData = nullptr;
 			if (itRemovedLightData != compositingChain.begin())
@@ -413,26 +433,6 @@ namespace PRE
 					*pPreviousLightData->pNode,
 					*pNextLightData->pNode
 				);
-			}
-
-			// re-link shadow pass if necessary
-			if (pShadowData != nullptr && pShadowData->pLastLightData == pRemovedLightData)
-			{
-				pShadowData->pLastLightData = nullptr;
-				renderer.DetachCompositingNodeDependency(
-					*pRemovedLightData->pNode,
-					*pShadowData->pNode
-				);
-				if (itRemovedLightData != itLightFront)
-				{
-					auto itSecondLastLightData(itRemovedLightData);
-					auto pSecondLastLightData = *--itSecondLastLightData;
-					renderer.AttachCompositingNodeDependency(
-						*pSecondLastLightData->pNode,
-						*pShadowData->pNode
-					);
-					pShadowData->pLastLightData = pSecondLastLightData;
-				}
 			}
 
 			// erase light render pass data
