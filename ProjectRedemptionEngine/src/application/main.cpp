@@ -66,15 +66,15 @@ protected:
 
         _pMaterial = &GetRendering().CreateMaterial();
         _pMaterial->SetShader(_pShader);
-        _pMaterial->SetTextureBinding(_pDiffuseTexture, 1);
-        _pMaterial->SetTextureBinding(_pEmissionTexture, 2);
-        _pMaterial->SetTextureBinding(_pNormalTexture, 3);
-        _pMaterial->SetTextureBinding(_pSpecularTexture, 4);
+        _pMaterial->SetTextureBinding(_pDiffuseTexture, 2);
+        _pMaterial->SetTextureBinding(_pEmissionTexture, 3);
+        _pMaterial->SetTextureBinding(_pNormalTexture, 4);
+        _pMaterial->SetTextureBinding(_pSpecularTexture, 5);
 
-        _pShader->SetInt("diffuseSampler", 1);
-        _pShader->SetInt("emissionSampler", 2);
-        _pShader->SetInt("normalSampler", 3);
-        _pShader->SetInt("specularSampler", 4);
+        _pShader->SetInt("diffuseSampler", 2);
+        _pShader->SetInt("emissionSampler", 3);
+        _pShader->SetInt("normalSampler", 4);
+        _pShader->SetInt("specularSampler", 5);
         _pShader->SetBackFaceCulling(false);
 
         auto& modelRendererComponent = *gameObject().GetComponent<PREModelRendererComponent>();
@@ -238,15 +238,15 @@ protected:
         _pMaterial = &GetRendering().CreateMaterial();
         _pMaterial->SetShader(_pShader);
 
-        _pMaterial->SetTextureBinding(_pDiffuseTexture, 1);
-        _pMaterial->SetTextureBinding(_pEmissionTexture, 2);
-        _pMaterial->SetTextureBinding(_pNormalTexture, 3);
-        _pMaterial->SetTextureBinding(_pSpecularTexture, 4);
+        _pMaterial->SetTextureBinding(_pDiffuseTexture, 2);
+        _pMaterial->SetTextureBinding(_pEmissionTexture, 3);
+        _pMaterial->SetTextureBinding(_pNormalTexture, 4);
+        _pMaterial->SetTextureBinding(_pSpecularTexture, 5);
 
-        _pShader->SetInt("diffuseSampler", 1);
-        _pShader->SetInt("emissionSampler", 2);
-        _pShader->SetInt("normalSampler", 3);
-        _pShader->SetInt("specularSampler", 4);
+        _pShader->SetInt("diffuseSampler", 2);
+        _pShader->SetInt("emissionSampler", 3);
+        _pShader->SetInt("normalSampler", 4);
+        _pShader->SetInt("specularSampler", 5);
         auto& modelRendererComponent = *gameObject().GetComponent<PREModelRendererComponent>();
         modelRendererComponent.SetMesh(_pMesh);
         modelRendererComponent.SetMaterial(_pMaterial);
@@ -366,6 +366,7 @@ public:
     float speed = 3.5f;
     float rotationSpeed = 60.0f;
     bool enabled = true;
+    PRESpotLightComponent* _pSpotLightComponent = nullptr;
 
 protected:
     void OnStart() override
@@ -427,13 +428,22 @@ protected:
         _pInput->MouseMotion(mdx, mdy);
         if (mdx || mdy)
         {
-            auto dx = (float)mdx / HALF_WINDOW_WIDTH;
+            auto dx = -(float)mdx / HALF_WINDOW_WIDTH;
             auto dy = -(float)mdy / HALF_WINDOW_HEIGHT;
 
             // TODO: framerate and viewport independent rotation
-            _pTransform->SetEuler(
-                _pTransform->GetEuler() + glm::vec3(dy, dx, 0) * rotationSpeed
+            _pTransform->SetLocalEuler(
+                _pTransform->GetLocalEuler() + glm::vec3(dy, dx, 0) * rotationSpeed
             );
+        }
+
+        if (_pInput->KeyPressed(PREKeyCode::O) && _pSpotLightComponent != nullptr)
+        {
+            _pSpotLightComponent->SetColor(glm::vec3(1.0f));
+        }
+        if (_pInput->KeyPressed(PREKeyCode::P) && _pSpotLightComponent != nullptr)
+        {
+            _pSpotLightComponent->SetColor(glm::vec3(0.0f));
         }
     }
 
@@ -475,7 +485,6 @@ protected:
         cameraComponent.SetSkyBox(_pSkybox);
         _pTransform = gameObject().GetComponent<PRETransformComponent>();
         _pInput = &GetInput();
-        _pSpotLightComponent = gameObject().GetComponent<PRESpotLightComponent>();
     }
 
     void OnUpdate() override
@@ -505,14 +514,6 @@ protected:
         {
             std::cout << "~" << 1 / GetTime().GetDeltaTime() << " FPS." << std::endl;
         }
-        if (_pInput->KeyPressed(PREKeyCode::O))
-        {
-            _pSpotLightComponent->SetColor(glm::vec3(1.0f));
-        }
-        if (_pInput->KeyPressed(PREKeyCode::P))
-        {
-            _pSpotLightComponent->SetColor(glm::vec3(0.0f));
-        }
     }
 
     void OnDestroy() override
@@ -524,7 +525,6 @@ private:
     PRESkyBox* _pSkybox = nullptr;
     PRETransformComponent* _pTransform = nullptr;
     PREInput* _pInput = nullptr;
-    PRESpotLightComponent* _pSpotLightComponent = nullptr;
 };
 
 class BufferDisplayScreenComponent : public PREGameObjectComponent
@@ -695,6 +695,20 @@ protected:
     }
 };
 
+class SpotLightTemplate : public PREGameObjectTemplate
+{
+protected:
+    void OnInstantiateTemplate() override
+    {
+        auto& spotLightComponent = *AddPREComponent<PRESpotLightComponent>();
+        spotLightComponent.SetAttentuationLinear(0.0f);
+        spotLightComponent.SetAttentuationQuadratic(0.15f);
+        spotLightComponent.SetColor(glm::vec3(0.0f));
+        spotLightComponent.SetTag(1);
+        AddPREComponent<PREModelRendererComponent>();
+    }
+};
+
 class DirectionalLightTemplate : public PREGameObjectTemplate
 {
     void OnInstantiateTemplate() override
@@ -719,12 +733,7 @@ protected:
     void OnInstantiateTemplate() override
     {
         AddPREComponent<PRECameraComponent>();
-        AddPREComponent<FlyCamControllerComponent>();
-        auto& spotLightComponent = *AddPREComponent<PRESpotLightComponent>();
-        spotLightComponent.SetAttentuationLinear(0.0f);
-        spotLightComponent.SetAttentuationQuadratic(0.15f);
-        spotLightComponent.SetColor(glm::vec3(0.0f));
-        spotLightComponent.SetTag(1);
+        auto& flyCamControllerComponent = *AddPREComponent<FlyCamControllerComponent>();
 
         auto& cameraControllerComponent = *AddPREComponent<CameraControllerComponent>();
         cameraControllerComponent.skyBoxRightPath = "/skyboxes/Night MoonBurst/Right+X.png";
@@ -733,9 +742,18 @@ protected:
         cameraControllerComponent.skyBoxBottomPath = "/skyboxes/Night MoonBurst/Bottom-Y.png";
         cameraControllerComponent.skyBoxFrontPath = "/skyboxes/Night MoonBurst/Front+Z.png";
         cameraControllerComponent.skyBoxBackPath = "/skyboxes/Night MoonBurst/Back-Z.png";
-        GetPREComponent<PRETransformComponent>()->SetPosition(
-            glm::vec3(0.0f, 1.0f, 2.5f)
+
+        auto pTransformComponent = GetPREComponent<PRETransformComponent>();
+        pTransformComponent->SetPosition(
+            glm::vec3(0.0f, 1.0f, -2.5f)
         );
+
+        SpotLightTemplate spotLightTemplate;
+        auto& spotLight = Instantiate(spotLightTemplate);
+        auto pSpotLightTransform = spotLight.GetComponent<PRETransformComponent>();
+        pSpotLightTransform->SetParent(pTransformComponent, false);
+        pSpotLightTransform->SetLocalPosition(glm::vec3(0.25f, -0.25f, -0.25f));
+        flyCamControllerComponent._pSpotLightComponent = spotLight.GetComponent<PRESpotLightComponent>();
     }
 };
 
@@ -788,6 +806,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
     FloorTemplate floorTemplate;
 
     CameraTemplate cameraTemplate;
+
     AmbientLightTemplate ambientLightTemplate;
     PointLightTemplate pointLightTemplate;
     DirectionalLightTemplate directionalLightTemplate;
@@ -862,6 +881,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
         auto& light = applicationContext.world.Instantiate(pointLightTemplate);
         auto& lightTransform = *light.GetComponent<PRETransformComponent>();
         lightTransform.SetPosition(lightPositions[i]);
+        lightTransform.SetParent(&sceneRootTransform, false);
         auto& lightComponent = *light.GetComponent<PREPointLightComponent>();
         lightComponent.SetAttentuationLinear(linearLightLuminosities[i]);
         lightComponent.SetAttentuationQuadratic(quadraticLightLuminosities[i]);

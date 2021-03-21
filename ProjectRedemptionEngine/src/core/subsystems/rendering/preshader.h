@@ -28,6 +28,11 @@ namespace PRE
 			static const string LIGHT_ACCUMULATOR_SAMPLER;
 			static const int LIGHT_ACCUMULATOR_BINDING;
 
+			static const string SHADOW_MAP_SAMPLER;
+			static const int SHADOW_MAP_BINDING;
+			static const string SHADOW_MAP_VIEW_MATRIX; // light's POV
+			static const string SHADOW_MAP_PROJECTION_MATRIX;
+
 			// mutually exclusive, to be used as part of lighting equation
 			static const string AMBIENT_LIGHT_FLAG;
 			static const string POINT_LIGHT_FLAG;

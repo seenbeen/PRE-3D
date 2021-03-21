@@ -12,6 +12,7 @@ namespace PRE
 		class PRERendering;
 
 		using PRE::GameObjectModule::GameObjectTemplate;
+		using PRE::GameObjectModule::GameObject;
 
 		class PREGameObjectTemplate : public GameObjectTemplate
 		{
@@ -36,6 +37,8 @@ namespace PRE
 				return pComponent;
 			}
 
+			GameObject& Instantiate(PREGameObjectTemplate& gameObjectTemplate);
+
 			void OnInstantiate() override;
 
 			virtual void OnInstantiateTemplate() = 0;
@@ -45,6 +48,7 @@ namespace PRE
 
 			using GameObjectTemplate::AddComponent;
 			using GameObjectTemplate::GetComponent;
+			using GameObjectTemplate::Instantiate;
 		};
 	} // namespace Core
 } // namespace PRE

@@ -17,11 +17,15 @@ uniform mat4 PRE_PROJECTION_MATRIX;
 
 uniform mat4 PRE_BONE_TRANSFORMS[MAX_BONES];
 
+uniform mat4 PRE_SHADOW_MAP_VIEW_MATRIX;
+uniform mat4 PRE_SHADOW_MAP_PROJECTION_MATRIX;
+
 uniform vec3 PRE_VIEW_POSITION;
 uniform vec3 PRE_LIGHT_POSITION;
 uniform vec3 PRE_LIGHT_DIRECTION;
 
 out vec3 iFragPos;
+out vec4 iFragPosLightSpace;
 
 out vec3 iTangentViewPos;
 out vec3 iTangentFragPos;
@@ -55,12 +59,15 @@ void main()
     mat3 TBN = transpose(mat3(T, B, N));
 
     iTangentViewPos = TBN * PRE_VIEW_POSITION;
-    iFragPos = vec3(PRE_MODEL_MATRIX * boneInfluence * vec4(iPos, 1.0));
+
+    iFragPos = vec3(PRE_MODEL_MATRIX * boneInfluence * vec4(iPos, 1.0f));
+    iFragPosLightSpace = PRE_SHADOW_MAP_PROJECTION_MATRIX * PRE_SHADOW_MAP_VIEW_MATRIX * vec4(iFragPos, 1.0f);
+
     iTangentFragPos = TBN * iFragPos;
     iTangentLightPos = TBN * PRE_LIGHT_POSITION;
     iTangentLightDirection = TBN * PRE_LIGHT_DIRECTION;
 
-    gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * boneInfluence * vec4(iPos, 1.0);
+    gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * vec4(iFragPos, 1.0f);
 
     iTexCoord = iUV;
 }

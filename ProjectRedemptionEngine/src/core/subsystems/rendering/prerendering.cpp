@@ -46,6 +46,7 @@
 
 #ifdef __PRE_DEBUG__
 #include <assert.h>
+#include <iostream>
 #endif
 
 namespace PRE
@@ -293,15 +294,6 @@ namespace PRE
 			auto pRenderPass = &renderPass;
 			auto pLightData = &lightData;
 
-			if (pShadowData != nullptr && pShadowData->pLastLightData == nullptr)
-			{
-				renderer.AttachCompositingNodeDependency(
-					*pLightData->pNode,
-					*pShadowData->pNode
-				);
-				pShadowData->pLastLightData = pLightData;
-			}
-
 			PRELightRenderPassData* pPreviousLightData = nullptr;
 			if (itLightFront != compositingChain.begin())
 			{
@@ -340,6 +332,16 @@ namespace PRE
 					*pLightData->pNode,
 					*pNextLightData->pNode
 				);
+			}
+
+			// link shadow pass
+			if (pShadowData != nullptr && pShadowData->pLastLightData == nullptr)
+			{
+				renderer.AttachCompositingNodeDependency(
+					*pLightData->pNode,
+					*pShadowData->pNode
+				);
+				pShadowData->pLastLightData = pLightData;
 			}
 
 			// insert light render pass data
@@ -413,6 +415,7 @@ namespace PRE
 				);
 			}
 
+			// re-link shadow pass if necessary
 			if (pShadowData != nullptr && pShadowData->pLastLightData == pRemovedLightData)
 			{
 				pShadowData->pLastLightData = nullptr;
@@ -482,7 +485,6 @@ namespace PRE
 						_impl.lightPOVCamera,
 						_impl.modelTagMap,
 						_impl.shadowMap2D,
-						_shadowShader2D,
 						spotLightComponent
 					);
 					auto pNewShadowData = new PREShadowRenderPassData(
@@ -911,7 +913,7 @@ namespace PRE
 
 					// shader program may have been temporarily set by shadow
 					// casting, so reset any of these temp changes from last pass
-					modelRendererComponent._pMaterial->ResetShaderProgram();
+					// modelRendererComponent._pMaterial->ResetShaderProgram();
 
 					auto pShader = modelRendererComponent._pMaterial->_pShader;
 					pShader->SetInt(
@@ -982,8 +984,31 @@ namespace PRE
 					else if (lightPassContext._pSpotLightComponent != nullptr)
 					{
 						auto pSpotLightComponent = lightPassContext._pSpotLightComponent;
-						pSpotLightComponent->AllocateIfNotAllocated();
+
+#ifdef __PRE_DEBUG__
+						assert(pSpotLightComponent->_pTransform != nullptr);
+#endif
+
 						pShader->SetInt(PREShader::SPOT_LIGHT_FLAG, 1);
+
+						// shadow map
+						modelRendererComponent._pMaterial->_material.SetTextureBinding(
+							lightPassContext._pShadowMap,
+							PREShader::SHADOW_MAP_BINDING
+						);
+						pShader->SetInt(
+							PREShader::SHADOW_MAP_SAMPLER,
+							PREShader::SHADOW_MAP_BINDING
+						);
+						pShader->SetMat4(
+							PREShader::SHADOW_MAP_VIEW_MATRIX,
+							pSpotLightComponent->_pTransform->GetInverseMatrix()
+						);
+						pShader->SetMat4(
+							PREShader::SHADOW_MAP_PROJECTION_MATRIX,
+							glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f)
+						);
+
 						pShader->SetVec3(
 							PREShader::LIGHT_POSITION,
 							pSpotLightComponent->_pTransform->GetPosition()
@@ -1075,52 +1100,50 @@ namespace PRE
 			}
 
 			pModels = &itModels->second;
-
-			// TODO: Spatial query optimizing to only render visible models
-			for (auto it = pModels->begin(); it != pModels->end(); ++it)
+			if (shadowPassContext._pSpotLightComponent != nullptr)
 			{
-				auto& modelRendererComponent = **it;
+				auto pSpotLightComponent = shadowPassContext._pSpotLightComponent;
 
-				if (
-					modelRendererComponent._pModel == nullptr ||
-					modelRendererComponent._pMaterial == nullptr ||
-					modelRendererComponent._pMaterial->_pShader == nullptr
-					)
+#ifdef __PRE_DEBUG__
+				assert(pSpotLightComponent->_pTransform != nullptr);
+#endif
+
+				shadowPassContext._lightPOVCamera.SetKind(RenderCamera::Kind::PERSPECTIVE);
+				shadowPassContext._lightPOVCamera.SetSize(90);
+				shadowPassContext._lightPOVCamera.SetAspectRatio(1);
+				shadowPassContext._lightPOVCamera.SetNearClippingPlane(0.1f);
+				shadowPassContext._lightPOVCamera.SetFarClippingPlane(10.0f);
+
+				// May cause questions, but you really shouldn't be
+				// scaling lights anyhow; eliminate scale
+				if (pSpotLightComponent->_pTransform->GetScale() != glm::vec3(1.0f))
 				{
-					continue;
+					pSpotLightComponent->_pTransform->SetScale(glm::vec3(1.0f));
+				}
+				shadowPassContext._lightPOVCamera.SetViewMatrix(
+					pSpotLightComponent->_pTransform->GetInverseMatrix()
+				);
+				composition.SetCamera(&shadowPassContext._lightPOVCamera);
+
+				for (auto it = pModels->begin(); it != pModels->end(); ++it)
+				{
+					auto& modelRendererComponent = **it;
+
+					if (
+						modelRendererComponent._pModel == nullptr ||
+						modelRendererComponent._pMaterial == nullptr ||
+						modelRendererComponent._pMaterial->_pShader == nullptr
+						)
+					{
+						continue;
+					}
+
+					composition.AddModel(*modelRendererComponent._pModel);
 				}
 
-				if (shadowPassContext._pPointLightComponent != nullptr)
-				{
-					auto pPointLightComponent = shadowPassContext._pPointLightComponent;
-					pPointLightComponent->AllocateIfNotAllocated();
-				}
-				else if (shadowPassContext._pSpotLightComponent != nullptr)
-				{
-					auto pSpotLightComponent = shadowPassContext._pSpotLightComponent;
-					pSpotLightComponent->AllocateIfNotAllocated();
-
-					modelRendererComponent._pMaterial->TempSetShaderProgram(
-						shadowPassContext._shadowShader
-					);
-					shadowPassContext._lightPOVCamera.SetKind(RenderCamera::Kind::PERSPECTIVE);
-					shadowPassContext._lightPOVCamera.SetAspectRatio(1);
-					shadowPassContext._lightPOVCamera.SetNearClippingPlane(0.1f);
-					shadowPassContext._lightPOVCamera.SetFarClippingPlane(100.0f);
-					shadowPassContext._lightPOVCamera.SetSize(90);
-					shadowPassContext._lightPOVCamera.SetViewMatrix(
-						pSpotLightComponent->_pTransform->GetMatrix()
-					);
-				}
-				else if (shadowPassContext._pDirectionalLightComponent != nullptr)
-				{
-					auto pDirectionalLightComponent = shadowPassContext._pDirectionalLightComponent;
-					pDirectionalLightComponent->AllocateIfNotAllocated();
-				}
-				composition.AddModel(*modelRendererComponent._pModel);
+				composition.Clear();
+				composition.SetCompositingTarget(&shadowPassContext._target);
 			}
-			composition.SetCamera(&shadowPassContext._lightPOVCamera);
-			composition.SetCompositingTarget(&shadowPassContext._target);
 		}
 
 		const unsigned int PRERendering::SHADOW_MAP_SIZE = 1024;
@@ -1138,23 +1161,6 @@ namespace PRE
 			return *(new PRERendering(applicationContext, renderer));
 		}
 
-		static const string SHADOW_SHADER_2D_VERTEX =
-			"#version 330 core\n"
-			"layout (location = 0) in vec3 iPos;\n"
-			"\n"
-			"uniform mat4 PRE_MODEL_MATRIX;\n"
-			"uniform mat4 PRE_VIEW_MATRIX;\n"
-			"uniform mat4 PRE_PROJECTION_MATRIX;\n"
-			"\n"
-			"void main()\n"
-			"{\n"
-			"	gl_Position = PRE_PROJECTION_MATRIX * PRE_VIEW_MATRIX * PRE_MODEL_MATRIX * vec4(iPos, 1.0f);\n"
-			"}\n";
-
-		static const string SHADOW_SHADER_2D_FRAGMENT =
-			"#version 330 core\n"
-			"void main() {}\n";
-
 		PRERendering::PRERendering(
 			PREApplicationContext& applicationContext,
 			Renderer& renderer
@@ -1167,17 +1173,10 @@ namespace PRE
 					renderer.width,
 					renderer.height
 				)
-			),
-			_shadowShader2D(
-				CreateShader(
-					SHADOW_SHADER_2D_VERTEX,
-					SHADOW_SHADER_2D_FRAGMENT
-				)
 			) {}
 
 		PRERendering::~PRERendering()
 		{
-			DestroyShader(_shadowShader2D);
 			DestroyRenderTexture(_screenRenderTexture);
 			delete &_impl;
 		}
@@ -1484,6 +1483,7 @@ namespace PRE
 				auto pLightContext = new PRELightRenderPassContext(
 					_impl.modelTagMap,
 					*pRenderPass,
+					_impl.shadowMap2D, // TODO: shadowMap3D
 					pointLightComponent
 				);
 				auto pNewLightData = new PRELightRenderPassData(
@@ -1565,6 +1565,7 @@ namespace PRE
 				auto pLightContext = new PRELightRenderPassContext(
 					_impl.modelTagMap,
 					*pRenderPass,
+					_impl.shadowMap2D,
 					spotLightComponent
 				);
 				auto pNewLightData = new PRELightRenderPassData(
@@ -1576,14 +1577,13 @@ namespace PRE
 				);
 
 				PREShadowRenderPassData* pNewShadowData = nullptr;
-				// link shadow node if necessary
+				// link shadow pass if necessary
 				if (shadowPassData.find(pRenderPass->_layer) == shadowPassData.end())
 				{
 					auto pShadowContext = new PREShadowRenderPassContext(
 						_impl.lightPOVCamera,
 						_impl.modelTagMap,
 						_impl.shadowMap2D,
-						_shadowShader2D,
 						spotLightComponent
 					);
 					pNewShadowData = new PREShadowRenderPassData(
@@ -1684,6 +1684,7 @@ namespace PRE
 				auto pLightContext = new PRELightRenderPassContext(
 					_impl.modelTagMap,
 					*pRenderPass,
+					_impl.shadowMap2D,
 					directionalLightComponent
 				);
 				auto pNewLightData = new PRELightRenderPassData(
@@ -1794,6 +1795,7 @@ namespace PRE
 				auto pLightContext = new PRELightRenderPassContext(
 					_impl.modelTagMap,
 					*pRenderPass,
+					_impl.shadowMap2D, // TODO: shadowMap3D
 					pointLightComponent
 				);
 				auto pNewLightData = new PRELightRenderPassData(
@@ -1824,6 +1826,7 @@ namespace PRE
 				auto pLightContext = new PRELightRenderPassContext(
 					_impl.modelTagMap,
 					*pRenderPass,
+					_impl.shadowMap2D,
 					spotLightComponent
 				);
 				auto pNewLightData = new PRELightRenderPassData(
@@ -1854,6 +1857,7 @@ namespace PRE
 				auto pLightContext = new PRELightRenderPassContext(
 					_impl.modelTagMap,
 					*pRenderPass,
+					_impl.shadowMap2D,
 					directionalLightComponent
 				);
 				auto pNewLightData = new PRELightRenderPassData(

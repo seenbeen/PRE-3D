@@ -35,7 +35,7 @@ namespace PRE
 				auto existingElement = _gameObjectComponents.find(typeId);
 				if (existingElement == _gameObjectComponents.end())
 				{
-					return nullptr;
+					throw std::exception("Component not found.");
 				}
 				return static_cast<TGameObjectComponent*>(existingElement->second);
 			}

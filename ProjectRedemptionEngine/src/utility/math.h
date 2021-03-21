@@ -2,6 +2,9 @@
 #include <algorithm>
 #include <list>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 namespace PRE
 {
 	namespace Utility
@@ -28,6 +31,8 @@ namespace PRE
 				);
 				return total / (n * (n + 1.0f) / 2.0f);
 			}
+
+			bool Decompose(const glm::mat4& matrix, glm::vec3 scale, glm::vec3 rotation, glm::fquat& rotationQuat, glm::vec3& position);
 		}
 	}
 }

@@ -7,6 +7,8 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
+#include <include/utility.h>
+
 #ifdef __PRE_DEBUG__
 #include <assert.h>
 #endif
@@ -185,14 +187,14 @@ namespace PRE
 			void SetEuler(const glm::vec3& euler)
 			{
 				_euler = euler;
-				_rotation = glm::quat(glm::radians(_euler));
+				_rotation = glm::fquat(glm::radians(_euler));
 				UpdateMatrix();
 			}
 
 			void SetLocalEuler(const glm::vec3& localEuler)
 			{
 				_localEuler = localEuler;
-				_localRotation = glm::quat(glm::radians(_localEuler));
+				_localRotation = glm::fquat(glm::radians(_localEuler));
 				UpdateLocalMatrix();
 			}
 #pragma endregion
@@ -269,19 +271,15 @@ namespace PRE
 					_localMatrix = _matrix;
 				}
 
-				glm::vec3 skew;
-				glm::vec4 perspective;
-
-				glm::decompose(_localMatrix, _localScale, _localRotation, _localPosition, skew, perspective);
-				_localEuler = glm::degrees(glm::eulerAngles(_localRotation));
-
 				// TODO: Cache
 				_inverseMatrix = glm::inverse(_matrix);
+
+				PRE::Utility::Math::Decompose(_localMatrix, _localScale, _localEuler, _localRotation, _localPosition);
 
 				// Notify children of update
 				for (auto it = _childTransforms.begin(); it != _childTransforms.end(); ++it)
 				{
-					(*it)->AncestryChanged();
+					(*it)->UpdateLocalMatrix();
 				}
 			}
 
@@ -293,40 +291,23 @@ namespace PRE
 
 				if (_parentTransform != nullptr)
 				{
-					_matrix = _localMatrix * _parentTransform->_matrix;
+					_matrix = _parentTransform->_matrix * _localMatrix;
 				}
 				else
 				{
 					_matrix = _localMatrix;
 				}
 
-				glm::vec3 skew;
-				glm::vec4 perspective;
-
-				glm::decompose(_matrix, _scale, _rotation, _position, skew, perspective);
-				_euler = glm::degrees(glm::eulerAngles(_rotation));
-
 				// TODO: Cache
 				_inverseMatrix = glm::inverse(_matrix);
+
+				PRE::Utility::Math::Decompose(_matrix, _scale, _euler, _rotation, _position);
 
 				// Notify children of update
 				for (auto it = _childTransforms.begin(); it != _childTransforms.end(); ++it)
 				{
-					(*it)->AncestryChanged();
+					(*it)->UpdateLocalMatrix();
 				}
-			}
-
-			void AncestryChanged()
-			{
-				_matrix = _parentTransform->_matrix * _localMatrix;
-
-				glm::vec3 skew;
-				glm::vec4 perspective;
-
-				glm::decompose(_matrix, _scale, _rotation, _position, skew, perspective);
-				_euler = glm::degrees(glm::eulerAngles(_rotation));
-
-				UpdateMatrix();
 			}
 		};
 	} // namespace TransformSubsystem

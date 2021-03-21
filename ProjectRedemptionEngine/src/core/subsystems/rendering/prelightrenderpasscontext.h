@@ -2,6 +2,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include <include/modules/rendering.h>
+
 namespace PRE
 {
 	namespace Core
@@ -18,6 +20,8 @@ namespace PRE
 		using std::unordered_map;
 		using std::unordered_set;
 
+		using PRE::RenderingModule::RenderCompositingTarget;
+
 		class PRELightRenderPassContext
 		{
 			PRELightRenderPassContext& operator=(const PRELightRenderPassContext&) = delete;
@@ -28,6 +32,8 @@ namespace PRE
 		private:
 			unordered_map<int, unordered_set<PREModelRendererComponent*>>& _modelTagMap;
 			PRERenderTexture& _renderTexture;
+
+			RenderCompositingTarget* _pShadowMap;
 
 			PREAmbientLightComponent* const _pAmbientLightComponent;
 			PREPointLightComponent* const _pPointLightComponent;
@@ -43,18 +49,21 @@ namespace PRE
 			PRELightRenderPassContext(
 				unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 				PRERenderTexture& renderTexture,
+				RenderCompositingTarget& shadowMap,
 				PREPointLightComponent& pointLightComponent
 			);
 
 			PRELightRenderPassContext(
 				unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 				PRERenderTexture& renderTexture,
+				RenderCompositingTarget& shadowMap,
 				PRESpotLightComponent& spotLightComponent
 			);
 
 			PRELightRenderPassContext(
 				unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 				PRERenderTexture& renderTexture,
+				RenderCompositingTarget& shadowMap,
 				PREDirectionalLightComponent& directionalLightComponent
 			);
 

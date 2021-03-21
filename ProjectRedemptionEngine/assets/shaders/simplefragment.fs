@@ -1,6 +1,7 @@
 #version 330 core
 
 in vec3 iFragPos;
+in vec4 iFragPosLightSpace;
 
 in vec3 iTangentViewPos;
 in vec3 iTangentFragPos;
@@ -15,6 +16,8 @@ uniform int PRE_IS_FIRST_LIGHT_PASS;
 
 uniform vec2 PRE_LIGHT_ACCUMULATOR_SAMPLER_SIZE;
 uniform sampler2D PRE_LIGHT_ACCUMULATOR_SAMPLER;
+
+uniform sampler2D PRE_SHADOW_MAP_SAMPLER;
 
 uniform int PRE_AMBIENT_LIGHT_FLAG;
 uniform int PRE_POINT_LIGHT_FLAG;
@@ -35,6 +38,18 @@ uniform sampler2D normalSampler;
 uniform sampler2D specularSampler;
 
 out vec4 FragColor;
+
+float ShadowCalculation(vec4 fragPosLightSpace)
+{
+    vec3 projCoords = (fragPosLightSpace.xyz / fragPosLightSpace.w) / 2.0f + 0.5f;
+    float closestDepth = texture(PRE_SHADOW_MAP_SAMPLER, projCoords.xy).r;
+    float shadow = projCoords.z - 0.001 > closestDepth ? 1.0f : 0.0f;
+    if (projCoords.z > 1.0)
+    {
+		shadow = 0;
+    }
+    return 1.0f - shadow;
+}
 
 void main()
 {
@@ -81,7 +96,7 @@ void main()
 
     vec4 directionalLight = PRE_DIRECTIONAL_LIGHT_FLAG * (directionalDiffuse + directionalSpecular);
 
-    vec4 litColor = (ambientLight + pointLight + spotLight + directionalLight) * vec4(PRE_LIGHT_COLOR, 1.0f);
+    vec4 litColor = (ambientLight + pointLight + spotLight * ShadowCalculation(iFragPosLightSpace) + directionalLight) * vec4(PRE_LIGHT_COLOR, 1.0f);
 
     FragColor = accumulatorColor + litColor;
 }

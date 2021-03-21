@@ -39,7 +39,6 @@ namespace PRE
 
 			// this is the shadow depth frame buffer
 			RenderCompositingTarget& _target;
-			PREShader& _shadowShader;
 
 			PREPointLightComponent* const _pPointLightComponent;
 			PRESpotLightComponent* const _pSpotLightComponent;
@@ -49,7 +48,6 @@ namespace PRE
 				RenderCamera& lightPOVCamera,
 				unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 				RenderCompositingTarget& target,
-				PREShader& shadowShader,
 				PREPointLightComponent& pointLightComponent
 			);
 
@@ -57,7 +55,6 @@ namespace PRE
 				RenderCamera& lightPOVCamera,
 				unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 				RenderCompositingTarget& target,
-				PREShader& shadowShader,
 				PRESpotLightComponent& spotLightComponent
 			);
 
@@ -65,7 +62,6 @@ namespace PRE
 				RenderCamera& lightPOVCamera,
 				unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 				RenderCompositingTarget& target,
-				PREShader& shadowShader,
 				PREDirectionalLightComponent& directionalLightComponent
 			);
 

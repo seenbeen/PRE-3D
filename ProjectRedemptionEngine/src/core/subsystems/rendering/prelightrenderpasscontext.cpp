@@ -26,6 +26,7 @@ namespace PRE
 			:
 			_modelTagMap(modelTagMap),
 			_renderTexture(renderTexture),
+			_pShadowMap(nullptr),
 			_pAmbientLightComponent(&ambientLightComponent),
 			_pPointLightComponent(nullptr),
 			_pSpotLightComponent(nullptr),
@@ -34,11 +35,13 @@ namespace PRE
 		PRELightRenderPassContext::PRELightRenderPassContext(
 			unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 			PRERenderTexture& renderTexture,
+			RenderCompositingTarget& shadowMap,
 			PREPointLightComponent& pointLightComponent
 		)
 			:
 			_modelTagMap(modelTagMap),
 			_renderTexture(renderTexture),
+			_pShadowMap(&shadowMap),
 			_pAmbientLightComponent(nullptr),
 			_pPointLightComponent(&pointLightComponent),
 			_pSpotLightComponent(nullptr),
@@ -47,11 +50,13 @@ namespace PRE
 		PRELightRenderPassContext::PRELightRenderPassContext(
 			unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 			PRERenderTexture& renderTexture,
+			RenderCompositingTarget& shadowMap,
 			PRESpotLightComponent& spotLightComponent
 		)
 			:
 			_modelTagMap(modelTagMap),
 			_renderTexture(renderTexture),
+			_pShadowMap(&shadowMap),
 			_pAmbientLightComponent(nullptr),
 			_pPointLightComponent(nullptr),
 			_pSpotLightComponent(&spotLightComponent),
@@ -60,11 +65,13 @@ namespace PRE
 		PRELightRenderPassContext::PRELightRenderPassContext(
 			unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 			PRERenderTexture& renderTexture,
+			RenderCompositingTarget& shadowMap,
 			PREDirectionalLightComponent& directionalLightComponent
 		)
 			:
 			_modelTagMap(modelTagMap),
 			_renderTexture(renderTexture),
+			_pShadowMap(&shadowMap),
 			_pAmbientLightComponent(nullptr),
 			_pPointLightComponent(nullptr),
 			_pSpotLightComponent(nullptr),

@@ -28,14 +28,12 @@ namespace PRE
 			RenderCamera& lightPOVCamera,
 			unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 			RenderCompositingTarget& target,
-			PREShader& shadowShader,
 			PREPointLightComponent& pointLightComponent
 		)
 			:
 			_lightPOVCamera(lightPOVCamera),
 			_modelTagMap(modelTagMap),
 			_target(target),
-			_shadowShader(shadowShader),
 			_pPointLightComponent(&pointLightComponent),
 			_pSpotLightComponent(nullptr),
 			_pDirectionalLightComponent(nullptr) {}
@@ -44,14 +42,12 @@ namespace PRE
 			RenderCamera& lightPOVCamera,
 			unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 			RenderCompositingTarget& target,
-			PREShader& shadowShader,
 			PRESpotLightComponent& spotLightComponent
 		)
 			:
 			_lightPOVCamera(lightPOVCamera),
 			_modelTagMap(modelTagMap),
 			_target(target),
-			_shadowShader(shadowShader),
 			_pPointLightComponent(nullptr),
 			_pSpotLightComponent(&spotLightComponent),
 			_pDirectionalLightComponent(nullptr) {}
@@ -60,14 +56,12 @@ namespace PRE
 			RenderCamera& lightPOVCamera,
 			unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 			RenderCompositingTarget& target,
-			PREShader& shadowShader,
 			PREDirectionalLightComponent& directionalLightComponent
 		)
 			:
 			_lightPOVCamera(lightPOVCamera),
 			_modelTagMap(modelTagMap),
 			_target(target),
-			_shadowShader(shadowShader),
 			_pPointLightComponent(nullptr),
 			_pSpotLightComponent(nullptr),
 			_pDirectionalLightComponent(&directionalLightComponent) {}

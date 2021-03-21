@@ -250,8 +250,6 @@ namespace PRE
 
 			Impl& _impl;
 			PRERenderTexture& _screenRenderTexture;
-			PREShader& _shadowShader2D;
-			// RenderShaderProgram& shadowShader3D;
 
 			PRERendering(
 				PREApplicationContext& applicationContext,
