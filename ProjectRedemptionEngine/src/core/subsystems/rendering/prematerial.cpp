@@ -52,9 +52,20 @@ namespace PRE
 
 		PREMaterial::~PREMaterial() {}
 
-		void PREMaterial::TempSetShaderProgram(PREShader& shader)
+		void PREMaterial::TempBindShadowShader()
 		{
-			_material.SetShaderProgram(&shader._shaderProgram);
+			if (_pShader != nullptr)
+			{
+				_material.SetShaderProgram(&_pShader->_shadowShaderProgram);
+			}
+		}
+
+		void PREMaterial::TempBindCubeMapShadowShader()
+		{
+			if (_pShader != nullptr)
+			{
+				_material.SetShaderProgram(&_pShader->_cubeMapShadowShaderProgram);
+			}
 		}
 
 		void PREMaterial::ResetShaderProgram()

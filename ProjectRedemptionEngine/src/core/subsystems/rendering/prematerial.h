@@ -41,10 +41,11 @@ namespace PRE
 
 			// temporarily binds a shader program without changing
 			// the currently bound shader program. Used for temporary shader
-			// settingm, such as for shadows
-			void TempSetShaderProgram(PREShader& shader);
+			// setting, ie. shadows
+			void TempBindShadowShader();
+			void TempBindCubeMapShadowShader();
 
-			// re-binds the bound shader program if it exists
+			// re-binds the og shader program if it exists
 			void ResetShaderProgram();
 
 			void BindRenderTextureAccumulatorBindings();

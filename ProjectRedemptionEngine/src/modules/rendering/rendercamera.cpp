@@ -43,10 +43,20 @@ namespace PRE
 			_impl.projectionMatrixChanged = true;
 		}
 
+		const RenderCamera::Kind& RenderCamera::GetKind() const
+		{
+			return _impl.kind;
+		}
+
 		void RenderCamera::SetSize(float size)
 		{
 			_impl.size = size;
 			_impl.projectionMatrixChanged = true;
+		}
+
+		float RenderCamera::GetSize() const
+		{
+			return _impl.size;
 		}
 
 		void RenderCamera::SetAspectRatio(float aspectRatio)
@@ -55,16 +65,31 @@ namespace PRE
 			_impl.projectionMatrixChanged = true;
 		}
 
+		float RenderCamera::GetAspectRatio() const
+		{
+			return _impl.aspectRatio;
+		}
+
 		void RenderCamera::SetNearClippingPlane(float nearClippingPlane)
 		{
 			_impl.nearClippingPlane = nearClippingPlane;
 			_impl.projectionMatrixChanged = true;
 		}
 
+		float RenderCamera::GetNearClippingPlane() const
+		{
+			return _impl.nearClippingPlane;
+		}
+
 		void RenderCamera::SetFarClippingPlane(float farClippingPlane)
 		{
 			_impl.farClippingPlane = farClippingPlane;
 			_impl.projectionMatrixChanged = true;
+		}
+
+		float RenderCamera::GetFarClippingPlane() const
+		{
+			return _impl.farClippingPlane;
 		}
 
 		void RenderCamera::SetViewMatrix(const glm::mat4& viewMatrix)

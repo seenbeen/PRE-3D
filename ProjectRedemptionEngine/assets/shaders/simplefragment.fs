@@ -18,6 +18,8 @@ uniform vec2 PRE_LIGHT_ACCUMULATOR_SAMPLER_SIZE;
 uniform sampler2D PRE_LIGHT_ACCUMULATOR_SAMPLER;
 
 uniform sampler2D PRE_SHADOW_MAP_SAMPLER;
+uniform samplerCube PRE_SHADOW_CUBE_MAP_SAMPLER;
+uniform float PRE_SHADOW_MAP_FAR_CLIPPING_PLANE;
 
 uniform int PRE_AMBIENT_LIGHT_FLAG;
 uniform int PRE_POINT_LIGHT_FLAG;
@@ -61,6 +63,24 @@ float ShadowCalculation2D(vec4 fragPosLightSpace)
 		shadow = 0;
     }
     return 1.0f - shadow;
+}
+
+float ShadowCalculation3D(vec3 fragPos)
+{
+	vec3 fragToLight = fragPos - PRE_LIGHT_POSITION;
+
+    float bias = 0.15f;
+
+	float shadowDepth = texture(PRE_SHADOW_CUBE_MAP_SAMPLER, fragToLight).r * PRE_SHADOW_MAP_FAR_CLIPPING_PLANE;
+
+    float shadow = 0.0f;
+
+	if (length(fragToLight) - bias > shadowDepth)
+	{
+		shadow = 1.0f;
+	}
+
+	return 1.0f - shadow;
 }
 
 void main()
@@ -108,7 +128,7 @@ void main()
 
     vec4 directionalLight = PRE_DIRECTIONAL_LIGHT_FLAG * (directionalDiffuse + directionalSpecular);
 
-    vec4 litColor = (ambientLight + pointLight + (spotLight + directionalLight) * ShadowCalculation2D(iFragPosLightSpace)) * vec4(PRE_LIGHT_COLOR, 1.0f);
+    vec4 litColor = (ambientLight + pointLight * ShadowCalculation3D(iFragPos) + (spotLight + directionalLight) * ShadowCalculation2D(iFragPosLightSpace)) * vec4(PRE_LIGHT_COLOR, 1.0f);
 
     FragColor = accumulatorColor + litColor;
 }

@@ -54,6 +54,8 @@ namespace PRE
 		using PRE::RenderingModule::RenderCompositingNode;
 		using PRE::RenderingModule::RenderCompositingTarget;
 		using PRE::RenderingModule::RenderCamera;
+		using PRE::RenderingModule::RenderGeometryShader;
+		using PRE::RenderingModule::RenderFragmentShader;
 		using PRE::RenderingModule::RenderShaderProgram;
 		using PRE::RenderingModule::RenderMesh;
 		using PRE::RenderingModule::RenderMaterial;
@@ -105,8 +107,12 @@ namespace PRE
 
 				PRELightRenderPassData* const rootRenderPassData;
 
+				RenderFragmentShader& shadowFragmentShader;
+				RenderGeometryShader& cubeMapShadowGeometryShader;
+				RenderFragmentShader& cubeMapShadowFragmentShader;
+
 				RenderCompositingTarget& shadowMap2D;
-				//RenderCompositingTarget& shadowMap3D;
+				RenderCompositingTarget& shadowMap3D;
 
 				RenderCamera& lightPOVCamera;
 
@@ -129,7 +135,11 @@ namespace PRE
 					RenderMaterial& screenMaterial,
 					RenderModel& screenModel,
 					RenderCamera& screenCamera,
+					RenderFragmentShader& shadowFragmentShader,
+					RenderGeometryShader& cubeMapShadowGeometryShader,
+					RenderFragmentShader& cubeMapShadowFragmentShader,
 					RenderCompositingTarget& shadowMap2D,
+					RenderCompositingTarget& shadowMap3D,
 					RenderCamera& lightPOVCamera
 				);
 				~Impl();
@@ -165,9 +175,6 @@ namespace PRE
 			void DestroyRenderTexture(PRERenderTexture& renderTexture);
 
 			PREShader& CreateShader(const string& vertex, const string& fragment);
-
-		private: // internal, used for shadow mapping
-			PREShader& CreateShader(const string& vertex, const string& geometry, const string& fragment);
 
 		public:
 			void DestroyShader(PREShader& shader);

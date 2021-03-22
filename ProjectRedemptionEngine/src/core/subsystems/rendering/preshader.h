@@ -11,6 +11,9 @@ namespace PRE
 		class PREMaterial;
 
 		using std::string;
+		using PRE::RenderingModule::RenderVertexShader;
+		using PRE::RenderingModule::RenderGeometryShader;
+		using PRE::RenderingModule::RenderFragmentShader;
 		using PRE::RenderingModule::RenderShaderProgram;
 
 		class PREShader
@@ -28,10 +31,14 @@ namespace PRE
 			static const string LIGHT_ACCUMULATOR_SAMPLER;
 			static const int LIGHT_ACCUMULATOR_BINDING;
 
+			static const string SHADOW_CUBE_MAP_MATRICES;
 			static const string SHADOW_MAP_SAMPLER;
+			static const string SHADOW_CUBE_MAP_SAMPLER;
 			static const int SHADOW_MAP_BINDING;
+			static const int SHADOW_CUBE_MAP_BINDING;
 			static const string SHADOW_MAP_VIEW_MATRIX; // light's POV
 			static const string SHADOW_MAP_PROJECTION_MATRIX;
+			static const string SHADOW_MAP_FAR_CLIPPING_PLANE;
 
 			// mutually exclusive, to be used as part of lighting equation
 			static const string AMBIENT_LIGHT_FLAG;
@@ -81,8 +88,15 @@ namespace PRE
 
 		private:
 			RenderShaderProgram& _shaderProgram;
+			RenderShaderProgram& _shadowShaderProgram;
+			RenderShaderProgram& _cubeMapShadowShaderProgram;
 
-			PREShader(RenderShaderProgram& shaderProgram);
+			PREShader(
+				RenderShaderProgram& shaderProgram,
+				RenderShaderProgram& shadowShaderProgram,
+				RenderShaderProgram& cubeMapShadowShaderProgram
+			);
+
 			~PREShader();
 		};
 	} // namespace Core

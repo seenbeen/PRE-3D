@@ -66,15 +66,15 @@ protected:
 
         _pMaterial = &GetRendering().CreateMaterial();
         _pMaterial->SetShader(_pShader);
-        _pMaterial->SetTextureBinding(_pDiffuseTexture, 2);
-        _pMaterial->SetTextureBinding(_pEmissionTexture, 3);
-        _pMaterial->SetTextureBinding(_pNormalTexture, 4);
-        _pMaterial->SetTextureBinding(_pSpecularTexture, 5);
+        _pMaterial->SetTextureBinding(_pDiffuseTexture, 3);
+        _pMaterial->SetTextureBinding(_pEmissionTexture, 4);
+        _pMaterial->SetTextureBinding(_pNormalTexture, 5);
+        _pMaterial->SetTextureBinding(_pSpecularTexture, 6);
 
-        _pShader->SetInt("diffuseSampler", 2);
-        _pShader->SetInt("emissionSampler", 3);
-        _pShader->SetInt("normalSampler", 4);
-        _pShader->SetInt("specularSampler", 5);
+        _pShader->SetInt("diffuseSampler", 3);
+        _pShader->SetInt("emissionSampler", 4);
+        _pShader->SetInt("normalSampler", 5);
+        _pShader->SetInt("specularSampler", 6);
         _pShader->SetBackFaceCulling(false);
 
         auto& modelRendererComponent = *gameObject().GetComponent<PREModelRendererComponent>();
@@ -238,15 +238,15 @@ protected:
         _pMaterial = &GetRendering().CreateMaterial();
         _pMaterial->SetShader(_pShader);
 
-        _pMaterial->SetTextureBinding(_pDiffuseTexture, 2);
-        _pMaterial->SetTextureBinding(_pEmissionTexture, 3);
-        _pMaterial->SetTextureBinding(_pNormalTexture, 4);
-        _pMaterial->SetTextureBinding(_pSpecularTexture, 5);
+        _pMaterial->SetTextureBinding(_pDiffuseTexture, 3);
+        _pMaterial->SetTextureBinding(_pEmissionTexture, 4);
+        _pMaterial->SetTextureBinding(_pNormalTexture, 5);
+        _pMaterial->SetTextureBinding(_pSpecularTexture, 6);
 
-        _pShader->SetInt("diffuseSampler", 2);
-        _pShader->SetInt("emissionSampler", 3);
-        _pShader->SetInt("normalSampler", 4);
-        _pShader->SetInt("specularSampler", 5);
+        _pShader->SetInt("diffuseSampler", 3);
+        _pShader->SetInt("emissionSampler", 4);
+        _pShader->SetInt("normalSampler", 5);
+        _pShader->SetInt("specularSampler", 6);
         auto& modelRendererComponent = *gameObject().GetComponent<PREModelRendererComponent>();
         modelRendererComponent.SetMesh(_pMesh);
         modelRendererComponent.SetMaterial(_pMaterial);
@@ -677,6 +677,16 @@ protected:
     }
 };
 
+class LightCubeTemplate : public PREGameObjectTemplate
+{
+protected:
+    void OnInstantiateTemplate() override
+    {
+        AddPREComponent<PREModelRendererComponent>();
+        AddPREComponent<LightCubeComponent>();
+    }
+};
+
 class AmbientLightTemplate : public PREGameObjectTemplate
 {
 protected:
@@ -691,9 +701,7 @@ class PointLightTemplate : public PREGameObjectTemplate
 protected:
     void OnInstantiateTemplate() override
     {
-        AddPREComponent<PREModelRendererComponent>();
         AddPREComponent<PREPointLightComponent>();
-        AddPREComponent<LightCubeComponent>();
     }
 };
 
@@ -716,7 +724,7 @@ class DirectionalLightTemplate : public PREGameObjectTemplate
     void OnInstantiateTemplate() override
     {
         auto& directionalLightComponent = *AddPREComponent<PREDirectionalLightComponent>();
-        directionalLightComponent.SetColor(glm::vec3(1.0f / 2.5f));
+        directionalLightComponent.SetColor(glm::vec3(1.0f / 4.0f));
     }
 };
 
@@ -811,6 +819,8 @@ void OnInitialize(PREApplicationContext& applicationContext)
     PointLightTemplate pointLightTemplate;
     DirectionalLightTemplate directionalLightTemplate;
 
+    LightCubeTemplate lightCubeTemplate;
+
     auto& sceneRoot = applicationContext.world.Instantiate();
     auto& sceneRootTransform = *sceneRoot.GetComponent<PRETransformComponent>();
 
@@ -860,9 +870,9 @@ void OnInitialize(PREApplicationContext& applicationContext)
     sceneRootTransform.SetEuler(glm::vec3(0, 180, 0));
 
     glm::vec3 lightPositions[] { glm::vec3(-2.5f, 2, 0), glm::vec3(2.5f, 2, 0), glm::vec3(0, 2, -2.5f), glm::vec3(0, 2, 2.5f) };
-    glm::vec3 lightColors[]{ glm::vec3(0, 0, 1), glm::vec3(0, 1, 0), glm::vec3(1, 0, 0), glm::vec3(1, 1, 1) };
-    float linearLightLuminosities[]{ 0.3f, 0.3f, 0.3f, 0.3f };
-    float quadraticLightLuminosities[]{ 0.3f, 0.3f, 0.3f, 0.3f };
+    glm::vec3 lightColors[]{ glm::vec3(1, 1, 0), glm::vec3(1, 0, 1), glm::vec3(0, 1, 1), glm::vec3(1, 1, 1) };
+    float linearLightLuminosities[]{ 0.1f, 0.035f, 0.1f, 0.1f };
+    float quadraticLightLuminosities[]{ 0.14f, 0.05f, 0.14f, 0.14f };
 
     auto& ambientLight = applicationContext.world.Instantiate(ambientLightTemplate);
     auto& ambientLightComponent = *ambientLight.GetComponent<PREAmbientLightComponent>();
@@ -887,9 +897,12 @@ void OnInitialize(PREApplicationContext& applicationContext)
         lightComponent.SetAttentuationQuadratic(quadraticLightLuminosities[i]);
         lightComponent.SetColor(lightColors[i]);
         lightComponent.SetTag(1);
-        auto& lightCube = *light.GetComponent<LightCubeComponent>();
-        lightCube.color = lightColors[i];
-        auto plightModelRendererComponent = light.GetComponent<PREModelRendererComponent>();
+        auto& lightCube = applicationContext.world.Instantiate(lightCubeTemplate);
+        auto& lightCubeTransform = *lightCube.GetComponent<PRETransformComponent>();
+        lightCubeTransform.SetParent(&lightTransform, false);
+        auto& lightCubeComponent = *lightCube.GetComponent<LightCubeComponent>();
+        lightCubeComponent.color = lightColors[i];
+        auto plightModelRendererComponent = lightCube.GetComponent<PREModelRendererComponent>();
         plightModelRendererComponent->SetTag(1);
     }
 }

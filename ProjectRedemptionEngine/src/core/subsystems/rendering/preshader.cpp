@@ -15,10 +15,14 @@ namespace PRE
 		const string PREShader::LIGHT_ACCUMULATOR_SAMPLER = "PRE_LIGHT_ACCUMULATOR_SAMPLER";
 		const int PREShader::LIGHT_ACCUMULATOR_BINDING = 0;
 
+		const string PREShader::SHADOW_CUBE_MAP_MATRICES = "PRE_SHADOW_CUBE_MAP_MATRICES";
 		const string PREShader::SHADOW_MAP_SAMPLER = "PRE_SHADOW_MAP_SAMPLER";
+		const string PREShader::SHADOW_CUBE_MAP_SAMPLER = "PRE_SHADOW_CUBE_MAP_SAMPLER";
 		const int PREShader::SHADOW_MAP_BINDING = 1;
+		const int PREShader::SHADOW_CUBE_MAP_BINDING = 2;
 		const string PREShader::SHADOW_MAP_VIEW_MATRIX = "PRE_SHADOW_MAP_VIEW_MATRIX";
 		const string PREShader::SHADOW_MAP_PROJECTION_MATRIX = "PRE_SHADOW_MAP_PROJECTION_MATRIX";
+		const string PREShader::SHADOW_MAP_FAR_CLIPPING_PLANE = "PRE_SHADOW_MAP_FAR_CLIPPING_PLANE";
 
 		const string PREShader::AMBIENT_LIGHT_FLAG = "PRE_AMBIENT_LIGHT_FLAG";
 		const string PREShader::POINT_LIGHT_FLAG = "PRE_POINT_LIGHT_FLAG";
@@ -146,9 +150,15 @@ namespace PRE
 			_shaderProgram.SetMat4(name, values, nValues);
 		}
 
-		PREShader::PREShader(RenderShaderProgram& shaderProgram)
+		PREShader::PREShader(
+			RenderShaderProgram& shaderProgram,
+			RenderShaderProgram& shadowShaderProgram,
+			RenderShaderProgram& cubeMapShadowShaderProgram
+		)
 			:
-			_shaderProgram(shaderProgram) {}
+			_shaderProgram(shaderProgram),
+			_shadowShaderProgram(shadowShaderProgram),
+			_cubeMapShadowShaderProgram(cubeMapShadowShaderProgram) {}
 
 		PREShader::~PREShader() {}
 	} // namespace Core

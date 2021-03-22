@@ -21,7 +21,7 @@ namespace PRE
 			glGenFramebuffers(1, &bufferId);
 			glBindFramebuffer(GL_FRAMEBUFFER, bufferId);
 
-			auto target = new RenderTexture(size, false);
+			auto target = new RenderTexture(size, isCubeMap);
 			target->Bind();
 			target->BindTarget(GL_DEPTH_ATTACHMENT);
 

@@ -58,10 +58,20 @@ namespace PRE
 
 		public:
 			void SetKind(const Kind& kind);
+			const Kind& GetKind() const;
+
 			void SetSize(float size);
+			float GetSize() const;
+
 			void SetAspectRatio(float aspectRatio);
+			float GetAspectRatio() const;
+
 			void SetNearClippingPlane(float nearClippingPlane);
+			float GetNearClippingPlane() const;
+
 			void SetFarClippingPlane(float farClippingPlane);
+			float GetFarClippingPlane() const;
+
 			void SetViewMatrix(const glm::mat4& viewMatrix);
 
 			const glm::mat4& GetViewMatrix();

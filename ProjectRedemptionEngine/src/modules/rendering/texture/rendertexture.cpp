@@ -17,7 +17,21 @@ namespace PRE
 		{
 			if (isCubeMap)
 			{
-				throw "don't do that yet";
+				GLuint textureId;
+				glGenTextures(1, &textureId);
+				glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
+				for (unsigned int i = 0; i < 6; ++i)
+				{
+					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, size, size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+				}
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+				glBindTexture(GL_TEXTURE_CUBE_MAP, GL_NONE);
+
+				return *(new RenderTexture::Impl(TextureKind::CUBE_MAP, textureId));
 			}
 			else
 			{
@@ -221,7 +235,14 @@ namespace PRE
 
 		void RenderTexture::BindTarget(GLenum attachment)
 		{
-			glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, _impl.textureId, 0);
+			if (_impl.textureKind == Impl::TextureKind::STANDARD)
+			{
+				glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, _impl.textureId, 0);
+			}
+			else
+			{
+				glFramebufferTexture(GL_FRAMEBUFFER, attachment, _impl.textureId, 0);
+			}
 		}
 
 		void RenderTexture::SetActive(GLenum textureUnit)
