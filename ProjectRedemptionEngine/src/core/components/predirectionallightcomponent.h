@@ -15,6 +15,7 @@ namespace PRE
 		class PRETransformComponent;
 		class PRERendering;
 		class PRELightRenderPassData;
+		class PREShadowRenderPassData;
 
 		using std::list;
 		using std::unordered_map;
@@ -37,6 +38,8 @@ namespace PRE
 		private:
 			PRETransformComponent* _pTransform = nullptr;
 			unordered_map<int, list<PRELightRenderPassData*>::iterator> _fronts;
+
+			unordered_map<int, PREShadowRenderPassData*> _shadowPassData;
 
 			int _tag = 0;
 

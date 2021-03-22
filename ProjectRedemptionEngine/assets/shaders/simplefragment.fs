@@ -39,11 +39,23 @@ uniform sampler2D specularSampler;
 
 out vec4 FragColor;
 
-float ShadowCalculation(vec4 fragPosLightSpace)
+float ShadowCalculation2D(vec4 fragPosLightSpace)
 {
     vec3 projCoords = (fragPosLightSpace.xyz / fragPosLightSpace.w) / 2.0f + 0.5f;
-    float closestDepth = texture(PRE_SHADOW_MAP_SAMPLER, projCoords.xy).r;
-    float shadow = projCoords.z - 0.001 > closestDepth ? 1.0f : 0.0f;
+    float bias = 0.001f;
+
+    float shadow = 0.0f;
+    vec2 texelSize = 1.0f / textureSize(PRE_SHADOW_MAP_SAMPLER, 0);
+    for(int x = -1; x <= 1; ++x)
+    {
+        for(int y = -1; y <= 1; ++y)
+        {
+            float pcfDepth = texture(PRE_SHADOW_MAP_SAMPLER, projCoords.xy + vec2(x, y) * texelSize).r;
+            shadow += projCoords.z - bias > pcfDepth  ? 1.0f : 0.0f;
+        }
+    }
+    shadow /= 9.0;
+
     if (projCoords.z > 1.0)
     {
 		shadow = 0;
@@ -96,7 +108,7 @@ void main()
 
     vec4 directionalLight = PRE_DIRECTIONAL_LIGHT_FLAG * (directionalDiffuse + directionalSpecular);
 
-    vec4 litColor = (ambientLight + pointLight + spotLight * ShadowCalculation(iFragPosLightSpace) + directionalLight) * vec4(PRE_LIGHT_COLOR, 1.0f);
+    vec4 litColor = (ambientLight + pointLight + (spotLight + directionalLight) * ShadowCalculation2D(iFragPosLightSpace)) * vec4(PRE_LIGHT_COLOR, 1.0f);
 
     FragColor = accumulatorColor + litColor;
 }

@@ -801,7 +801,7 @@ void OnInitialize(PREApplicationContext& applicationContext)
 
     VampireTemplate capoeiraTemplate, thrillerTemplate;
     capoeiraTemplate.animationPath = "/animations/mixamo/Breathing Idle.dae";
-    thrillerTemplate.animationPath = "/animations/mixamo/Running.dae";
+    thrillerTemplate.animationPath = "/animations/mixamo/Thriller Part 4.dae";
 
     FloorTemplate floorTemplate;
 

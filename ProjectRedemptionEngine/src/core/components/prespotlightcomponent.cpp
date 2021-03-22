@@ -11,6 +11,7 @@
 #include <core/subsystems/world/pregameobjectcomponent.h>
 
 #include <core/subsystems/rendering/prerendering.h>
+#include <core/subsystems/rendering/preshadowrenderpassdata.h>
 
 namespace PRE
 {
