@@ -80,6 +80,8 @@ float ShadowCalculation3D(vec3 fragPos)
 		shadow = 1.0f;
 	}
 
+	// TODO: Sampling for soft shadows
+
 	return 1.0f - shadow;
 }
 
