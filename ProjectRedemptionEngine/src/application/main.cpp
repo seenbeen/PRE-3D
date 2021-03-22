@@ -870,9 +870,9 @@ void OnInitialize(PREApplicationContext& applicationContext)
     sceneRootTransform.SetEuler(glm::vec3(0, 180, 0));
 
     glm::vec3 lightPositions[] { glm::vec3(-2.5f, 2, 0), glm::vec3(2.5f, 2, 0), glm::vec3(0, 2, -2.5f), glm::vec3(0, 2, 2.5f) };
-    glm::vec3 lightColors[]{ glm::vec3(1, 1, 0), glm::vec3(1, 0, 1), glm::vec3(0, 1, 1), glm::vec3(1, 1, 1) };
-    float linearLightLuminosities[]{ 0.1f, 0.035f, 0.1f, 0.1f };
-    float quadraticLightLuminosities[]{ 0.14f, 0.05f, 0.14f, 0.14f };
+    glm::vec3 lightColors[]{ glm::vec3(1, 0, 0), glm::vec3(1, 0, 1), glm::vec3(0, 1, 1), glm::vec3(0, 1, 0) };
+    float linearLightLuminosities[]{ 0.35f, 0.07f, 0.1f, 0.1f };
+    float quadraticLightLuminosities[]{ 0.05f, 0.07f, 0.14f, 0.14f };
 
     auto& ambientLight = applicationContext.world.Instantiate(ambientLightTemplate);
     auto& ambientLightComponent = *ambientLight.GetComponent<PREAmbientLightComponent>();
