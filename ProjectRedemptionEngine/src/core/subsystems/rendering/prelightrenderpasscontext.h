@@ -21,6 +21,7 @@ namespace PRE
 		using std::unordered_set;
 
 		using PRE::RenderingModule::RenderCompositingTarget;
+		using PRE::RenderingModule::RenderCamera;
 
 		class PRELightRenderPassContext
 		{
@@ -33,7 +34,8 @@ namespace PRE
 			unordered_map<int, unordered_set<PREModelRendererComponent*>>& _modelTagMap;
 			PRERenderTexture& _renderTexture;
 
-			RenderCompositingTarget* _pShadowMap;
+			RenderCamera* const _pShadowCamera;
+			RenderCompositingTarget* const _pShadowMap;
 
 			PREAmbientLightComponent* const _pAmbientLightComponent;
 			PREPointLightComponent* const _pPointLightComponent;
@@ -49,6 +51,7 @@ namespace PRE
 			PRELightRenderPassContext(
 				unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 				PRERenderTexture& renderTexture,
+				RenderCamera& shadowCamera,
 				RenderCompositingTarget& shadowMap,
 				PREPointLightComponent& pointLightComponent
 			);
@@ -56,6 +59,7 @@ namespace PRE
 			PRELightRenderPassContext(
 				unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 				PRERenderTexture& renderTexture,
+				RenderCamera& shadowCamera,
 				RenderCompositingTarget& shadowMap,
 				PRESpotLightComponent& spotLightComponent
 			);
@@ -63,6 +67,7 @@ namespace PRE
 			PRELightRenderPassContext(
 				unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 				PRERenderTexture& renderTexture,
+				RenderCamera& shadowCamera,
 				RenderCompositingTarget& shadowMap,
 				PREDirectionalLightComponent& directionalLightComponent
 			);

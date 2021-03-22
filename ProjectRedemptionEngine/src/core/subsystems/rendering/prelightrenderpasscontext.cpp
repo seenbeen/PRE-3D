@@ -18,6 +18,9 @@ namespace PRE
 		using std::unordered_map;
 		using std::unordered_set;
 
+		using PRE::RenderingModule::RenderCompositingTarget;
+		using PRE::RenderingModule::RenderCamera;
+
 		PRELightRenderPassContext::PRELightRenderPassContext(
 			unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 			PRERenderTexture& renderTexture,
@@ -26,6 +29,7 @@ namespace PRE
 			:
 			_modelTagMap(modelTagMap),
 			_renderTexture(renderTexture),
+			_pShadowCamera(nullptr),
 			_pShadowMap(nullptr),
 			_pAmbientLightComponent(&ambientLightComponent),
 			_pPointLightComponent(nullptr),
@@ -35,12 +39,14 @@ namespace PRE
 		PRELightRenderPassContext::PRELightRenderPassContext(
 			unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 			PRERenderTexture& renderTexture,
+			RenderCamera& shadowCamera,
 			RenderCompositingTarget& shadowMap,
 			PREPointLightComponent& pointLightComponent
 		)
 			:
 			_modelTagMap(modelTagMap),
 			_renderTexture(renderTexture),
+			_pShadowCamera(&shadowCamera),
 			_pShadowMap(&shadowMap),
 			_pAmbientLightComponent(nullptr),
 			_pPointLightComponent(&pointLightComponent),
@@ -50,12 +56,14 @@ namespace PRE
 		PRELightRenderPassContext::PRELightRenderPassContext(
 			unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 			PRERenderTexture& renderTexture,
+			RenderCamera& shadowCamera,
 			RenderCompositingTarget& shadowMap,
 			PRESpotLightComponent& spotLightComponent
 		)
 			:
 			_modelTagMap(modelTagMap),
 			_renderTexture(renderTexture),
+			_pShadowCamera(&shadowCamera),
 			_pShadowMap(&shadowMap),
 			_pAmbientLightComponent(nullptr),
 			_pPointLightComponent(nullptr),
@@ -65,12 +73,14 @@ namespace PRE
 		PRELightRenderPassContext::PRELightRenderPassContext(
 			unordered_map<int, unordered_set<PREModelRendererComponent*>>& modelTagMap,
 			PRERenderTexture& renderTexture,
+			RenderCamera& shadowCamera,
 			RenderCompositingTarget& shadowMap,
 			PREDirectionalLightComponent& directionalLightComponent
 		)
 			:
 			_modelTagMap(modelTagMap),
 			_renderTexture(renderTexture),
+			_pShadowCamera(&shadowCamera),
 			_pShadowMap(&shadowMap),
 			_pAmbientLightComponent(nullptr),
 			_pPointLightComponent(nullptr),

@@ -752,7 +752,7 @@ protected:
         auto& spotLight = Instantiate(spotLightTemplate);
         auto pSpotLightTransform = spotLight.GetComponent<PRETransformComponent>();
         pSpotLightTransform->SetParent(pTransformComponent, false);
-        pSpotLightTransform->SetLocalPosition(glm::vec3(0.25f, -0.25f, -0.25f));
+        pSpotLightTransform->SetLocalPosition(glm::vec3(0.15f, -0.15f, -0.15f));
         flyCamControllerComponent._pSpotLightComponent = spotLight.GetComponent<PRESpotLightComponent>();
     }
 };

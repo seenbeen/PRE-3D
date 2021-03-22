@@ -1029,7 +1029,7 @@ namespace PRE
 						);
 						pShader->SetMat4(
 							PREShader::SHADOW_MAP_PROJECTION_MATRIX,
-							glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f)
+							lightPassContext._pShadowCamera->GetProjectionMatrix()
 						);
 
 						pShader->SetVec3(
@@ -1086,7 +1086,7 @@ namespace PRE
 						);
 						pShader->SetMat4(
 							PREShader::SHADOW_MAP_PROJECTION_MATRIX,
-							glm::ortho(-6.0f, 6.0f, -6.0f, 6.0f, -10.0f, 10.0f)
+							lightPassContext._pShadowCamera->GetProjectionMatrix()
 						);
 
 						pShader->SetVec3(
@@ -1236,7 +1236,7 @@ namespace PRE
 			}
 		}
 
-		const unsigned int PRERendering::SHADOW_MAP_SIZE = 1024;
+		const unsigned int PRERendering::SHADOW_MAP_SIZE = 2048;
 
 		PRERendering& PRERendering::MakePRERendering(
 			const PRERenderingConfig& renderingConfig,
@@ -1573,6 +1573,7 @@ namespace PRE
 				auto pLightContext = new PRELightRenderPassContext(
 					_impl.modelTagMap,
 					*pRenderPass,
+					_impl.lightPOVCamera,
 					_impl.shadowMap2D, // TODO: shadowMap3D
 					pointLightComponent
 				);
@@ -1655,6 +1656,7 @@ namespace PRE
 				auto pLightContext = new PRELightRenderPassContext(
 					_impl.modelTagMap,
 					*pRenderPass,
+					_impl.lightPOVCamera,
 					_impl.shadowMap2D,
 					spotLightComponent
 				);
@@ -1775,6 +1777,7 @@ namespace PRE
 				auto pLightContext = new PRELightRenderPassContext(
 					_impl.modelTagMap,
 					*pRenderPass,
+					_impl.lightPOVCamera,
 					_impl.shadowMap2D,
 					directionalLightComponent
 				);
@@ -1924,6 +1927,7 @@ namespace PRE
 				auto pLightContext = new PRELightRenderPassContext(
 					_impl.modelTagMap,
 					*pRenderPass,
+					_impl.lightPOVCamera,
 					_impl.shadowMap2D, // TODO: shadowMap3D
 					pointLightComponent
 				);
@@ -1955,6 +1959,7 @@ namespace PRE
 				auto pLightContext = new PRELightRenderPassContext(
 					_impl.modelTagMap,
 					*pRenderPass,
+					_impl.lightPOVCamera,
 					_impl.shadowMap2D,
 					spotLightComponent
 				);
@@ -1986,6 +1991,7 @@ namespace PRE
 				auto pLightContext = new PRELightRenderPassContext(
 					_impl.modelTagMap,
 					*pRenderPass,
+					_impl.lightPOVCamera,
 					_impl.shadowMap2D,
 					directionalLightComponent
 				);
