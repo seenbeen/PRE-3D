@@ -250,6 +250,7 @@ protected:
         auto& modelRendererComponent = *gameObject().GetComponent<PREModelRendererComponent>();
         modelRendererComponent.SetMesh(_pMesh);
         modelRendererComponent.SetMaterial(_pMaterial);
+        modelRendererComponent.SetCastsShadows(false);
     }
 
     void OnDestroy() override
@@ -338,6 +339,7 @@ protected:
         auto& modelRendererComponent = *gameObject().GetComponent<PREModelRendererComponent>();
         modelRendererComponent.SetMesh(_pMesh);
         modelRendererComponent.SetMaterial(_pMaterial);
+        modelRendererComponent.SetCastsShadows(false);
 
         gameObject().GetComponent<PRETransformComponent>()->SetScale(glm::vec3(0.1f));
     }
@@ -744,9 +746,7 @@ protected:
         cameraControllerComponent.skyBoxBackPath = "/skyboxes/Night MoonBurst/Back-Z.png";
 
         auto pTransformComponent = GetPREComponent<PRETransformComponent>();
-        pTransformComponent->SetPosition(
-            glm::vec3(0.0f, 1.0f, -2.5f)
-        );
+        pTransformComponent->SetPosition(glm::vec3(0.0f, 1.0f, 2.5f));
 
         SpotLightTemplate spotLightTemplate;
         auto& spotLight = Instantiate(spotLightTemplate);
@@ -800,8 +800,8 @@ void OnInitialize(PREApplicationContext& applicationContext)
     nullLightComponent.SetTag(0); // technically not necessary; default = 0
 
     VampireTemplate capoeiraTemplate, thrillerTemplate;
-    capoeiraTemplate.animationPath = "/animations/mixamo/Breathing Idle.dae";
-    thrillerTemplate.animationPath = "/animations/mixamo/Thriller Part 4.dae";
+    capoeiraTemplate.animationPath = "/animations/mixamo/Capoeira.dae";
+    thrillerTemplate.animationPath = "/animations/mixamo/Running.dae";
 
     FloorTemplate floorTemplate;
 
@@ -859,10 +859,10 @@ void OnInitialize(PREApplicationContext& applicationContext)
 
     sceneRootTransform.SetEuler(glm::vec3(0, 180, 0));
 
-    glm::vec3 lightPositions[] { glm::vec3(-2.5f, 2, 1), glm::vec3(2.5f, 2, 1), glm::vec3(0, 2, -2.5f) };
-    glm::vec3 lightColors[]{ glm::vec3(0, 0, 1), glm::vec3(0, 1, 0), glm::vec3(1, 0, 0) };
-    float linearLightLuminosities[]{ 0.3f, 0.3f, 0.3f };
-    float quadraticLightLuminosities[]{ 0.3f, 0.3f, 0.3f };
+    glm::vec3 lightPositions[] { glm::vec3(-2.5f, 2, 0), glm::vec3(2.5f, 2, 0), glm::vec3(0, 2, -2.5f), glm::vec3(0, 2, 2.5f) };
+    glm::vec3 lightColors[]{ glm::vec3(0, 0, 1), glm::vec3(0, 1, 0), glm::vec3(1, 0, 0), glm::vec3(1, 1, 1) };
+    float linearLightLuminosities[]{ 0.3f, 0.3f, 0.3f, 0.3f };
+    float quadraticLightLuminosities[]{ 0.3f, 0.3f, 0.3f, 0.3f };
 
     auto& ambientLight = applicationContext.world.Instantiate(ambientLightTemplate);
     auto& ambientLightComponent = *ambientLight.GetComponent<PREAmbientLightComponent>();
@@ -873,10 +873,10 @@ void OnInitialize(PREApplicationContext& applicationContext)
 
     auto& directionalLight = applicationContext.world.Instantiate(directionalLightTemplate);
     auto& directionalLightTransform = *directionalLight.GetComponent<PRETransformComponent>();
-    directionalLightTransform.SetEuler(glm::vec3(-45.f, 0.0f, 0.0f));
+    directionalLightTransform.SetEuler(glm::vec3(-35.f, 0.0f, 0.0f));
     directionalLight.GetComponent<PREDirectionalLightComponent>()->SetTag(1);
 
-    for (auto i = 0; i < 3; ++i)
+    for (auto i = 0; i < 4; ++i)
     {
         auto& light = applicationContext.world.Instantiate(pointLightTemplate);
         auto& lightTransform = *light.GetComponent<PRETransformComponent>();
@@ -911,7 +911,7 @@ int main(int argc, char *argv[])
             PREApplicationConfig(
                 PREInputConfig(),
                 PRERenderingConfig(
-                    "PRE v0.34 DEV",
+                    "PRE v0.36 DEV",
                     1024,
                     768
                 ),

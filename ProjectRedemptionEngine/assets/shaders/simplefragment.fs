@@ -42,7 +42,7 @@ out vec4 FragColor;
 float ShadowCalculation2D(vec4 fragPosLightSpace)
 {
     vec3 projCoords = (fragPosLightSpace.xyz / fragPosLightSpace.w) / 2.0f + 0.5f;
-    float bias = 0.001f;
+    float bias = 0.002f;
 
     float shadow = 0.0f;
     vec2 texelSize = 1.0f / textureSize(PRE_SHADOW_MAP_SAMPLER, 0);

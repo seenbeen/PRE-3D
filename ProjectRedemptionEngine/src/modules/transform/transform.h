@@ -32,11 +32,10 @@ namespace PRE
 				_parentTransform(nullptr),
 				_matrix(),
 				_inverseMatrix(),
-				_localMatrix(),
 				_position(),
 				_localPosition(),
-				_rotation(glm::vec3()),
-				_localRotation(glm::vec3()),
+				_rotation(),
+				_localRotation(),
 				_euler(),
 				_localEuler(),
 				_scale(1),
@@ -242,8 +241,6 @@ namespace PRE
 			glm::mat4 _matrix;
 			glm::mat4 _inverseMatrix;
 
-			glm::mat4 _localMatrix; // local-to-parent
-
 			glm::vec3 _position;
 			glm::vec3 _localPosition;
 
@@ -264,17 +261,19 @@ namespace PRE
 
 				if (_parentTransform != nullptr)
 				{
-					_localMatrix = _parentTransform->_inverseMatrix * _matrix;
+					PRE::Utility::Math::Decompose(_parentTransform->_inverseMatrix * _matrix, _localScale, _localEuler, _localRotation, _localPosition);
 				}
 				else
 				{
-					_localMatrix = _matrix;
+					_localScale = _scale;
+					_localRotation = _rotation;
+					_localEuler = _euler;
+					_localPosition = _position;
 				}
 
 				// TODO: Cache
 				_inverseMatrix = glm::inverse(_matrix);
 
-				PRE::Utility::Math::Decompose(_localMatrix, _localScale, _localEuler, _localRotation, _localPosition);
 
 				// Notify children of update
 				for (auto it = _childTransforms.begin(); it != _childTransforms.end(); ++it)
@@ -285,23 +284,26 @@ namespace PRE
 
 			void UpdateLocalMatrix()
 			{
-				_localMatrix = glm::translate(glm::mat4(), _localPosition);
-				_localMatrix = _localMatrix * glm::mat4_cast(_localRotation);
-				_localMatrix = glm::scale(_localMatrix, _localScale);
+				_matrix = glm::translate(glm::mat4(), _localPosition);
+				_matrix = _matrix * glm::mat4_cast(_localRotation);
+				_matrix = glm::scale(_matrix, _localScale);
 
 				if (_parentTransform != nullptr)
 				{
-					_matrix = _parentTransform->_matrix * _localMatrix;
+					_matrix = _parentTransform->_matrix * _matrix;
+					PRE::Utility::Math::Decompose(_matrix, _scale, _euler, _rotation, _position);
 				}
 				else
 				{
-					_matrix = _localMatrix;
+					_scale = _localScale;
+					_rotation = _localRotation;
+					_euler = _localEuler;
+					_position = _localPosition;
 				}
 
 				// TODO: Cache
 				_inverseMatrix = glm::inverse(_matrix);
 
-				PRE::Utility::Math::Decompose(_matrix, _scale, _euler, _rotation, _position);
 
 				// Notify children of update
 				for (auto it = _childTransforms.begin(); it != _childTransforms.end(); ++it)

@@ -1176,6 +1176,7 @@ namespace PRE
 					auto& modelRendererComponent = **it;
 
 					if (
+						!modelRendererComponent._castsShadows ||
 						modelRendererComponent._pModel == nullptr ||
 						modelRendererComponent._pMaterial == nullptr ||
 						modelRendererComponent._pMaterial->_pShader == nullptr
@@ -1220,6 +1221,7 @@ namespace PRE
 					auto& modelRendererComponent = **it;
 
 					if (
+						!modelRendererComponent._castsShadows ||
 						modelRendererComponent._pModel == nullptr ||
 						modelRendererComponent._pMaterial == nullptr ||
 						modelRendererComponent._pMaterial->_pShader == nullptr
@@ -1236,7 +1238,7 @@ namespace PRE
 			}
 		}
 
-		const unsigned int PRERendering::SHADOW_MAP_SIZE = 2048;
+		const unsigned int PRERendering::SHADOW_MAP_SIZE = 1024;
 
 		PRERendering& PRERendering::MakePRERendering(
 			const PRERenderingConfig& renderingConfig,
