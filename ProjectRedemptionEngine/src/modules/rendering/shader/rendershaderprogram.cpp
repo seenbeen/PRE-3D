@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 
 #include <modules/rendering/shader/rendervertexshader.h>
+#include <modules/rendering/shader/rendergeometryshader.h>
 #include <modules/rendering/shader/renderfragmentshader.h>
 
 #ifdef __PRE_DEBUG__
@@ -24,6 +25,33 @@ namespace PRE
 		{
 			auto programId = glCreateProgram();
 			glAttachShader(programId, vertexShader._impl.shaderId);
+			glAttachShader(programId, fragmentShader._impl.shaderId);
+			glLinkProgram(programId);
+
+#ifdef __PRE_DEBUG__
+			// validate link status
+			GLint success;
+			glGetProgramiv(programId, GL_LINK_STATUS, &success);
+			if (!success)
+			{
+				GLchar infoLog[1024];
+				glGetProgramInfoLog(programId, 1024, NULL, infoLog);
+				assert(false);
+			}
+#endif
+
+			return *(new Impl(programId));
+		}
+
+		RenderShaderProgram::Impl& RenderShaderProgram::Impl::MakeImpl(
+			const RenderVertexShader& vertexShader,
+			const RenderGeometryShader& geometryShader,
+			const RenderFragmentShader& fragmentShader
+		)
+		{
+			auto programId = glCreateProgram();
+			glAttachShader(programId, vertexShader._impl.shaderId);
+			glAttachShader(programId, geometryShader._impl.shaderId);
 			glAttachShader(programId, fragmentShader._impl.shaderId);
 			glLinkProgram(programId);
 
@@ -201,6 +229,14 @@ namespace PRE
 		)
 			:
 			_impl(Impl::MakeImpl(vertexShader, fragmentShader)) {}
+
+		RenderShaderProgram::RenderShaderProgram(
+			const RenderVertexShader& vertexShader,
+			const RenderGeometryShader& geometryShader,
+			const RenderFragmentShader& fragmentShader
+		)
+			:
+			_impl(Impl::MakeImpl(vertexShader, geometryShader, fragmentShader)) {}
 
 		RenderShaderProgram::~RenderShaderProgram()
 		{

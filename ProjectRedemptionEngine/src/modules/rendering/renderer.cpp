@@ -15,6 +15,7 @@
 #include <modules/rendering/compositing/rendercompositingnode.h>
 #include <modules/rendering/rendercamera.h>
 #include <modules/rendering/shader/rendervertexshader.h>
+#include <modules/rendering/shader/rendergeometryshader.h>
 #include <modules/rendering/shader/renderfragmentshader.h>
 #include <modules/rendering/shader/rendershaderprogram.h>
 #include <modules/rendering/model/rendermesh.h>
@@ -338,6 +339,29 @@ namespace PRE
 			delete pVertexShader;
 		}
 
+		RenderGeometryShader& Renderer::AllocateGeometryShader(const string& shaderSource)
+		{
+			auto geometryShader = new RenderGeometryShader(shaderSource);
+
+#ifdef __PRE_DEBUG__
+			_geometryShaders.insert(geometryShader);
+#endif
+
+			return *geometryShader;
+		}
+
+		void Renderer::DeallocateGeometryShader(const RenderGeometryShader& geometryShader)
+		{
+			auto pGeometryShader = &geometryShader;
+
+#ifdef __PRE_DEBUG__
+			assert(_geometryShaders.find(pGeometryShader) != _geometryShaders.end());
+			_geometryShaders.erase(pGeometryShader);
+#endif
+
+			delete pGeometryShader;
+		}
+
 		RenderFragmentShader& Renderer::AllocateFragmentShader(const string& shaderSource)
 		{
 			auto fragmentShader = new RenderFragmentShader(shaderSource);
@@ -367,6 +391,21 @@ namespace PRE
 		)
 		{
 			auto shaderProgram = new RenderShaderProgram(vertexShader, fragmentShader);
+
+#ifdef __PRE_DEBUG__
+			_shaderPrograms.insert(shaderProgram);
+#endif
+
+			return *shaderProgram;
+		}
+
+		RenderShaderProgram& Renderer::AllocateShaderProgram(
+			const RenderVertexShader& vertexShader,
+			const RenderGeometryShader& geometryShader,
+			const RenderFragmentShader& fragmentShader
+		)
+		{
+			auto shaderProgram = new RenderShaderProgram(vertexShader, geometryShader, fragmentShader);
 
 #ifdef __PRE_DEBUG__
 			_shaderPrograms.insert(shaderProgram);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <modules/rendering/shader/rendervertexshader.h>
+#include <modules/rendering/shader/rendergeometryshader.h>
 #include <modules/rendering/shader/renderfragmentshader.h>
 #include <modules/rendering/shader/rendershaderprogram.h>
 

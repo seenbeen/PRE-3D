@@ -578,10 +578,29 @@ namespace PRE
 		{
 			auto& vertexShader = _impl.renderer.AllocateVertexShader(vertex);
 			auto& fragmentShader = _impl.renderer.AllocateFragmentShader(fragment);
+
 			auto pShader = new PREShader(
 				_impl.renderer.AllocateShaderProgram(vertexShader, fragmentShader)
 			);
+
 			_impl.renderer.DeallocateFragmentShader(fragmentShader);
+			_impl.renderer.DeallocateVertexShader(vertexShader);
+			pShader->_shaderProgram.SetDepthFunction(RenderShaderProgram::DepthFunction::LESS_THAN_OR_EQUAL);
+			return *pShader;
+		}
+
+		PREShader& PRERendering::CreateShader(const string& vertex, const string& geometry, const string& fragment)
+		{
+			auto& vertexShader = _impl.renderer.AllocateVertexShader(vertex);
+			auto& fragmentShader = _impl.renderer.AllocateFragmentShader(fragment);
+			auto& geometryShader = _impl.renderer.AllocateGeometryShader(geometry);
+
+			auto pShader = new PREShader(
+				_impl.renderer.AllocateShaderProgram(vertexShader, geometryShader, fragmentShader)
+			);
+
+			_impl.renderer.DeallocateFragmentShader(fragmentShader);
+			_impl.renderer.DeallocateGeometryShader(geometryShader);
 			_impl.renderer.DeallocateVertexShader(vertexShader);
 			pShader->_shaderProgram.SetDepthFunction(RenderShaderProgram::DepthFunction::LESS_THAN_OR_EQUAL);
 			return *pShader;

@@ -20,6 +20,7 @@ namespace PRE
 	{
 		class RenderCamera;
 		class RenderVertexShader;
+		class RenderGeometryShader;
 		class RenderFragmentShader;
 		class RenderShaderProgram;
 		class RenderMesh;
@@ -102,6 +103,9 @@ namespace PRE
 			RenderVertexShader& AllocateVertexShader(const string& shaderSource);
 			void DeallocateVertexShader(const RenderVertexShader& vertexShader);
 
+			RenderGeometryShader& AllocateGeometryShader(const string& shaderSource);
+			void DeallocateGeometryShader(const RenderGeometryShader& geometryShader);
+
 			RenderFragmentShader& AllocateFragmentShader(const string& shaderSource);
 			void DeallocateFragmentShader(const RenderFragmentShader& fragmentShader);
 
@@ -109,6 +113,13 @@ namespace PRE
 				const RenderVertexShader& vertexShader,
 				const RenderFragmentShader& fragmentShader
 			);
+
+			RenderShaderProgram& AllocateShaderProgram(
+				const RenderVertexShader& vertexShader,
+				const RenderGeometryShader& geometryShader,
+				const RenderFragmentShader& fragmentShader
+			);
+
 			void DeallocateShaderProgram(const RenderShaderProgram& shaderProgram);
 
 			RenderMesh& AllocateMesh(
@@ -182,6 +193,7 @@ namespace PRE
 			unordered_set<const RenderCamera*> _cameras;
 
 			unordered_set<const RenderVertexShader*> _vertexShaders;
+			unordered_set<const RenderGeometryShader*> _geometryShaders;
 			unordered_set<const RenderFragmentShader*> _fragmentShaders;
 			unordered_set<const RenderShaderProgram*> _shaderPrograms;
 

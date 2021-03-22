@@ -398,6 +398,9 @@
     <ClInclude Include="src\core\subsystems\rendering\preshadowrenderpassdata.h">
       <Filter>Header Files\Core\Subsystems\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="src\modules\rendering\shader\rendergeometryshader.h">
+      <Filter>Header Files\Modules\Rendering\Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\modules\gameobject\gameobject.cpp">
@@ -606,6 +609,9 @@
     </ClCompile>
     <ClCompile Include="src\core\subsystems\rendering\preshadowrenderpassdata.cpp">
       <Filter>Source Files\Core\Subsystems\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\rendering\shader\rendergeometryshader.cpp">
+      <Filter>Source Files\Modules\Rendering\Shader</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

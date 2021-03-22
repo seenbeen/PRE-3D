@@ -165,6 +165,11 @@ namespace PRE
 			void DestroyRenderTexture(PRERenderTexture& renderTexture);
 
 			PREShader& CreateShader(const string& vertex, const string& fragment);
+
+		private: // internal, used for shadow mapping
+			PREShader& CreateShader(const string& vertex, const string& geometry, const string& fragment);
+
+		public:
 			void DestroyShader(PREShader& shader);
 
 			PRETexture& CreateTexture(

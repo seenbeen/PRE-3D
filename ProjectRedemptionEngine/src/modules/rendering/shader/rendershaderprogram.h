@@ -11,6 +11,7 @@ namespace PRE
 	{
 		class Renderer;
 		class RenderVertexShader;
+		class RenderGeometryShader;
 		class RenderFragmentShader;
 		class RenderMaterial;
 
@@ -52,6 +53,13 @@ namespace PRE
 					const RenderVertexShader& vertexShader,
 					const RenderFragmentShader& fragmentShader
 				);
+
+				static Impl& MakeImpl(
+					const RenderVertexShader& vertexShader,
+					const RenderGeometryShader& geometryShader,
+					const RenderFragmentShader& fragmentShader
+				);
+
 				Impl(GLuint programId);
 				~Impl();
 			};
@@ -96,6 +104,13 @@ namespace PRE
 				const RenderVertexShader& vertexShader,
 				const RenderFragmentShader& fragmentShader
 			);
+
+			RenderShaderProgram(
+				const RenderVertexShader& vertexShader,
+				const RenderGeometryShader& geometryShader,
+				const RenderFragmentShader& fragmentShader
+			);
+
 			~RenderShaderProgram();
 
 			void Bind();

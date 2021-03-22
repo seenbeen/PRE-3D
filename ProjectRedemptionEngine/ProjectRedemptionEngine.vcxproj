@@ -75,6 +75,7 @@
     <ClCompile Include="src\modules\rendering\rendercamera.cpp" />
     <ClCompile Include="src\modules\rendering\renderer.cpp" />
     <ClCompile Include="src\modules\rendering\shader\renderfragmentshader.cpp" />
+    <ClCompile Include="src\modules\rendering\shader\rendergeometryshader.cpp" />
     <ClCompile Include="src\modules\rendering\shader\rendershaderprogram.cpp" />
     <ClCompile Include="src\modules\rendering\shader\rendervertexshader.cpp" />
     <ClCompile Include="src\modules\rendering\texture\rendertexture.cpp" />
@@ -153,6 +154,7 @@
     <ClInclude Include="src\modules\rendering\rendercamera.h" />
     <ClInclude Include="src\modules\rendering\renderer.h" />
     <ClInclude Include="src\modules\rendering\shader\renderfragmentshader.h" />
+    <ClInclude Include="src\modules\rendering\shader\rendergeometryshader.h" />
     <ClInclude Include="src\modules\rendering\shader\rendershaderprogram.h" />
     <ClInclude Include="src\modules\rendering\shader\rendervertexshader.h" />
     <ClInclude Include="src\modules\rendering\texture\rendertexture.h" />
